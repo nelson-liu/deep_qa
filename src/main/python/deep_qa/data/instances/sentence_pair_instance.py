@@ -25,8 +25,12 @@ class SentencePairInstance(TextInstance):
         self.second_sentence = second_sentence
 
     @overrides
-    def words(self) -> List[str]:
-        return self._words_from_text(self.first_sentence) + self._words_from_text(self.second_sentence)
+    def words(self) -> Dict[str, List[str]]:
+        words = self._words_from_text(self.first_sentence)
+        second_sentence_words = self._words_from_text(self.second_sentence)
+        for namespace in words:
+            words[namespace].extend(second_sentence_words[namespace])
+        return words
 
     @overrides
     def to_indexed_instance(self, data_indexer: DataIndexer):

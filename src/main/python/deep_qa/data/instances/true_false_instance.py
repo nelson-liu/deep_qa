@@ -28,7 +28,7 @@ class TrueFalseInstance(TextInstance):
         return 'TrueFalseInstance(' + self.text + ', ' + str(self.label) + ')'
 
     @overrides
-    def words(self) -> List[str]:
+    def words(self) -> Dict[str, List[str]]:
         return self._words_from_text(self.text)
 
     @overrides

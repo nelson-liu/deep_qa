@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import Dict, List
 
 import numpy
@@ -36,9 +37,11 @@ class MultipleTrueFalseInstance(TextInstance):
 
     @overrides
     def words(self):
-        words = []
+        words = defaultdict(list)
         for option in self.options:
-            words.extend(option.words())
+            option_words = option.words()
+            for namespace in option_words:
+                words[namespace].extend(option_words[namespace])
         return words
 
     @overrides

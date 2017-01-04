@@ -81,10 +81,17 @@ class TextInstance(Instance):
         """
         return self.encoder.index_text(text, self._tokenize, data_indexer)
 
-    def words(self) -> List[str]:
+    def words(self) -> Dict[str, List[str]]:
         """
-        Returns a list of all of the words in this instance.  This is mainly used for computing
-        word counts when fitting a word vocabulary on a dataset.
+        Returns a list of all of the words in this instance, contained in a namespace dictionary.
+        This is mainly used for computing word counts when fitting a word vocabulary on a dataset.
+
+        The namespace dictionary allows you to have several embedding matrices with different vocab
+        sizes, e.g., for words and for characters (in fact, words and characters are the only use
+        cases I can think of for now, but this allows you to do other more crazy things if you
+        want).  You can call the namespaces whatever you want, but if you want the DataIndexer to
+        work correctly without namespace arguments, you should use the key 'words' to represent
+        word tokens.
         """
         raise NotImplementedError
 

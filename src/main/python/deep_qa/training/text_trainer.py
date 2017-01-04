@@ -243,7 +243,7 @@ class TextTrainer(Trainer):
         """
         return TextDataset.read_from_file(files[0], self._instance_type(), tokenizer=self.tokenizer)
 
-    def _embed_input(self, input_layer: Layer, embedding_name: str="embedding"):
+    def _embed_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
         """
         This function embeds a word sequence input, using an embedding defined by `embedding_name`.
 
@@ -261,10 +261,13 @@ class TextTrainer(Trainer):
         the same name each time (or just don't pass a name, which accomplishes the same thing).  If
         for some reason you want to have different embeddings for different inputs, use a different
         name for the embedding.
+
+        Additionally, we allow for multiple vocabularies, e.g., if you want to embed both
+        characters and words with separate embedding matrices.
         """
         # pylint: disable=redefined-variable-type
         if embedding_name not in self.embedding_layers:
-            self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name)
+            self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name, vocab_name)
 
         embedding_layer, projection_layer = self.embedding_layers[embedding_name]
         embedded_input = embedding_layer(input_layer)
@@ -277,7 +280,7 @@ class TextTrainer(Trainer):
 
         return embedded_input
 
-    def _get_new_embedding(self, name):
+    def _get_new_embedding(self, name, vocab_name='words'):
         """
         Creates an Embedding Layer (and possibly also a Dense projection Layer) based on the
         parameters you've passed to the TextTrainer.  These could be pre-trained embeddings or not,
@@ -290,10 +293,11 @@ class TextTrainer(Trainer):
                     self.fine_tune_embeddings)
         else:
             # TimeDistributedEmbedding works with inputs of any shape.
-            embedding_layer = TimeDistributedEmbedding(input_dim=self.data_indexer.get_vocab_size(),
-                                                       output_dim=self.embedding_size,
-                                                       mask_zero=True,  # this handles padding correctly
-                                                       name=name)
+            embedding_layer = TimeDistributedEmbedding(
+                    input_dim=self.data_indexer.get_vocab_size(vocab_name),
+                    output_dim=self.embedding_size,
+                    mask_zero=True,  # this handles padding correctly
+                    name=name)
         projection_layer = None
         if self.project_embeddings:
             projection_layer = TimeDistributed(Dense(output_dim=self.embedding_size,),

@@ -31,11 +31,12 @@ class QuestionAnswerInstance(TextInstance):
                 '|'.join(self.answer_options) + ', ' + str(self.label) + ')'
 
     @overrides
-    def words(self) -> List[str]:
-        words = []
-        words.extend(self._words_from_text(self.question_text))
+    def words(self) -> Dict[str, List[str]]:
+        words = self._words_from_text(self.question_text)
         for option in self.answer_options:
-            words.extend(self._words_from_text(option))
+            option_words = self._words_from_text(option)
+            for namespace in words:
+                words[namespace].extend(option_words[namespace])
         return words
 
     @overrides

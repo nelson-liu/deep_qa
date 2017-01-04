@@ -33,10 +33,11 @@ class BackgroundInstance(TextInstance):
 
     @overrides
     def words(self):
-        words = []
-        words.extend(self.instance.words())
+        words = self.instance.words()
         for background_text in self.background:
-            words.extend(self._words_from_text(background_text))
+            background_words = self._words_from_text(background_text)
+            for namespace in words:
+                words[namespace].extend(background_words[namespace])
         return words
 
     @overrides

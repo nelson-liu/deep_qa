@@ -15,36 +15,38 @@ class TestTextInstance:
     """
     def test_words_tokenizes_the_sentence_correctly(self):
         t = TrueFalseInstance("This is a sentence.", None)
-        assert t.words() == ['this', 'is', 'a', 'sentence', '.']
+        assert t.words() == {'words': ['this', 'is', 'a', 'sentence', '.']}
         TextInstance.encoder = text_encoders['characters']
-        assert t.words() == ['T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's', 'e', 'n', 't',
-                             'e', 'n', 'c', 'e', '.']
+        assert t.words() == {'characters': ['T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's',
+                                            'e', 'n', 't', 'e', 'n', 'c', 'e', '.']}
         TextInstance.encoder = text_encoders['words and characters']
-        assert t.words() == ['this', 'is', 'a', 'sentence', '.', 'T', 'h', 'i', 's', ' ', 'i', 's',
-                             ' ', 'a', ' ', 's', 'e', 'n', 't', 'e', 'n', 'c', 'e', '.']
+        assert t.words() == {'words': ['this', 'is', 'a', 'sentence', '.'],
+                             'characters': ['T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's',
+                                            'e', 'n', 't', 'e', 'n', 'c', 'e', '.']}
         TextInstance.encoder = text_encoders['word tokens']
 
     def test_to_indexed_instance_converts_correctly(self):
         data_indexer = DataIndexer()
-        a_index = data_indexer.add_word_to_index("a")
-        capital_a_index = data_indexer.add_word_to_index("A")
-        space_index = data_indexer.add_word_to_index(" ")
-        sentence_index = data_indexer.add_word_to_index("sentence")
-        s_index = data_indexer.add_word_to_index("s")
-        e_index = data_indexer.add_word_to_index("e")
-        n_index = data_indexer.add_word_to_index("n")
-        t_index = data_indexer.add_word_to_index("t")
-        c_index = data_indexer.add_word_to_index("c")
+        a_word_index = data_indexer.add_word_to_index("a", namespace='words')
+        sentence_index = data_indexer.add_word_to_index("sentence", namespace='words')
+        capital_a_index = data_indexer.add_word_to_index("A", namespace='characters')
+        space_index = data_indexer.add_word_to_index(" ", namespace='characters')
+        a_index = data_indexer.add_word_to_index("a", namespace='characters')
+        s_index = data_indexer.add_word_to_index("s", namespace='characters')
+        e_index = data_indexer.add_word_to_index("e", namespace='characters')
+        n_index = data_indexer.add_word_to_index("n", namespace='characters')
+        t_index = data_indexer.add_word_to_index("t", namespace='characters')
+        c_index = data_indexer.add_word_to_index("c", namespace='characters')
 
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
-        assert instance.word_indices == [a_index, sentence_index]
+        assert instance.word_indices == [a_word_index, sentence_index]
         TextInstance.encoder = text_encoders['characters']
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
         assert instance.word_indices == [capital_a_index, space_index, s_index, e_index, n_index, t_index,
                                          e_index, n_index, c_index, e_index]
         TextInstance.encoder = text_encoders['words and characters']
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
-        assert instance.word_indices == [[a_index, a_index],
+        assert instance.word_indices == [[a_word_index, a_index],
                                          [sentence_index, s_index, e_index, n_index, t_index,
                                           e_index, n_index, c_index, e_index]]
         TextInstance.encoder = text_encoders['word tokens']
