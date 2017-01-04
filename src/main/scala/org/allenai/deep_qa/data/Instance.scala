@@ -103,6 +103,10 @@ case class SnliInstance(
   }
 }
 
+/**
+  * An Instance created from the Stanford Question
+  * Answering Dataset (SQuAD).
+  */
 case class SquadInstance(
   question: String,
   passage: String,
