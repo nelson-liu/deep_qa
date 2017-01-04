@@ -116,3 +116,21 @@ case class SquadInstance(
     Seq(Seq(s"${question}\t${passage}${labelString}"))
   }
 }
+
+/**
+  * An Instance created from the Who Did What (WDW) dataset.
+  */
+case class WDWInstance(
+  passage: String,
+  question: String,
+  answers: Option[Seq[String]],
+  override val label: Option[Int]
+) extends Instance {
+  def asStrings(): Seq[Seq[String]] = {
+    val answerString = answers.mkString("###")
+    label match {
+      case Some(l) => Seq(Seq(s"$passage\t$question\t$answerString\t${l.mkString(",")}"))
+      case None => Seq(Seq(s"$passage\t$question\t$answerString"))
+    }
+  }
+}
