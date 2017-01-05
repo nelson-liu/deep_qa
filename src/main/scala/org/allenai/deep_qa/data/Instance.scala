@@ -122,15 +122,16 @@ case class SquadInstance(
   */
 case class WDWInstance(
   passage: String,
-  question: String,
+  leftContext: String,
+  rightContext: String
   answers: Option[Seq[String]],
   override val label: Option[Int]
 ) extends Instance {
   def asStrings(): Seq[Seq[String]] = {
     val answerString = answers.mkString("###")
     label match {
-      case Some(l) => Seq(Seq(s"$passage\t$question\t$answerString\t${l.mkString(",")}"))
-      case None => Seq(Seq(s"$passage\t$question\t$answerString"))
+      case Some(l) => Seq(Seq(s"$passage\t$leftContext\t$rightContext\t$answerString\t${l.mkString(",")}"))
+      case None => Seq(Seq(s"$passage\t$leftContext\t$rightContext\t$answerString"))
     }
   }
 }
