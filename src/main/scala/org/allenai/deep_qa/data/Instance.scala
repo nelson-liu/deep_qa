@@ -124,7 +124,7 @@ case class WDWInstance(
   passage: String,
   leftContext: String,
   rightContext: String
-  answers: Option[Seq[String]],
+  answers: [Seq[String]],
   override val label: Option[Int]
 ) extends Instance {
   def asStrings(): Seq[Seq[String]] = {
