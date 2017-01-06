@@ -3,7 +3,7 @@ package org.allenai.deep_qa.data
 import com.mattg.util.FakeFileUtil
 import org.scalatest._
 
-class WDWDatasetReaderSpec extends FlatSpecLike with Matchers {
+class WhoDidWhatDatasetReaderSpec extends FlatSpecLike with Matchers {
 
   val fileUtil = new FakeFileUtil
   val rightContext1 = "walked through the general managers meetings in Dana Point , Calif. , " +
@@ -118,7 +118,7 @@ class WDWDatasetReaderSpec extends FlatSpecLike with Matchers {
       |</ROOT>""".stripMargin
 
   fileUtil.addFileToBeRead(datasetFile, datasetFileContents)
-  val reader = new WDWDatasetReader(fileUtil)
+  val reader = new WhoDidWhatDatasetReader(fileUtil)
   val answers1 = Seq("Joe Maddon", "Lou Piniella", "Ron Gardenhire", "Charlie Manuel")
   val answers2 = Seq("George W. Bush", "John Podesta", "Fox", "Bill Clinton")
 
@@ -126,7 +126,7 @@ class WDWDatasetReaderSpec extends FlatSpecLike with Matchers {
     val dataset = reader.readFile(datasetFile)
 
     dataset.instances.size should be(2)
-    dataset.instances(0) should be(WDWInstance(passage1, leftContext1, rightContext1, answers1, Some(0)))
-    dataset.instances(1) should be(WDWInstance(passage2, leftContext2, rightContext2, answers2, Some(0)))
+    dataset.instances(0) should be(WhoDidWhatInstance(passage1, leftContext1, rightContext1, answers1, Some(0)))
+    dataset.instances(1) should be(WhoDidWhatInstance(passage2, leftContext2, rightContext2, answers2, Some(0)))
   }
 }
