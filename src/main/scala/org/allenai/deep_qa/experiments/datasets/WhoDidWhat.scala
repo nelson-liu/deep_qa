@@ -19,7 +19,7 @@ object WhoDidWhatDatasets {
       "strict/"
     }
 
-    val outputDirectory = wdwDir + "processed/" + supression
+    val outputDirectory = wdwDir + "processed/" + supression.toLowerCase
     val inputFile = wdwDir + suppression + s"${split}.xml"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
