@@ -14,12 +14,12 @@ object WhoDidWhatDatasets {
         // relaxed is for training only
         throw new IllegalArgumentException("Relaxed dataset can only be used for train.")
       }
-      "relaxed/"
+      "Relaxed/"
     } else {
-      "strict/"
+      "Strict/"
     }
 
-    val outputDirectory = wdwDir + "processed/" + supression.toLowerCase
+    val outputDirectory = wdwDir + "processed/" + suppression.toLowerCase
     val inputFile = wdwDir + suppression + s"${split}.xml"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
