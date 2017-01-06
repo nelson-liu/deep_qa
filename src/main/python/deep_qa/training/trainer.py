@@ -267,7 +267,6 @@ class Trainer:
                 self.debug_dataset = self._load_dataset_from_files(debug_data)
                 self.debug_input, _ = self._prepare_data(self.debug_dataset, for_train=False)
             self.debug_model = self._build_debug_model(debug_layer_names, debug_masks)
-            self.debug_model.compile(loss='mse', optimizer='sgd')  # Will not train this model.
 
         # Now we actually train the model using various Keras callbacks to control training.
         callbacks = self._get_callbacks()
@@ -408,8 +407,7 @@ class Trainer:
         debug_outputs.extend([debug_output_dict['mask_for_' + name] for name in debug_masks])
         return DeepQaModel(input=debug_inputs, output=debug_outputs)
 
-    def _overall_debug_output(self, output_dict: Dict[str, numpy.array]) -> str:
-        # pylint: disable=unused-argument
+    def _overall_debug_output(self, output_dict: Dict[str, numpy.array]) -> str: # pylint: disable=unused-argument
         return "Number of instances: %d\n" % len(self.debug_dataset.instances)
 
     def _instance_debug_output(self, instance: Instance, outputs: Dict[str, numpy.array]) -> str:

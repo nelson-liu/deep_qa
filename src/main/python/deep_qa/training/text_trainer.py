@@ -1,22 +1,25 @@
 from copy import deepcopy
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 import logging
 import pickle
 
 from keras import backend as K
-from keras.layers import Dense, Dropout, Input, Layer, TimeDistributed
+from keras.layers import Dense, Dropout, Input, Layer, TimeDistributed, merge
 from overrides import overrides
 import numpy
 
 from ..common.params import get_choice_with_default
 from ..data.dataset import TextDataset
 from ..data.instances.instance import Instance, TextInstance
+from ..data.instances.text_encoders import text_encoders
 from ..data.instances.true_false_instance import TrueFalseInstance
 from ..data.embeddings import PretrainedEmbeddings
 from ..data.tokenizer import tokenizers
 from ..data.data_indexer import DataIndexer
 from ..layers.encoders import encoders, set_regularization_params
 from ..layers.time_distributed_embedding import TimeDistributedEmbedding
+from ..layers.vector_matrix_split import VectorMatrixSplit
+from ..layers.wrappers import FixedTimeDistributed, OutputMask
 from .models import DeepQaModel
 from .trainer import Trainer
 
@@ -55,6 +58,10 @@ class TextTrainer(Trainer):
         # If this is not set, we'll calculate a max length from the data.
         self.max_sentence_length = params.pop('max_sentence_length', None)
 
+        # Upper limit on length of words in the training data. Only applicable for "words and
+        # characters" text encoding.
+        self.max_word_length = params.pop('max_word_length', None)
+
         # Which tokenizer to use for TextInstances
         tokenizer_choice = get_choice_with_default(params, 'tokenizer', list(tokenizers.keys()))
         self.tokenizer = tokenizers[tokenizer_choice]()
@@ -66,6 +73,19 @@ class TextTrainer(Trainer):
         # Hint: Use lstm or cnn for sentences, treelstm for logical forms, and bow for either.
         self.encoder_params = params.pop('encoder', {})
 
+        # With some text_encodings, you can have separate sentence encoders and word encoders
+        # (where sentence encoders combine word vectors into sentence vectors, and word encoders
+        # combine character vectors into sentence vectors).  If you want to have separate encoders,
+        # here's your chance to specify the word encoder.
+        self.word_encoder_params = params.pop('word_encoder', self.encoder_params)
+
+        # Too many overlapping names...  I need to figure out a better way to name these things.
+        # The above encoder maps word embedding sequences into sentence vectors.  This
+        # text_encoding specifies how text sequences are encoded (e.g., as word tokens, characters,
+        # words and characters, etc.).
+        self.text_encoding = get_choice_with_default(params, 'text_encoding', list(text_encoders.keys()))
+        TextInstance.encoder = text_encoders[self.text_encoding]
+
         super(TextTrainer, self).__init__(params)
 
         self.name = "TextTrainer"
@@ -76,6 +96,7 @@ class TextTrainer(Trainer):
         # after reading the training data.
         self.embedding_layers = {}
         self.sentence_encoder_layer = None
+        self.word_encoder_layer = None
         self._sentence_encoder_model = None
 
     @overrides
@@ -191,8 +212,15 @@ class TextTrainer(Trainer):
         This is about padding.  Any solver will have some number of things that need padding in
         order to make a compilable model, like the length of a sentence.  This method returns a
         dictionary of all of those things, mapping a length key to an int.
+
+        Here we return the lengths that are applicable to encoding words and sentences.  If you
+        have additional padding dimensions, call super()._get_max_lengths() and then update the
+        dictionary.
         """
-        raise NotImplementedError
+        return {
+                'word_sequence_length': self.max_sentence_length,
+                'word_character_length': self.max_word_length,
+                }
 
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
         """
@@ -201,7 +229,8 @@ class TextTrainer(Trainer):
         variables given a dictionary of lengths, perhaps computed from training data or loaded from
         a saved model.
         """
-        raise NotImplementedError
+        self.max_sentence_length = max_lengths['word_sequence_length']
+        self.max_word_length = max_lengths.get('word_character_length', None)
 
     @overrides
     def _set_params_from_model(self):
@@ -243,6 +272,21 @@ class TextTrainer(Trainer):
         """
         return TextDataset.read_from_file(files[0], self._instance_type(), tokenizer=self.tokenizer)
 
+    def _get_sentence_shape(self, sentence_length: int=None) -> Tuple[int]:
+        """
+        Returns a tuple specifying the shape of a tensor representing a sentence.  This is not
+        necessarily just (self.max_sentence_length,), because different text_encodings lead to
+        different tensor shapes.
+        """
+        if sentence_length is None:
+            # This can't be the default value for the function argument, because
+            # self.max_sentence_length will not have been set at class creation time.
+            sentence_length = self.max_sentence_length
+        if self.text_encoding == "words and characters":
+            return (sentence_length, self.max_word_length)
+        else:
+            return (sentence_length,)
+
     def _embed_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
         """
         This function embeds a word sequence input, using an embedding defined by `embedding_name`.
@@ -265,6 +309,8 @@ class TextTrainer(Trainer):
         Additionally, we allow for multiple vocabularies, e.g., if you want to embed both
         characters and words with separate embedding matrices.
         """
+        if self.text_encoding == 'words and characters':
+            return self._embed_words_and_characters(input_layer, embedding_name)
         # pylint: disable=redefined-variable-type
         if embedding_name not in self.embedding_layers:
             self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name, vocab_name)
@@ -304,6 +350,67 @@ class TextTrainer(Trainer):
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
+    def _embed_words_and_characters(self, input_layer: Layer, embedding_name: str):
+        """
+        We allow several different kinds of text encodings as input to our models (e.g., word
+        tokens, character tokens, word tokens combined with characters for each word).  When we
+        have this combined word-and-characters representation, we need to do some fancy footwork to
+        get a proper embedding.
+
+        This method assumes the input shape is (..., sentence_length, word_length + 1), where the
+        first integer for each word in the tensor is the word index, and the remaining word_length
+        entries is the character sequence.  We'll first split this into two tensors, one of shape
+        (..., sentence_length), and one of shape (..., sentence_length, word_length), where the
+        first is the word sequence, and the second is the character sequence for each word.  We'll
+        pass the word sequence through an embedding layer, as normal, and pass the character
+        sequence through a _separate_ embedding layer, then an encoder, to get a word vector out.
+        We'll then concatenate the two word vectors, returning a tensor of shape
+        (..., sentence_length, embedding_dim * 2).
+        """
+        # We'll be calling self._embed_input(), which will check the value of self.text_encoding.
+        # Unless we change it, we'll get into an infinite loop.
+        prior_text_encoding = self.text_encoding
+        self.text_encoding = "TEMPORARILY_HIDDEN"
+
+        # This is happening before any masking is done, so we don't need to worry about the
+        # mask_split_axis argument to VectorMatrixSplit.
+        words, characters = VectorMatrixSplit(split_axis=-1)(input_layer)
+        word_embedding = self._embed_input(words,
+                                           embedding_name='word_' + embedding_name,
+                                           vocab_name='words')
+        character_embedding = self._embed_input(characters,
+                                                embedding_name='character_' + embedding_name,
+                                                vocab_name='characters')
+
+        # A note about masking here: we care about the character masks when encoding a character
+        # sequence, so we need the mask to be passed to the character encoder correctly.  However,
+        # we _don't_ care here about whether the whole word will be masked, as the word_embedding
+        # will carry that information, so the output mask returned by the TimeDistributed layer
+        # here will be ignored.
+        print("Input layer:", input_layer)
+        print("Word embedding:", word_embedding)
+        print("Character embedding:", character_embedding)
+        character_mask = OutputMask()(character_embedding)
+        print("Character mask:", character_mask)
+        word_encoder = FixedTimeDistributed(self._get_word_encoder())
+        word_encoding = word_encoder(character_embedding)
+
+        merge_mode = lambda inputs: K.concatenate(inputs, axis=-1)
+        def merge_shape(input_shapes):
+            output_shape = list(input_shapes[0])
+            output_shape[-1] *= 2
+            return tuple(output_shape)
+        merge_mask = lambda masks: masks[0]
+        final_embedded_input = merge([word_embedding, word_encoding],
+                                     mode=merge_mode,
+                                     output_shape=merge_shape,
+                                     output_mask=merge_mask,
+                                     name='combined_word_embedding')
+
+        # Don't forget to restore the original value of self.text_encoding.
+        self.text_encoding = prior_text_encoding
+        return final_embedded_input
+
     def _get_sentence_encoder(self):
         """
         A sentence encoder takes as input a sequence of word embeddings, and returns as output a
@@ -311,19 +418,34 @@ class TextTrainer(Trainer):
         could be more complex, if the "sentence" is actually a logical form.
         """
         if self.sentence_encoder_layer is None:
-            self.sentence_encoder_layer = self._get_new_encoder()
+            self.sentence_encoder_layer = self._get_new_sentence_encoder()
         return self.sentence_encoder_layer
 
-    def _get_new_encoder(self, name="sentence_encoder"):
+    def _get_new_sentence_encoder(self, name="sentence_encoder"):
         # The code that follows would be destructive to self.encoder_params (lots of calls to
         # params.pop()), but we may need to create several encoders.  So we'll make a copy and use
         # that instead of self.encoder_params.
-        encoder_params = deepcopy(self.encoder_params)
-        encoder_type = get_choice_with_default(encoder_params, "type", list(encoders.keys()))
-        encoder_params["name"] = name
-        encoder_params["output_dim"] = self.embedding_size
-        set_regularization_params(encoder_type, encoder_params)
-        return encoders[encoder_type](**encoder_params)
+        return self._get_new_encoder(deepcopy(self.encoder_params), name)
+
+    def _get_word_encoder(self):
+        """
+        This is like a sentence encoder, but for sentences; we don't just use
+        self._get_sentence_encoder() for this, because we allow different models to be specified
+        for this.
+        """
+        if self.word_encoder_layer is None:
+            self.word_encoder_layer = self._get_new_word_encoder()
+        return self.word_encoder_layer
+
+    def _get_new_word_encoder(self, name="word_encoder"):
+        return self._get_new_encoder(deepcopy(self.word_encoder_params), name)
+
+    def _get_new_encoder(self, params: Dict[str, Any], name: str):
+        encoder_type = get_choice_with_default(params, "type", list(encoders.keys()))
+        params["name"] = name
+        params["output_dim"] = self.embedding_size
+        set_regularization_params(encoder_type, params)
+        return encoders[encoder_type](**params)
 
     def _build_sentence_encoder_model(self):
         """
