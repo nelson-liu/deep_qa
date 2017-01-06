@@ -11,12 +11,10 @@ class WDWDatasetReader(fileUtil: FileUtil) extends DatasetReader[WDWInstance] {
     val xml = scala.xml.Utility.trim(scala.xml.XML.loadString(fileUtil.readFileContents(filename)))
     val instanceTuples = for {
       mc <- xml \ "mc"
-      question_node = mc \ "question"
-      question_text = question_node.text
 
+      question_node = mc \ "question"
       leftContext_node = question_node \ "leftcontext"
       leftContext = leftContext_node.text
-
       rightContext_node = question_node \ "rightcontext"
       rightContext = rightContext_node.text
 
