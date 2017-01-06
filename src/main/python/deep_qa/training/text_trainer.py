@@ -217,10 +217,10 @@ class TextTrainer(Trainer):
         have additional padding dimensions, call super()._get_max_lengths() and then update the
         dictionary.
         """
-        return {
-                'word_sequence_length': self.max_sentence_length,
-                'word_character_length': self.max_word_length,
-                }
+        lengths = {'word_sequence_length': self.max_sentence_length}
+        if self.text_encoding == "words and characters":
+            lengths['word_character_length'] = self.max_word_length
+        return lengths
 
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
         """

@@ -55,7 +55,11 @@ class TestTextTrainer(TestCase):
         def new_debug(output_dict, epoch):  # pylint: disable=unused-argument
             # We're going to check two things in here: that the shape of combined word embedding is
             # as expected, and that the mask is computed correctly.
-            word_embeddings = output_dict['combined_word_embedding']
+            # TODO(matt): actually, from this test, it looks like the mask is returned as
+            # output_dict['combined_word_embedding'][1].  Maybe this means we can simplify the
+            # logic in Trainer._debug()?  I need to look into this more to be sure that's
+            # consistently happening, though.
+            word_embeddings = output_dict['combined_word_embedding'][0]
             assert len(word_embeddings) == 6
             assert word_embeddings[0].shape == (3, 4)
             word_masks = output_dict['masks']['combined_word_embedding']
