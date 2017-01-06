@@ -9,19 +9,21 @@ import org.json4s.JsonDSL._
 object WhoDidWhatDatasets {
 
   def WhoDidWhatFile(wdwDir: String, split: String, relaxed: Boolean = false): JValue = {
-    var outputSubdir = "processed/Strict/"
-    if (relaxed){
+    val suppression = if (relaxed){
       if (split != "train"){
         // relaxed is for training only
         throw new IllegalArgumentException("Relaxed dataset can only be used for train.")
       }
-      outputSubdir = "processed/Relaxed/"
+      "relaxed/"
+    } else {
+      "strict/"
     }
-    val outputDirectory = wdwDir + outputSubdir
-    val inputFile = wdwDir + s"${split}.xml"
+
+    val outputDirectory = wdwDir + "processed/" + supression
+    val inputFile = wdwDir + suppression + s"${split}.xml"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
-    ("reader" -> "wdw") ~
+    ("reader" -> "who did what") ~
     ("input file" -> inputFile) ~
     ("output files" -> outputFiles)
   }
@@ -38,5 +40,5 @@ object WhoDidWhatDatasets {
   val devFile = WhoDidWhatFile(baseDir, "dev")
   val dev = WhoDidWhatDataset(baseDir, "dev")
   val relaxedTrainFile = WhoDidWhatFile(baseDir, "train", true)
-  val relaxedTrrain = WhoDidWhatDataset(baseDir, "train", true)
+  val relaxedTrain = WhoDidWhatDataset(baseDir, "train", true)
 }
