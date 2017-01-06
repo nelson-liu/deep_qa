@@ -23,7 +23,7 @@ object WDWDatasets {
     ("data files" -> List(file))
   }
 
-  val baseDir = "/efs/data/dlfa/who_did_what/Relaxed/"
+  val baseDir = "/efs/data/dlfa/who_did_what/Strict/"
 
   val trainFile = wdwFile(baseDir, "train")
   val train = wdwDataset(baseDir, "train")
