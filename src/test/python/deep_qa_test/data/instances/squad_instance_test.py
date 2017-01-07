@@ -20,8 +20,8 @@ class TestSquadInstance:
         label = (9, 13)
         line = self.instance_to_line(question, passage, label)
         instance = SquadInstance.read_from_line(line)
-        assert instance.first_sentence == question
-        assert instance.second_sentence == passage
+        assert instance.question_text == question
+        assert instance.passage_text == passage
         assert instance.label == label
         assert instance.index is None
 
@@ -32,8 +32,8 @@ class TestSquadInstance:
         index = 23
         line = self.instance_to_line(question, passage, label, index)
         instance = SquadInstance.read_from_line(line)
-        assert instance.first_sentence == question
-        assert instance.second_sentence == passage
+        assert instance.question_text == question
+        assert instance.passage_text == passage
         assert instance.label == label
         assert instance.index == index
 
@@ -48,8 +48,8 @@ class TestSquadInstance:
         period_index = data_indexer.add_word_to_index(".")
         question_index = data_indexer.add_word_to_index("?")
         indexed_instance = instance.to_indexed_instance(data_indexer)
-        assert indexed_instance.first_sentence_indices == [what_index, do_index, dogs_index,
-                                                           eat_index, question_index]
-        assert indexed_instance.second_sentence_indices == [dogs_index, eat_index, cats_index,
-                                                            period_index]
+        assert indexed_instance.question_indices == [what_index, do_index, dogs_index,
+                                                     eat_index, question_index]
+        assert indexed_instance.sentence_indices == [dogs_index, eat_index, cats_index,
+                                                     period_index]
         assert indexed_instance.label == (2, 2)
