@@ -17,6 +17,8 @@ class TestNNSolver(TestCase):
     # pylint: disable=protected-access
 
     def setUp(self):
+        if os.path.exists(TEST_DIR):
+            shutil.rmtree(TEST_DIR)
         os.mkdir(TEST_DIR)
         write_true_false_solver_files()
 

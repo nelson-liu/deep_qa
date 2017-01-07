@@ -14,6 +14,8 @@ from ..common.constants import TEST_DIR
 
 class TestPretrainedEmbeddings(TestCase):
     def setUp(self):
+        if os.path.exists(TEST_DIR):
+            shutil.rmtree(TEST_DIR)
         os.mkdir(TEST_DIR)
 
     def tearDown(self):
