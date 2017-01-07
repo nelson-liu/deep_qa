@@ -10,8 +10,10 @@ from ..tokenizer import tokenizers, Tokenizer
 
 class QuestionPassageInstance(TextInstance):
     """
-    A QuestionPassageInstance has question text and a passage, where the passage contains
-    the answer to the question.
+    A QuestionPassageInstance is a base class for datasets that contain
+    consist primarily of a question text and a passage, where the passage contains
+    the answer to the question. This class should not be used directly due to
+    the missing ``_index_label`` function, use a subclass instead.
     """
     def __init__(self,
                  question_text: str,
@@ -30,8 +32,8 @@ class QuestionPassageInstance(TextInstance):
 
     @overrides
     def words(self) -> List[str]:
-        return (self._words_from_text(self.first_sentence) +
-                self._words_from_text(self.second_sentence))
+        return (self._words_from_text(self.question_text) +
+                self._words_from_text(self.passage_text))
 
     def _index_label(self, label: Any) -> List[int]:
         """
@@ -60,7 +62,7 @@ class IndexedQuestionPassageInstance(IndexedInstance):
                  index: int=None):
         super(IndexedQuestionPassageInstance, self).__init__(label, index)
         self.question_indices = question_indices
-        self.sentence_indices = passage_indices
+        self.passage_indices = passage_indices
 
     @classmethod
     @overrides
@@ -76,7 +78,7 @@ class IndexedQuestionPassageInstance(IndexedInstance):
         arguments.
         """
         question_lengths = self._get_word_sequence_lengths(self.question_indices)
-        passage_lengths = self._get_word_sequence_lengths(self.sentence_indices)
+        passage_lengths = self._get_word_sequence_lengths(self.passage_indices)
         lengths = {}
 
         # the number of words in the longest question

@@ -2,21 +2,21 @@ from typing import Tuple, List
 
 from overrides import overrides
 
-from .question_passage_instance import IndexedQuestionPassageInstance, QuestionPassageInstance
-from ..data_indexer import DataIndexer
+from .question_passage_instance import QuestionPassageInstance
 from ..tokenizer import tokenizers, Tokenizer
 
 
 class SquadInstance(QuestionPassageInstance):
     """
     A SquadInstance is a QuestionPassageInstance that represents a (question, passage) pair from the
-    Stanford Question Answering dataset, with an associated label.  The main thing this class
-    handles over QuestionPassageInstance is the label, which is given as a span of _characters_ in the
-    passage.  The label we are going to use in the rest of the code is a span of _tokens_ in the
-    passage, so the mapping from character labels to token labels depends on the tokenization we
-    did, and the logic to handle this is, unfortunately, a little complicated.  The label
-    conversion happens when converting a SquadInstance to in IndexedInstance (where character
-    indices are generally lost, anyway).
+    Stanford Question Answering dataset, with an associated label. The main thing this class
+    handles over QuestionPassageInstance is in specifying the form of and how to index the
+    label, which is given as a span of _characters_ in the passage.  The label we are going
+    to use in the rest of the code is a span of _tokens_ in the passage, so the mapping
+    from character labels to token labels depends on the tokenization we did, and the logic
+    to handle this is, unfortunately, a little complicated. The label conversion happens
+    when converting a SquadInstance to in IndexedInstance (where character indices are
+    generally lost, anyway).
     """
     def __init__(self,
                  question: str,
@@ -27,10 +27,14 @@ class SquadInstance(QuestionPassageInstance):
         super(SquadInstance, self).__init__(question, passage, label, index, tokenizer)
 
     def __str__(self):
-        return 'SquadInstance(' + self.qusetion_text + ', ' + self.passage_text + ', ' + str(self.label) + ')'
+        return 'SquadInstance(' + self.question_text + ', ' + self.passage_text + ', ' + str(self.label) + ')'
 
     @overrides
     def _index_label(self, label: Tuple[int, int]) -> List[int]:
+        """
+        Specify how to index `self.label`, which is needed to convert the
+        SquadInstance into an IndexedInstance (handled in superclass).
+        """
         new_label = None
         if self.label is not None:
             new_label = self.tokenizer.char_span_to_token_span(self.passage_text, self.label)

@@ -50,6 +50,6 @@ class TestSquadInstance:
         indexed_instance = instance.to_indexed_instance(data_indexer)
         assert indexed_instance.question_indices == [what_index, do_index, dogs_index,
                                                      eat_index, question_index]
-        assert indexed_instance.sentence_indices == [dogs_index, eat_index, cats_index,
-                                                     period_index]
+        assert indexed_instance.passage_indices == [dogs_index, eat_index, cats_index,
+                                                    period_index]
         assert indexed_instance.label == (2, 2)
