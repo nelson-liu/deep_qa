@@ -87,9 +87,10 @@ class IndexedQuestionPassageInstance(IndexedInstance):
         # the number of words in the longest passage
         lengths['num_passage_words'] = passage_lengths['word_sequence_length']
 
-        # the length of the longest word across the passage and question
-        lengths['word_character_length'] = max(question_lengths['word_character_length'],
-                                               passage_lengths['word_character_length'])
+        if 'word_character_length' in question_lengths and 'word_character_length' in passage_lengths:
+            # the length of the longest word across the passage and question
+            lengths['word_character_length'] = max(question_lengths['word_character_length'],
+                                                   passage_lengths['word_character_length'])
         return lengths
 
     @overrides
