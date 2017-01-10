@@ -4,9 +4,10 @@ This script takes as input CSV files from the Maluuba NewsQA dataset.
 The dataset is quite dirty by default, so this script does some preprocessing
 and extracts the relevant information we neeed in the deep_qa library.
 """
-import logging
-import re
 import json
+import logging
+import os
+import re
 
 from argparse import ArgumentParser
 import pandas as pd
@@ -84,7 +85,13 @@ def clean_newsqa_csv(newsqa_file_path):
         clean_file.append(clean_row)
     # turn the list of rows into a dataframe, and write to CSV
     dataframe = pd.DataFrame(clean_file, columns=clean_headers)
-    dataframe.to_csv(newsqa_file_path + ".clean", encoding="utf-8", index=False)
+    folder, filename = os.path.split(newsqa_file_path)
+    outdirectory = folder + "/cleaned/"
+    if not os.path.exists(outdirectory):
+        os.makedirs(outdirectory)
+    outpath = outdirectory + filename + ".clean"
+    print(outpath)
+    dataframe.to_csv(outpath, encoding="utf-8", index=False)
 
 if __name__ == '__main__':
     LOG_FMT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
