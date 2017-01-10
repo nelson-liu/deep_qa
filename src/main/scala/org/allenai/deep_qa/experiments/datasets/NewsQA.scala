@@ -10,7 +10,7 @@ object NewsQADatasets {
 
   def newsQAFile(newsQADir: String, split: String): JValue = {
     val outputDirectory = newsQADir + "processed/"
-    val inputFile = newsQADir + s"${split}.json"
+    val inputFile = newsQADir + "cleaned/" + s"${split}.csv.clean"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
     ("reader" -> "newsQA") ~
