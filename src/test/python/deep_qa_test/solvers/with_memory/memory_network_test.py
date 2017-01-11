@@ -14,7 +14,7 @@ class TestMemoryNetworkSolver(TestCase):
     # pylint: disable=protected-access
 
     def setUp(self):
-        os.mkdirs(TEST_DIR, exist_ok=True)
+        os.makedirs(TEST_DIR, exist_ok=True)
         write_memory_network_files()
 
     def tearDown(self):

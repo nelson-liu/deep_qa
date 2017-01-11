@@ -14,7 +14,7 @@ from ..common.constants import TEST_DIR
 
 class TestPretrainedEmbeddings(TestCase):
     def setUp(self):
-        os.mkdirs(TEST_DIR, exist_ok=True)
+        os.makedirs(TEST_DIR, exist_ok=True)
 
     def tearDown(self):
         shutil.rmtree(TEST_DIR)
