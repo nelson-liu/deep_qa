@@ -25,7 +25,6 @@ class CharacterSpanInstance(QuestionPassageInstance):
 
     This class should be used to represent training instances for the SQuAD
     (Stanford Question Answering) and NewsQA datasets, to name a few.
-
     """
     def __init__(self,
                  question: str,
