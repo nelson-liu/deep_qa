@@ -10,8 +10,8 @@ from ..tokenizer import tokenizers, Tokenizer
 
 class QuestionPassageInstance(TextInstance):
     """
-    A QuestionPassageInstance is a base class for datasets that contain
-    consist primarily of a question text and a passage, where the passage contains
+    A QuestionPassageInstance is a base class for datasets that consist
+    primarily of a question text and a passage, where the passage contains
     the answer to the question. This class should not be used directly due to
     the missing ``_index_label`` function, use a subclass instead.
     """
@@ -81,10 +81,10 @@ class IndexedQuestionPassageInstance(IndexedInstance):
         passage_lengths = self._get_word_sequence_lengths(self.passage_indices)
         lengths = {}
 
-        # the number of words in the longest question
+        # the number of words to pad the question to
         lengths['num_question_words'] = question_lengths['word_sequence_length']
 
-        # the number of words in the longest passage
+        # the number of words to pad the passage to
         lengths['num_passage_words'] = passage_lengths['word_sequence_length']
 
         if 'word_character_length' in question_lengths and 'word_character_length' in passage_lengths:
@@ -94,17 +94,18 @@ class IndexedQuestionPassageInstance(IndexedInstance):
         return lengths
 
     @overrides
-    def pad(self, max_lengths: List[int]):
+    def pad(self, max_lengths: Dict[str, int]):
         """
         In this function, we pad the questions and passages (in terms of number of words in each),
         as well as the individual words in the questions and passages themselves.
         """
-        max_lengths['word_sequence_length'] = max_lengths['num_question_words']
+        max_lengths_tmp = max_lengths.copy()
+        max_lengths_tmp['word_sequence_length'] = max_lengths_tmp['num_question_words']
         self.question_indices = self.pad_word_sequence(self.question_indices,
-                                                       max_lengths)
-        max_lengths['word_sequence_length'] = max_lengths['num_question_words']
+                                                       max_lengths_tmp)
+        max_lengths_tmp['word_sequence_length'] = max_lengths_tmp['num_question_words']
         self.passage_indices = self.pad_word_sequence(self.passage_indices,
-                                                      max_lengths)
+                                                      max_lengths_tmp)
 
     @overrides
     def as_training_data(self):
