@@ -20,9 +20,7 @@ class TestSnliPretrainers(TestCase):
     # pylint: disable=protected-access
 
     def setUp(self):
-        if os.path.exists(TEST_DIR):
-            shutil.rmtree(TEST_DIR)
-        os.mkdir(TEST_DIR)
+        os.mkdirs(TEST_DIR, exist_ok=True)
         write_snli_file()
         write_memory_network_files()
         self.pretrainer_params = {"train_files": [SNLI_FILE]}

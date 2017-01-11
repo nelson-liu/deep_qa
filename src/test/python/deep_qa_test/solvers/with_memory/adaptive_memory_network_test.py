@@ -20,9 +20,7 @@ class TestAdaptiveMemoryNetworkSolver(TestCase):
     # pylint: disable=protected-access
 
     def setUp(self):
-        if os.path.exists(TEST_DIR):
-            shutil.rmtree(TEST_DIR)
-        os.mkdir(TEST_DIR)
+        os.mkdirs(TEST_DIR, exist_ok=True)
         write_memory_network_files()
 
     def tearDown(self):
