@@ -23,6 +23,7 @@ class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
   "was not named a main suspect by investigators initially, but was summoned as co-accused during "+
   "the trial, Kochar said. Kochar said his client was in Australia when the teen was raped and killed. "+
   "Pandher faces trial in the remaining 18 killings and could remain in custody, the attorney said."
+  val fixedPassage1 = passage1.replace("\"\"", "\"")
 
   val question2 = "Where was one employee killed?"
   val label2 = "34:59"
@@ -42,6 +43,7 @@ class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
   "partner groups \"\"were taking care of 240,000 Sudanese refugees in 12 camps in eastern Chad and "+
   "some 50,000 from Central African Republic in the south of the country.\"\" Up to 30,000 people "+
   "in Chad fled the country for Cameroon during the rebel-government fighting. E-mail to a friend"
+  val fixedPassage2 = passage2.replace("\"\"", "\"")
 
   val question3 = "who did say South Africa did not issue a visa on time?"
   val label3 = "103:126"
@@ -59,6 +61,7 @@ class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
   "submitted to the South African High Commission in New Delhi, India, at the end of August, "+
   "and original passports were submitted on September 20, more than two weeks ago, a statement on "+
   "his website said."
+  val fixedPassage3 = passage3.replace("\"\"", "\"")
 
   val question4 = "Who is Radu Mazare?"
   val label4 = "191:222"
@@ -79,6 +82,7 @@ class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
   "small and I didn't see it,\"\" he said. \"\"I really liked the look of the uniform after seeing "+
   "it in the Tom Cruise film 'Valkyrie.' I bought it from a costume hire shop in Germany.\"\" A top "+
   "Nazi hunter said Mazare should quit."
+  val fixedPassage4 = passage4.replace("\"\"", "\"")
 
   val datasetFile = "/dataset"
   val datasetFileContents = s"""${header}
@@ -90,10 +94,6 @@ class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
   fileUtil.addFileToBeRead(datasetFile, datasetFileContents)
   val reader = new NewsQaDatasetReader(fileUtil)
   val dataset = reader.readFile(datasetFile)
-  val fixedPassage1 = passage1.replace("\"\"", "\"")
-  val fixedPassage2 = passage2.replace("\"\"", "\"")
-  val fixedPassage3 = passage3.replace("\"\"", "\"")
-  val fixedPassage4 = passage4.replace("\"\"", "\"")
 
   "readFile" should "return a correct dataset" in {
     dataset.instances.size should be (4)
