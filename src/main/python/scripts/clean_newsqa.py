@@ -14,12 +14,12 @@ import pandas as pd
 from tqdm import tqdm
 from scipy.stats import mode
 
-LOG_FMT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-logging.basicConfig(level=logging.INFO, format=LOG_FMT)
 logger = logging.getLogger(__name__) # pylint: disable=invalid-name
 
 
 def main():
+    LOG_FMT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(level=logging.INFO, format=LOG_FMT)
     parser = ArgumentParser(description=("Clean up a CSV file in "
                                          "the NewsQA dataset."))
     parser.add_argument('input_csv', nargs='+',
@@ -109,7 +109,7 @@ def clean_newsqa_csv(newsqa_file_path):
     outdirectory = folder + "/cleaned/"
     os.makedirs(outdirectory, exist_ok=True)
     outpath = outdirectory + filename + ".clean"
-    print(outpath)
+    logger.info("Saving cleaned file to %s", outpath)
     dataframe.to_csv(outpath, encoding="utf-8", index=False)
 
 if __name__ == '__main__':
