@@ -3,7 +3,7 @@ package org.allenai.deep_qa.data
 import com.mattg.util.FakeFileUtil
 import org.scalatest._
 
-class NewsQADatasetReaderSpec extends FlatSpecLike with Matchers {
+class NewsQaDatasetReaderSpec extends FlatSpecLike with Matchers {
 
   val fileUtil = new FakeFileUtil
   val header = "question_text,label,answer_string,passage"
@@ -88,26 +88,25 @@ class NewsQADatasetReaderSpec extends FlatSpecLike with Matchers {
       |${question4},${label4},"${answer4}","${passage4}"""".stripMargin
 
   fileUtil.addFileToBeRead(datasetFile, datasetFileContents)
-  val reader = new NewsQADatasetReader(fileUtil)
+  val reader = new NewsQaDatasetReader(fileUtil)
+  val dataset = reader.readFile(datasetFile)
+  val fixedPassage1 = passage1.replace("\"\"", "\"")
+  val fixedPassage2 = passage2.replace("\"\"", "\"")
+  val fixedPassage3 = passage3.replace("\"\"", "\"")
+  val fixedPassage4 = passage4.replace("\"\"", "\"")
 
   "readFile" should "return a correct dataset" in {
-    val dataset = reader.readFile(datasetFile)
-    val fixedPassage1 = passage1.replace("\"\"", "\"")
-    val fixedPassage2 = passage2.replace("\"\"", "\"")
-    val fixedPassage3 = passage3.replace("\"\"", "\"")
-    val fixedPassage4 = passage4.replace("\"\"", "\"")
     dataset.instances.size should be (4)
 
     // note that whitespace was trimmed following the answer.
-    dataset.instances(0) should be(NewsQAInstance(question1, fixedPassage1, Some(288, 290)))
-    dataset.instances(1) should be(NewsQAInstance(question2, fixedPassage2, Some(34, 59)))
-    dataset.instances(2) should be(NewsQAInstance(question3, fixedPassage3, Some(103, 126)))
-    dataset.instances(3) should be(NewsQAInstance(question4, fixedPassage4, Some(191, 222)))
+    dataset.instances(0) should be(SpanPredictionInstance(question1, fixedPassage1, Some(288, 290)))
+    dataset.instances(1) should be(SpanPredictionInstance(question2, fixedPassage2, Some(34, 59)))
+    dataset.instances(2) should be(SpanPredictionInstance(question3, fixedPassage3, Some(103, 126)))
+    dataset.instances(3) should be(SpanPredictionInstance(question4, fixedPassage4, Some(191, 222)))
 
     dataset.instances(0).passage.substring(dataset.instances(0).label.get._1, dataset.instances(0).label.get._2) should be (answer1)
     dataset.instances(1).passage.substring(dataset.instances(1).label.get._1, dataset.instances(1).label.get._2) should be (answer2)
     dataset.instances(2).passage.substring(dataset.instances(2).label.get._1, dataset.instances(2).label.get._2) should be (answer3)
     dataset.instances(3).passage.substring(dataset.instances(3).label.get._1, dataset.instances(3).label.get._2) should be (answer4)
-
   }
 }
