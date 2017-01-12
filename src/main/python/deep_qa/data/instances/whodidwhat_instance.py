@@ -148,11 +148,7 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         number of answer options, the answer options (in terms of numbers or words in each),
         as well as the individual words in the answer options.
         """
-        print(max_lengths)
-        print(self.passage_indices)
         super(IndexedWhoDidWhatInstance, self).pad(max_lengths)
-        print(max_lengths)
-        print(self.passage_indices)
 
         # pad the number of options
         num_options = max_lengths['num_options']
