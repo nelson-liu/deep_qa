@@ -4,7 +4,7 @@ import logging
 import pickle
 
 from keras import backend as K
-from keras.layers import Dense, Dropout, Input, Layer, TimeDistributed, merge
+from keras.layers import Dense, Dropout, Input, Layer, TimeDistributed
 from overrides import overrides
 import numpy
 
@@ -18,8 +18,6 @@ from ..data.tokenizer import tokenizers
 from ..data.data_indexer import DataIndexer
 from ..layers.encoders import encoders, set_regularization_params
 from ..layers.time_distributed_embedding import TimeDistributedEmbedding
-from ..layers.vector_matrix_split import VectorMatrixSplit
-from ..layers.wrappers import FixedTimeDistributed, OutputMask
 from .models import DeepQaModel
 from .trainer import Trainer
 
@@ -83,8 +81,13 @@ class TextTrainer(Trainer):
         # The above encoder maps word embedding sequences into sentence vectors.  This
         # text_encoding specifies how text sequences are encoded (e.g., as word tokens, characters,
         # words and characters, etc.).
-        self.text_encoding = get_choice_with_default(params, 'text_encoding', list(text_encoders.keys()))
-        TextInstance.encoder = text_encoders[self.text_encoding]
+        text_encoding = get_choice_with_default(params, 'text_encoding', list(text_encoders.keys()))
+        # Note that the way this works is a little odd - we need each Instance object to do the
+        # right thing when we call instance.words() and instance.to_indexed_instance().  So we set
+        # a class variable on TextInstance so that _all_ TextInstance objects use the setting that
+        # we read here.
+        self.text_encoder = text_encoders[text_encoding]
+        TextInstance.encoder = self.text_encoder
 
         super(TextTrainer, self).__init__(params)
 
@@ -217,10 +220,7 @@ class TextTrainer(Trainer):
         have additional padding dimensions, call super()._get_max_lengths() and then update the
         dictionary.
         """
-        lengths = {'word_sequence_length': self.max_sentence_length}
-        if self.text_encoding == "words and characters":
-            lengths['word_character_length'] = self.max_word_length
-        return lengths
+        return self.text_encoder.get_max_lengths(self.max_sentence_length, self.max_word_length)
 
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
         """
@@ -282,12 +282,9 @@ class TextTrainer(Trainer):
             # This can't be the default value for the function argument, because
             # self.max_sentence_length will not have been set at class creation time.
             sentence_length = self.max_sentence_length
-        if self.text_encoding == "words and characters":
-            return (sentence_length, self.max_word_length)
-        else:
-            return (sentence_length,)
+        return self.text_encoder.get_sentence_shape(sentence_length, self.max_word_length)
 
-    def _embed_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
+    def _embed_input(self, input_layer: Layer, embedding_name: str="embedding"):
         """
         This function embeds a word sequence input, using an embedding defined by `embedding_name`.
 
@@ -306,12 +303,20 @@ class TextTrainer(Trainer):
         for some reason you want to have different embeddings for different inputs, use a different
         name for the embedding.
 
+        In this function, we pass the work off to self.text_encoder, which might need to do some
+        additional processing to actually give you a word embedding (e.g., if your text encoder
+        uses both words and characters, we need to run the character encoder and concatenate the
+        result with a word embedding).
+        """
+        return self.text_encoder.embed_input(input_layer, self, embedding_name)
+
+    def _get_embedded_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
+        """
+        This function does most of the work for self._embed_input.
+
         Additionally, we allow for multiple vocabularies, e.g., if you want to embed both
         characters and words with separate embedding matrices.
         """
-        if self.text_encoding == 'words and characters':
-            return self._embed_words_and_characters(input_layer, embedding_name)
-        # pylint: disable=redefined-variable-type
         if embedding_name not in self.embedding_layers:
             self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name, vocab_name)
 
@@ -349,67 +354,6 @@ class TextTrainer(Trainer):
             projection_layer = TimeDistributed(Dense(output_dim=self.embedding_size,),
                                                name=name + '_projection')
         return embedding_layer, projection_layer
-
-    def _embed_words_and_characters(self, input_layer: Layer, embedding_name: str):
-        """
-        We allow several different kinds of text encodings as input to our models (e.g., word
-        tokens, character tokens, word tokens combined with characters for each word).  When we
-        have this combined word-and-characters representation, we need to do some fancy footwork to
-        get a proper embedding.
-
-        This method assumes the input shape is (..., sentence_length, word_length + 1), where the
-        first integer for each word in the tensor is the word index, and the remaining word_length
-        entries is the character sequence.  We'll first split this into two tensors, one of shape
-        (..., sentence_length), and one of shape (..., sentence_length, word_length), where the
-        first is the word sequence, and the second is the character sequence for each word.  We'll
-        pass the word sequence through an embedding layer, as normal, and pass the character
-        sequence through a _separate_ embedding layer, then an encoder, to get a word vector out.
-        We'll then concatenate the two word vectors, returning a tensor of shape
-        (..., sentence_length, embedding_dim * 2).
-        """
-        # We'll be calling self._embed_input(), which will check the value of self.text_encoding.
-        # Unless we change it, we'll get into an infinite loop.
-        prior_text_encoding = self.text_encoding
-        self.text_encoding = "TEMPORARILY_HIDDEN"
-
-        # This is happening before any masking is done, so we don't need to worry about the
-        # mask_split_axis argument to VectorMatrixSplit.
-        words, characters = VectorMatrixSplit(split_axis=-1)(input_layer)
-        word_embedding = self._embed_input(words,
-                                           embedding_name='word_' + embedding_name,
-                                           vocab_name='words')
-        character_embedding = self._embed_input(characters,
-                                                embedding_name='character_' + embedding_name,
-                                                vocab_name='characters')
-
-        # A note about masking here: we care about the character masks when encoding a character
-        # sequence, so we need the mask to be passed to the character encoder correctly.  However,
-        # we _don't_ care here about whether the whole word will be masked, as the word_embedding
-        # will carry that information, so the output mask returned by the TimeDistributed layer
-        # here will be ignored.
-        print("Input layer:", input_layer)
-        print("Word embedding:", word_embedding)
-        print("Character embedding:", character_embedding)
-        character_mask = OutputMask()(character_embedding)
-        print("Character mask:", character_mask)
-        word_encoder = FixedTimeDistributed(self._get_word_encoder())
-        word_encoding = word_encoder(character_embedding)
-
-        merge_mode = lambda inputs: K.concatenate(inputs, axis=-1)
-        def merge_shape(input_shapes):
-            output_shape = list(input_shapes[0])
-            output_shape[-1] *= 2
-            return tuple(output_shape)
-        merge_mask = lambda masks: masks[0]
-        final_embedded_input = merge([word_embedding, word_encoding],
-                                     mode=merge_mode,
-                                     output_shape=merge_shape,
-                                     output_mask=merge_mask,
-                                     name='combined_word_embedding')
-
-        # Don't forget to restore the original value of self.text_encoding.
-        self.text_encoding = prior_text_encoding
-        return final_embedded_input
 
     def _get_sentence_encoder(self):
         """
