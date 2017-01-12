@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from deep_qa.data.data_indexer import DataIndexer
 from deep_qa.data.instances.instance import TextInstance
-from deep_qa.data.instances.text_encoders import text_encoders
+from deep_qa.data.tokenizers import tokenizers
 from deep_qa.data.instances.true_false_instance import IndexedTrueFalseInstance, TrueFalseInstance
 
 
@@ -16,14 +16,14 @@ class TestTextInstance:
     def test_words_tokenizes_the_sentence_correctly(self):
         t = TrueFalseInstance("This is a sentence.", None)
         assert t.words() == {'words': ['this', 'is', 'a', 'sentence', '.']}
-        TextInstance.encoder = text_encoders['characters']
+        TextInstance.tokenizer = tokenizers['characters']({})
         assert t.words() == {'characters': ['T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's',
                                             'e', 'n', 't', 'e', 'n', 'c', 'e', '.']}
-        TextInstance.encoder = text_encoders['words and characters']
+        TextInstance.tokenizer = tokenizers['words and characters']({})
         assert t.words() == {'words': ['this', 'is', 'a', 'sentence', '.'],
                              'characters': ['T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 's',
                                             'e', 'n', 't', 'e', 'n', 'c', 'e', '.']}
-        TextInstance.encoder = text_encoders['word tokens']
+        TextInstance.tokenizer = tokenizers['words']({})
 
     def test_to_indexed_instance_converts_correctly(self):
         data_indexer = DataIndexer()
@@ -40,16 +40,16 @@ class TestTextInstance:
 
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
         assert instance.word_indices == [a_word_index, sentence_index]
-        TextInstance.encoder = text_encoders['characters']
+        TextInstance.tokenizer = tokenizers['characters']({})
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
         assert instance.word_indices == [capital_a_index, space_index, s_index, e_index, n_index, t_index,
                                          e_index, n_index, c_index, e_index]
-        TextInstance.encoder = text_encoders['words and characters']
+        TextInstance.tokenizer = tokenizers['words and characters']({})
         instance = TrueFalseInstance("A sentence", None).to_indexed_instance(data_indexer)
         assert instance.word_indices == [[a_word_index, a_index],
                                          [sentence_index, s_index, e_index, n_index, t_index,
                                           e_index, n_index, c_index, e_index]]
-        TextInstance.encoder = text_encoders['word tokens']
+        TextInstance.tokenizer = tokenizers['words']({})
 
 
 class TestIndexedInstance(TestCase):

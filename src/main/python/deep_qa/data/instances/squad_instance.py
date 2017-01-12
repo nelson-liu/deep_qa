@@ -2,9 +2,9 @@ from typing import Tuple
 
 from overrides import overrides
 
+from .instance import TextInstance
 from .sentence_pair_instance import IndexedSentencePairInstance, SentencePairInstance
 from ..data_indexer import DataIndexer
-from ..tokenizer import tokenizers, Tokenizer
 
 
 class SquadInstance(SentencePairInstance):
@@ -18,13 +18,8 @@ class SquadInstance(SentencePairInstance):
     conversion happens when converting a SquadInstance to in IndexedInstance (where character
     indices are generally lost, anyway).
     """
-    def __init__(self,
-                 question: str,
-                 passage: str,
-                 label: Tuple[int, int],
-                 index: int=None,
-                 tokenizer: Tokenizer=tokenizers['default']()):
-        super(SquadInstance, self).__init__(question, passage, label, index, tokenizer)
+    def __init__(self, question: str, passage: str, label: Tuple[int, int], index: int=None):
+        super(SquadInstance, self).__init__(question, passage, label, index)
 
     def __str__(self):
         return 'SquadInstance(' + self.first_sentence + ', ' + self.second_sentence + ', ' + str(self.label) + ')'
@@ -35,14 +30,11 @@ class SquadInstance(SentencePairInstance):
         indexed_passage = self._index_text(self.second_sentence, data_indexer)
         new_label = None
         if self.label is not None:
-            new_label = self.tokenizer.char_span_to_token_span(self.second_sentence, self.label)
+            new_label = TextInstance.tokenizer.char_span_to_token_span(self.second_sentence, self.label)
         return IndexedSentencePairInstance(indexed_question, indexed_passage, new_label, self.index)
 
     @classmethod
-    def read_from_line(cls,
-                       line: str,
-                       default_label: bool=None,
-                       tokenizer: Tokenizer=tokenizers['default']()):
+    def read_from_line(cls, line: str, default_label: bool=None):
         """
         Reads a SquadInstance object from a line.  The format has one of two options:
 
@@ -66,4 +58,4 @@ class SquadInstance(SentencePairInstance):
         label_fields = label.split(",")
         span_begin = int(label_fields[0])
         span_end = int(label_fields[1])
-        return cls(question, passage, (span_begin, span_end), index, tokenizer)
+        return cls(question, passage, (span_begin, span_end), index)

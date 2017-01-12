@@ -5,7 +5,6 @@ from overrides import overrides
 
 from .instance import TextInstance, IndexedInstance
 from ..data_indexer import DataIndexer
-from ..tokenizer import tokenizers, Tokenizer
 
 
 class QuestionAnswerInstance(TextInstance):
@@ -16,13 +15,8 @@ class QuestionAnswerInstance(TextInstance):
     associated question text in the MultipleChoiceInstance, just a list of true/false statements,
     one of which is true.
     """
-    def __init__(self,
-                 question_text: str,
-                 answer_options: List[str],
-                 label: int,
-                 index: int=None,
-                 tokenizer: Tokenizer=tokenizers['default']()):
-        super(QuestionAnswerInstance, self).__init__(label, index, tokenizer)
+    def __init__(self, question_text: str, answer_options: List[str], label: int, index: int=None):
+        super(QuestionAnswerInstance, self).__init__(label, index)
         self.question_text = question_text
         self.answer_options = answer_options
 
@@ -50,10 +44,7 @@ class QuestionAnswerInstance(TextInstance):
 
     @classmethod
     @overrides
-    def read_from_line(cls,
-                       line: str,
-                       default_label: bool=None,
-                       tokenizer: Tokenizer=tokenizers['default']()):
+    def read_from_line(cls, line: str, default_label: bool=None):
         """
         Reads a QuestionAnswerInstance object from a line.  The format has two options:
 
@@ -80,7 +71,7 @@ class QuestionAnswerInstance(TextInstance):
             raise RuntimeError("Unrecognized line format: " + line)
         answer_options = answers.split("###")
         label = int(label_string)
-        return cls(question, answer_options, label, index, tokenizer)
+        return cls(question, answer_options, label, index)
 
 
 class IndexedQuestionAnswerInstance(IndexedInstance):

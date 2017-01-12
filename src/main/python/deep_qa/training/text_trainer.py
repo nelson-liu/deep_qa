@@ -11,10 +11,9 @@ import numpy
 from ..common.params import get_choice_with_default
 from ..data.dataset import TextDataset
 from ..data.instances.instance import Instance, TextInstance
-from ..data.instances.text_encoders import text_encoders
 from ..data.instances.true_false_instance import TrueFalseInstance
 from ..data.embeddings import PretrainedEmbeddings
-from ..data.tokenizer import tokenizers
+from ..data.tokenizers import tokenizers
 from ..data.data_indexer import DataIndexer
 from ..layers.encoders import encoders, set_regularization_params
 from ..layers.time_distributed_embedding import TimeDistributedEmbedding
@@ -60,9 +59,15 @@ class TextTrainer(Trainer):
         # characters" text encoding.
         self.max_word_length = params.pop('max_word_length', None)
 
-        # Which tokenizer to use for TextInstances
-        tokenizer_choice = get_choice_with_default(params, 'tokenizer', list(tokenizers.keys()))
-        self.tokenizer = tokenizers[tokenizer_choice]()
+        # Which tokenizer to use for TextInstances.
+        # Note that the way this works is a little odd - we need each Instance object to do the
+        # right thing when we call instance.words() and instance.to_indexed_instance().  So we set
+        # a class variable on TextInstance so that _all_ TextInstance objects use the setting that
+        # we read here.
+        tokenizer_params = params.pop('tokenizer', {})
+        tokenizer_choice = get_choice_with_default(tokenizer_params, 'type', list(tokenizers.keys()))
+        self.tokenizer = tokenizers[tokenizer_choice](tokenizer_params)
+        TextInstance.tokenizer = self.tokenizer
 
         # These parameters specify the kind of encoder used to encode any word sequence input.
         # If given, this must be a dict.  We will use the "type" key in this dict (which must match
@@ -76,18 +81,6 @@ class TextTrainer(Trainer):
         # combine character vectors into sentence vectors).  If you want to have separate encoders,
         # here's your chance to specify the word encoder.
         self.word_encoder_params = params.pop('word_encoder', self.encoder_params)
-
-        # Too many overlapping names...  I need to figure out a better way to name these things.
-        # The above encoder maps word embedding sequences into sentence vectors.  This
-        # text_encoding specifies how text sequences are encoded (e.g., as word tokens, characters,
-        # words and characters, etc.).
-        text_encoding = get_choice_with_default(params, 'text_encoding', list(text_encoders.keys()))
-        # Note that the way this works is a little odd - we need each Instance object to do the
-        # right thing when we call instance.words() and instance.to_indexed_instance().  So we set
-        # a class variable on TextInstance so that _all_ TextInstance objects use the setting that
-        # we read here.
-        self.text_encoder = text_encoders[text_encoding]
-        TextInstance.encoder = self.text_encoder
 
         super(TextTrainer, self).__init__(params)
 
@@ -203,7 +196,7 @@ class TextTrainer(Trainer):
         """
         if self._sentence_encoder_model is None:
             self._build_sentence_encoder_model()
-        instance = TrueFalseInstance(sentence, True, tokenizer=self.tokenizer)
+        instance = TrueFalseInstance(sentence, True)
         indexed_instance = instance.to_indexed_instance(self.data_indexer)
         indexed_instance.pad({'word_sequence_length': self.max_sentence_length})
         instance_input, _ = indexed_instance.as_training_data()
@@ -220,7 +213,7 @@ class TextTrainer(Trainer):
         have additional padding dimensions, call super()._get_max_lengths() and then update the
         dictionary.
         """
-        return self.text_encoder.get_max_lengths(self.max_sentence_length, self.max_word_length)
+        return self.tokenizer.get_max_lengths(self.max_sentence_length, self.max_word_length)
 
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
         """
@@ -270,7 +263,7 @@ class TextTrainer(Trainer):
         has background information could call this method, then do additional processing on the
         rest of the list, for instance).
         """
-        return TextDataset.read_from_file(files[0], self._instance_type(), tokenizer=self.tokenizer)
+        return TextDataset.read_from_file(files[0], self._instance_type())
 
     def _get_sentence_shape(self, sentence_length: int=None) -> Tuple[int]:
         """
@@ -282,7 +275,7 @@ class TextTrainer(Trainer):
             # This can't be the default value for the function argument, because
             # self.max_sentence_length will not have been set at class creation time.
             sentence_length = self.max_sentence_length
-        return self.text_encoder.get_sentence_shape(sentence_length, self.max_word_length)
+        return self.tokenizer.get_sentence_shape(sentence_length, self.max_word_length)
 
     def _embed_input(self, input_layer: Layer, embedding_name: str="embedding"):
         """
@@ -303,12 +296,12 @@ class TextTrainer(Trainer):
         for some reason you want to have different embeddings for different inputs, use a different
         name for the embedding.
 
-        In this function, we pass the work off to self.text_encoder, which might need to do some
+        In this function, we pass the work off to self.tokenizer, which might need to do some
         additional processing to actually give you a word embedding (e.g., if your text encoder
         uses both words and characters, we need to run the character encoder and concatenate the
         result with a word embedding).
         """
-        return self.text_encoder.embed_input(input_layer, self, embedding_name)
+        return self.tokenizer.embed_input(input_layer, self, embedding_name)
 
     def _get_embedded_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
         """

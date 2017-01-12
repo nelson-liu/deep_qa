@@ -14,7 +14,7 @@ class BackgroundInstance(TextInstance):
     other kinds of background knowledge.
     """
     def __init__(self, instance: TextInstance, background: List[str]):
-        super(BackgroundInstance, self).__init__(instance.label, instance.index, instance.tokenizer)
+        super(BackgroundInstance, self).__init__(instance.label, instance.index)
         self.instance = instance
         self.background = background
 
@@ -55,9 +55,7 @@ class IndexedBackgroundInstance(IndexedInstance):
     knowledge has also been indexed.
     """
     contained_instance_type = None
-    def __init__(self,
-                 indexed_instance: IndexedInstance,
-                 background_indices: List[List[int]]):
+    def __init__(self, indexed_instance: IndexedInstance, background_indices: List[List[int]]):
         super(IndexedBackgroundInstance, self).__init__(indexed_instance.label, indexed_instance.index)
         self.indexed_instance = indexed_instance
         self.background_indices = background_indices

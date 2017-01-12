@@ -9,7 +9,6 @@ from .instances.instance import Instance, TextInstance, IndexedInstance
 from .instances.background_instance import BackgroundInstance
 from .instances.labeled_background_instance import LabeledBackgroundInstance
 from .instances.multiple_true_false_instance import MultipleTrueFalseInstance
-from .tokenizer import tokenizers, Tokenizer
 from .data_indexer import DataIndexer
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -106,19 +105,13 @@ class TextDataset(Dataset):
         return TextDataset(question_instances)
 
     @staticmethod
-    def read_from_file(filename: str,
-                       instance_class,
-                       label: bool=None,
-                       tokenizer: Tokenizer=tokenizers['default']()) -> 'TextDataset':
+    def read_from_file(filename: str, instance_class, label: bool=None):
         lines = [x.strip() for x in codecs.open(filename, "r", "utf-8").readlines()]
-        return TextDataset.read_from_lines(lines, instance_class, label, tokenizer)
+        return TextDataset.read_from_lines(lines, instance_class, label)
 
     @staticmethod
-    def read_from_lines(lines: List[str],
-                        instance_class,
-                        label: bool=None,
-                        tokenizer: Tokenizer=tokenizers['default']()) -> 'TextDataset':
-        instances = [instance_class.read_from_line(x, label, tokenizer) for x in lines]
+    def read_from_lines(lines: List[str], instance_class, label: bool=None):
+        instances = [instance_class.read_from_line(x, label) for x in lines]
         labels = [(x.label, x) for x in instances]
         labels.sort(key=lambda x: str(x[0]))
         label_counts = [(label, len([x for x in group]))
