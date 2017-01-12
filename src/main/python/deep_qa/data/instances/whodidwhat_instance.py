@@ -130,7 +130,7 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         lengths['num_option_words'] = max([lengths['word_sequence_length'] for
                                            lengths in option_lengths])
         # the length of the longest word across the passage, question, and options
-        if ('word_character_length' in option_lengths[0]):
+        if 'word_character_length' in option_lengths[0]:
             # length of longest word (in characters) in options
             max_option_word_length = max([lengths['word_character_length'] for
                                           lengths in option_lengths])
