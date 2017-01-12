@@ -103,13 +103,33 @@ case class SnliInstance(
   }
 }
 
-case class SquadInstance(
+/**
+  * An Instance created from the Who Did What (WDW) dataset.
+  */
+case class WhoDidWhatInstance(
+  passage: String,
+  leftContext: String,
+  rightContext: String,
+  answerOptions: Seq[String],
+  override val label: Option[Int]
+) extends Instance {
+  def asStrings(): Seq[Seq[String]] = {
+    val answerString = answerOptions.mkString("###")
+    val labelString = label.map(l => s"\t$l")
+    Seq(Seq(s"$passage\t$leftContext\t$rightContext\t$answerString" + labelString))
+  }
+}
+
+/**
+  * An Instance created for the task of span prediction from a passage
+  * given a question. Used for Stanford Question Answering Dataset (SQuAD)
+  * and NewsQA dataset.
+  */
+case class SpanPredictionInstance(
   question: String,
   passage: String,
-  answerStartCharacterIndex: Option[Int],
-  answerEndCharacterIndex: Option[Int]
+  override val label: Option[(Int, Int)]
 ) extends Instance {
-  override val label: Option[(Int, Int)] = answerStartCharacterIndex.map((_, answerEndCharacterIndex.get))
   def asStrings(): Seq[Seq[String]] = {
     val labelString = (label.map { case (start, end) => s"\t${start},${end}" }).getOrElse("")
     Seq(Seq(s"${question}\t${passage}${labelString}"))

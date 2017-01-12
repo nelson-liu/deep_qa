@@ -7,12 +7,9 @@
 #### ESSENTIAL LIBRARIES FOR MAIN FUNCTIONALITY ####
 
 # Neural net and related libraries.
-# Require this specific keras commit which fixed some import errors in the tensorflow backend of
-# Keras 1.1.0.  Can be replaced once the next release is out.
-git+git://github.com/fchollet/keras.git@6b18a908b8ee6e9b58c834a3f7b1944e002764a3
-# keras==1.1.0
+keras
 h5py
-sklearn
+scikit-learn
 theano
 
 ## Tensorflow Requirements ##
@@ -54,3 +51,13 @@ pytest-pythonpath
 
 # Allows generation of coverage reports with pytest.
 pytest-cov
+
+#### LIBRARIES USED IN SCRIPTS ####
+# argument parsing in for data cleaning scripts
+argparse
+
+# Used to read the NewsQA CSV and output a clean one.
+pandas
+
+# progress bars in data cleaning scripts
+tqdm
