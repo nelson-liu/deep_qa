@@ -24,6 +24,7 @@ class TestWhoDidWhatInstance:
         assert instance.words() == ['cats', 'from', 'nevada', 'are', 'eaten', 'by', 'dogs',
                                     'in', 'xxx', '.', 'dogs', 'eat', 'cats', 'from', 'nevada',
                                     'in', 'washington', '.', 'nevada', 'washington']
+
     def test_read_from_line_handles_five_column(self):
         passage = "Dogs eat cats from Nevada in Washington ."
         left_context = "Cats from Nevada are eaten by dogs in"
@@ -139,8 +140,7 @@ class TestIndexedQuestionAnswerInstance(TestCase):
         self.instance.pad({'num_question_words': 7, 'num_passage_words': 4,
                            'num_option_words': 2, 'num_options': 4})
         inputs, label = self.instance.as_training_data()
-        assert np.all(label == np.asarray(1))
+        assert np.all(label == np.asarray([0, 1, 0, 0]))
         assert np.all(inputs[0] == np.asarray([0, 0, 1, 2, 3, 5, 6]))
         assert np.all(inputs[1] == np.asarray([4, 5, 6, 7]))
-        print(inputs[2])
         assert np.all(inputs[2] == np.asarray([[0, 2], [3, 5], [0, 6], [0, 0]]))

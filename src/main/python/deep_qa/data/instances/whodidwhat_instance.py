@@ -49,7 +49,6 @@ class WhoDidWhatInstance(QuestionPassageInstance):
     @overrides
     def to_indexed_instance(self, data_indexer: DataIndexer):
         question_indices = self._index_text(self.question_text, data_indexer)
-        print(self.question_text)
         passage_indices = self._index_text(self.passage_text, data_indexer)
         option_indices = [self._index_text(option, data_indexer) for option in
                           self.answer_options]
@@ -91,12 +90,7 @@ class WhoDidWhatInstance(QuestionPassageInstance):
         label = int(label_string)
 
         # form the question from left and right contexts, keeping spacing consistent
-        if left_context != "":
-            # add a space between left_context and XXX
-            left_context += " "
-        # right context will never be empty, since even if XXX occurs at the end of
-        # the question, there needs to be punctuation.
-        question = "{}XXX {}".format(left_context, right_context)
+        question = "{} XXX {}".format(left_context, right_context).strip()
 
         return cls(question, passage, answer_options, label, index, tokenizer)
 
@@ -125,55 +119,40 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         and the word length (in characters) among all the questions, passages,
         and answer options.
         """
-        question_lengths = self._get_word_sequence_lengths(self.question_indices)
-        passage_lengths = self._get_word_sequence_lengths(self.passage_indices)
         option_lengths = [self._get_word_sequence_lengths(option) for option in self.option_indices]
 
-        lengths = {}
+        lengths = super(IndexedWhoDidWhatInstance, self).get_lengths()
 
         # the number of options
         lengths['num_options'] = len(self.option_indices)
 
-        # the number of words in the longest question
-        lengths['num_question_words'] = question_lengths['word_sequence_length']
-
-        # the number of words in the longest passage
-        lengths['num_passage_words'] = passage_lengths['word_sequence_length']
-
         # the number of words in the longest option
         lengths['num_option_words'] = max([lengths['word_sequence_length'] for
                                            lengths in option_lengths])
-
         # the length of the longest word across the passage, question, and options
-        if ('word_character_length' in question_lengths and
-                    'word_character_length' in passage_lengths and 'word_character_length'
-                    in option_lengths[0]):
+        if ('word_character_length' in option_lengths[0]):
             # length of longest word (in characters) in options
             max_option_word_length = max([lengths['word_character_length'] for
                                           lengths in option_lengths])
 
-            lengths['word_character_length'] = max(question_lengths['word_character_length'],
-                                                   passage_lengths['word_character_length'],
+            lengths['word_character_length'] = max(lengths['word_character_length'],
                                                    max_option_word_length)
 
         return lengths
 
     @overrides
-    def pad(self, max_lengths: List[int]):
+    def pad(self, max_lengths: Dict[str, int]):
         """
         In this function, we pad the questions and passages (in terms of number of words in each),
         as well as the individual words in the questions and passages themselves. We also pad the
         number of answer options, the answer options (in terms of numbers or words in each),
         as well as the individual words in the answer options.
         """
-        # pad number of words in questions, number of characters in each word in question
-        max_lengths['word_sequence_length'] = max_lengths['num_question_words']
-        self.question_indices = self.pad_word_sequence(self.question_indices,
-                                                       max_lengths)
-        # pad number of words in passage, number of characters in each word in passage
-        max_lengths['word_sequence_length'] = max_lengths['num_passage_words']
-        self.passage_indices = self.pad_word_sequence(self.passage_indices,
-                                                      max_lengths)
+        print(max_lengths)
+        print(self.passage_indices)
+        super(IndexedWhoDidWhatInstance, self).pad(max_lengths)
+        print(max_lengths)
+        print(self.passage_indices)
 
         # pad the number of options
         num_options = max_lengths['num_options']
@@ -189,10 +168,14 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         self.option_indices = padded_options
 
 
-
     @overrides
     def as_training_data(self):
         question_array = np.asarray(self.question_indices, dtype='int32')
         passage_array = np.asarray(self.passage_indices, dtype='int32')
         options_array = np.asarray(self.option_indices, dtype='int32')
-        return (question_array, passage_array, options_array), np.asarray(self.label)
+        if self.label is None:
+            label = None
+        else:
+            label = np.zeros((len(self.option_indices)))
+            label[self.label] = 1
+        return (question_array, passage_array, options_array), label
