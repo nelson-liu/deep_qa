@@ -120,8 +120,7 @@ class TextDataset(Dataset):
         return TextDataset(instances)
 
     @staticmethod
-    def read_background_from_file(dataset: 'TextDataset', filename: str, background_class,
-                                  tokenizer: Tokenizer=tokenizers['default']()) -> 'TextDataset':
+    def read_background_from_file(dataset: 'TextDataset', filename: str, background_class):
         """
         Reads a file formatted as background information and matches the background to the
         sentences in the given dataset.  The given dataset must have instance indices, so we can
@@ -144,7 +143,7 @@ class TextDataset(Dataset):
             if index in new_instances:
                 instance = new_instances[index]
                 for sequence in fields[1:]:
-                    instance.background.append(background_class.read_from_line(sequence, None, tokenizer))
+                    instance.background.append(background_class.read_from_line(sequence, None))
         return TextDataset(list(new_instances.values()))
 
     @staticmethod
