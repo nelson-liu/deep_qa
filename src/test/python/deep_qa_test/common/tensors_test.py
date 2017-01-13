@@ -105,3 +105,20 @@ class TestTensors:
         assert result[1, 1, 4] != 0
         assert numpy.all(result[1, 2, :] == numpy.zeros((a_length)))
         assert numpy.all(result[1, 3, :] != numpy.zeros((a_length)))
+
+        # We should get the same result if we pass the smaller tensor in first.  Note the subtle
+        # difference here - we're only changing the order the tensors gets passed in to
+        # masked_batch_dot.
+        function = K.function([keras_tensor_a, keras_tensor_b, keras_mask_a, keras_mask_b],
+                              [tensors.masked_batch_dot(keras_tensor_b, keras_tensor_a,
+                                                        keras_mask_b, keras_mask_a)])
+        result = function([tensor_a, tensor_b, mask_a, mask_b])[0]
+        assert numpy.all(result[0, :, :] != numpy.zeros((common_length, a_length)))
+        assert numpy.all(result[1, 0, :] != numpy.zeros((a_length)))
+        assert result[1, 1, 0] != 0
+        assert result[1, 1, 1] != 0
+        assert result[1, 1, 2] != 0
+        assert result[1, 1, 3] == 0
+        assert result[1, 1, 4] != 0
+        assert numpy.all(result[1, 2, :] == numpy.zeros((a_length)))
+        assert numpy.all(result[1, 3, :] != numpy.zeros((a_length)))
