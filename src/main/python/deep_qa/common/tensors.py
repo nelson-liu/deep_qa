@@ -55,6 +55,9 @@ def masked_batch_dot(tensor_a, tensor_b, mask_a, mask_b):
         tensor_a, tensor_b = tensor_b, tensor_a
         mask_a, mask_b = mask_b, mask_a
 
+    if K.ndim(tensor_a) > 3 and K.backend() == 'theano':
+        raise RuntimeError("K.batch_dot() in theano is broken for tensors with more than"
+                           " three dimensions.  Use tensorflow instead.")
     a_dot_axis = K.ndim(tensor_a) - 1
     b_dot_axis = K.ndim(tensor_b) - 1
     if b_dot_axis < a_dot_axis:
@@ -74,7 +77,6 @@ def masked_batch_dot(tensor_a, tensor_b, mask_a, mask_b):
         # (batch_size, b_length)
         sum_axis = -1
         if b_dot_axis < a_dot_axis:
-            mask_b = K.expand_dims(mask_b, dim=-1)
             sum_axis -= 1
         mask_b = K.sum(K.ones_like(tensor_b), axis=sum_axis)
     # Casting masks to float since we TF would complain if we multiplied bools.
