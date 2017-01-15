@@ -4,7 +4,7 @@ from overrides import overrides
 from keras.layers import Input, merge
 
 from .multiple_true_false_memory_network import MultipleTrueFalseMemoryNetwork
-from ...layers.entailment_models import AnswerOptionSoftmax
+from ...layers.softmaxes.masked_softmax import MaskedSoftmax
 from ...layers.top_knowledge_selector import TopKnowledgeSelector
 from ...layers.wrappers import TimeDistributedWithMask, EncoderWrapper
 from ...training.models import DeepQaModel
@@ -63,5 +63,5 @@ class MultipleTrueFalseDecomposableAttention(MultipleTrueFalseMemoryNetwork):
         true_false_probabilities = entailment_layer(merged_embeddings)
 
         # (batch_size, num_options)
-        final_softmax = AnswerOptionSoftmax()(true_false_probabilities)
+        final_softmax = MaskedSoftmax()(true_false_probabilities)
         return DeepQaModel(input=[question_input, knowledge_input], output=final_softmax)
