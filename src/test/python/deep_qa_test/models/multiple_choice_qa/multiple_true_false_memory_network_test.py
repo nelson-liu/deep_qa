@@ -63,7 +63,7 @@ class TestMultipleTrueFalseMemoryNetwork(TestCase):
         _output_debug_info.side_effect = new_debug
         model.train()
 
-    @mock.patch.object(MultipleTrueFalseMemoryNetworkSolver, '_output_debug_info')
+    @mock.patch.object(MultipleTrueFalseMemoryNetwork, '_output_debug_info')
     def test_works_with_words_and_characters_encoder(self, _output_debug_info):
         args = {
                 'embedding_size': 4,
@@ -79,7 +79,7 @@ class TestMultipleTrueFalseMemoryNetwork(TestCase):
                                 ],
                         }
                 }
-        solver = get_solver(MultipleTrueFalseMemoryNetworkSolver, args)
+        model = get_model(MultipleTrueFalseMemoryNetwork, args)
 
         def new_debug(output_dict, epoch):  # pylint: disable=unused-argument
             # We're going to check two things in here: that the shape of combined word embedding is
@@ -108,7 +108,7 @@ class TestMultipleTrueFalseMemoryNetwork(TestCase):
             assert word_masks[3, 1, 0] == 1
             assert word_masks[3, 2, 0] == 0
         _output_debug_info.side_effect = new_debug
-        solver.train()
+        model.train()
 
     @requires_tensorflow
     def test_train_does_not_crash_using_adaptive_recurrence(self):
