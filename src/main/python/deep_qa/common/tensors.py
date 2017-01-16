@@ -197,3 +197,29 @@ def apply_feed_forward(input_tensor, weights, activation):
     for weight in weights:
         current_tensor = activation(K.dot(current_tensor, weight))
     return current_tensor
+
+
+def l1_normalize(tensor, mask=None):
+    """
+    Normalize a tensor by its L1 norm. Takes an optional mask.
+
+    Parameters
+    ----------
+    tensor : Tensor
+        Tensor of shape (?, max number of options) to be normalized.
+
+    mask: Tensor
+        Tensor of shape (?, max number of options) indicating which options
+        are padding and should not be considered when normalizing
+
+    Returns
+    -------
+    normalized_tensor : Tensor
+        Normalized tensor with shape (?, max number of options).
+    """
+    if mask is not None:
+        tensor = switch(mask, tensor, K.zeros_like(tensor))
+    norm = K.sum(tensor, keepdims=True)
+    normalized_tensor = tensor / norm
+    float32_normalized_tensor = K.cast(normalized_tensor, "float32")
+    return float32_normalized_tensor

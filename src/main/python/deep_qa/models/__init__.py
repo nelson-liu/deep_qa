@@ -2,6 +2,7 @@ from .entailment.decomposable_attention import DecomposableAttention
 from .memory_networks.differentiable_search import DifferentiableSearchMemoryNetwork
 from .memory_networks.memory_network import MemoryNetwork
 from .memory_networks.softmax_memory_network import SoftmaxMemoryNetwork
+from .multiple_choice_qa.attention_sum_reader import AttentionSumReader
 from .multiple_choice_qa.decomposable_attention import MultipleTrueFalseDecomposableAttention
 from .multiple_choice_qa.multiple_true_false_memory_network import MultipleTrueFalseMemoryNetwork
 from .multiple_choice_qa.multiple_true_false_similarity import MultipleTrueFalseSimilarity
@@ -17,6 +18,7 @@ from .memory_networks.pretrainers.snli_pretrainer import SnliAttentionPretrainer
 from .text_pretrainers.encoder_pretrainer import EncoderPretrainer
 
 concrete_models = {  # pylint: disable=invalid-name
+        'AttentionSumReader': AttentionSumReader,
         'DecomposableAttention': DecomposableAttention,
         'DifferentiableSearchMemoryNetwork': DifferentiableSearchMemoryNetwork,
         'MemoryNetwork': MemoryNetwork,
