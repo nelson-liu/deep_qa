@@ -65,11 +65,11 @@ class MultipleTrueFalseMemoryNetwork(MemoryNetwork):
 
     @overrides
     def _get_question_shape(self):
-        return (self.num_options, self.max_sentence_length,)
+        return (self.num_options,) + self._get_sentence_shape()
 
     @overrides
     def _get_background_shape(self):
-        return (self.num_options, self.max_knowledge_length, self.max_sentence_length)
+        return (self.num_options, self.max_knowledge_length) + self._get_sentence_shape()
 
     @overrides
     def _get_sentence_encoder(self):

@@ -33,7 +33,9 @@ class CharacterTokenizer(Tokenizer):
                     text_trainer: 'TextTrainer',
                     embedding_name: str="embedding"):
         # pylint: disable=protected-access
-        return text_trainer._get_embedded_input(input_layer, 'character_' + embedding_name, 'characters')
+        return text_trainer._get_embedded_input(input_layer,
+                                                embedding_name='character_' + embedding_name,
+                                                vocab_name='characters')
 
     @overrides
     def get_sentence_shape(self, sentence_length: int, word_length: int) -> Tuple[int]:

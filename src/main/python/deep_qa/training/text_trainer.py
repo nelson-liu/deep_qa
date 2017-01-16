@@ -303,15 +303,23 @@ class TextTrainer(Trainer):
         """
         return self.tokenizer.embed_input(input_layer, self, embedding_name)
 
-    def _get_embedded_input(self, input_layer: Layer, embedding_name: str="embedding", vocab_name: str='words'):
+    def _get_embedded_input(self,
+                            input_layer: Layer,
+                            embedding_size: int=None,
+                            embedding_name: str="embedding",
+                            vocab_name: str='words'):
         """
         This function does most of the work for self._embed_input.
 
         Additionally, we allow for multiple vocabularies, e.g., if you want to embed both
         characters and words with separate embedding matrices.
         """
+        if embedding_size is None:
+            embedding_size = self.embedding_size
         if embedding_name not in self.embedding_layers:
-            self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name, vocab_name)
+            self.embedding_layers[embedding_name] = self._get_new_embedding(embedding_name,
+                                                                            embedding_size,
+                                                                            vocab_name)
 
         embedding_layer, projection_layer = self.embedding_layers[embedding_name]
         embedded_input = embedding_layer(input_layer)
@@ -324,7 +332,7 @@ class TextTrainer(Trainer):
 
         return embedded_input
 
-    def _get_new_embedding(self, name, vocab_name='words'):
+    def _get_new_embedding(self, name: str, embedding_size: int, vocab_name: str='words'):
         """
         Creates an Embedding Layer (and possibly also a Dense projection Layer) based on the
         parameters you've passed to the TextTrainer.  These could be pre-trained embeddings or not,
@@ -339,12 +347,12 @@ class TextTrainer(Trainer):
             # TimeDistributedEmbedding works with inputs of any shape.
             embedding_layer = TimeDistributedEmbedding(
                     input_dim=self.data_indexer.get_vocab_size(vocab_name),
-                    output_dim=self.embedding_size,
+                    output_dim=embedding_size,
                     mask_zero=True,  # this handles padding correctly
                     name=name)
         projection_layer = None
         if self.project_embeddings:
-            projection_layer = TimeDistributed(Dense(output_dim=self.embedding_size,),
+            projection_layer = TimeDistributed(Dense(output_dim=embedding_size,),
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
@@ -419,6 +427,8 @@ class TextTrainer(Trainer):
             embedding_layers = set([n for n in output_dict.keys() if 'embedding' in n])
             for embedding_layer in embedding_layers:
                 if '_projection' in embedding_layer:
+                    continue
+                if embedding_layer.startswith('combined_'):
                     continue
                 result += self._render_embedding_matrix(embedding_layer)
         return result
