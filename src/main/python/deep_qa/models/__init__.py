@@ -16,7 +16,7 @@ from .memory_networks.pretrainers.attention_pretrainer import AttentionPretraine
 from .memory_networks.pretrainers.snli_pretrainer import SnliAttentionPretrainer, SnliEntailmentPretrainer
 from .text_pretrainers.encoder_pretrainer import EncoderPretrainer
 
-concrete_solvers = {  # pylint: disable=invalid-name
+concrete_models = {  # pylint: disable=invalid-name
         'DecomposableAttention': DecomposableAttention,
         'DifferentiableSearchMemoryNetwork': DifferentiableSearchMemoryNetwork,
         'MemoryNetwork': MemoryNetwork,
