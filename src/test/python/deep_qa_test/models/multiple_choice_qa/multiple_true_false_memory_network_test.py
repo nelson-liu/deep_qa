@@ -10,6 +10,7 @@ from ...common.models import get_model
 from ...common.models import write_multiple_true_false_memory_network_files
 from ...common.test_markers import requires_tensorflow
 
+
 class TestMultipleTrueFalseMemoryNetwork(TestCase):
     # pylint: disable=protected-access
 
@@ -20,7 +21,6 @@ class TestMultipleTrueFalseMemoryNetwork(TestCase):
     def tearDown(self):
         shutil.rmtree(TEST_DIR)
 
-    @requires_tensorflow
     def test_train_does_not_crash(self):
         model = get_model(MultipleTrueFalseMemoryNetwork)
         model.train()
