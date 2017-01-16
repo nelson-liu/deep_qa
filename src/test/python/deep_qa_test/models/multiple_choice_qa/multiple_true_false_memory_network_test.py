@@ -20,6 +20,7 @@ class TestMultipleTrueFalseMemoryNetwork(TestCase):
     def tearDown(self):
         shutil.rmtree(TEST_DIR)
 
+    @requires_tensorflow
     def test_train_does_not_crash(self):
         model = get_model(MultipleTrueFalseMemoryNetwork)
         model.train()
