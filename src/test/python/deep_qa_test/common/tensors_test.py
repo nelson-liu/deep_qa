@@ -72,7 +72,7 @@ class TestTensors:
         assert numpy.any(result[1, :, 4] != numpy.zeros((a_length)))
 
     def test_masked_batch_dot_handles_uneven_tensors(self):
-        # We're going to test masked_batch_dot with tensors of shape (batch_size, # a_length,
+        # We're going to test masked_batch_dot with tensors of shape (batch_size, a_length,
         # embedding_dim) and (batch_size, embedding_dim).  The result should have shape
         # (batch_size, a_length).
         embedding_dim = 3
@@ -97,16 +97,11 @@ class TestTensors:
         assert numpy.all(result[1, :] == numpy.zeros((a_length)))
 
         # We should get the same result if we flip the order of the tensors.
-        result = K.eval(tensors.masked_batch_dot(K.variable(tensor_b),
-                                                 K.variable(tensor_a),
-                                                 K.variable(mask_b),
-                                                 K.variable(mask_a)))
-        assert result[0, 0] != 0
-        assert result[0, 1] != 0
-        assert result[0, 2] != 0
-        assert result[0, 3] == 0
-        assert result[0, 4] != 0
-        assert numpy.all(result[1, :] == numpy.zeros((a_length)))
+        flipped_result = K.eval(tensors.masked_batch_dot(K.variable(tensor_b),
+                                                         K.variable(tensor_a),
+                                                         K.variable(mask_b),
+                                                         K.variable(mask_a)))
+        assert numpy.all(result == flipped_result)
 
     @requires_tensorflow
     def test_masked_batch_dot_handles_uneven_higher_order_tensors(self):
@@ -141,16 +136,8 @@ class TestTensors:
         assert numpy.all(result[1, 3, :] != numpy.zeros((a_length)))
 
         # We should get the same result if we pass the smaller tensor in first.
-        result = K.eval(tensors.masked_batch_dot(K.variable(tensor_b),
-                                                 K.variable(tensor_a),
-                                                 K.variable(mask_b),
-                                                 K.variable(mask_a)))
-        assert numpy.all(result[0, :, :] != numpy.zeros((common_length, a_length)))
-        assert numpy.all(result[1, 0, :] != numpy.zeros((a_length)))
-        assert result[1, 1, 0] != 0
-        assert result[1, 1, 1] != 0
-        assert result[1, 1, 2] != 0
-        assert result[1, 1, 3] == 0
-        assert result[1, 1, 4] != 0
-        assert numpy.all(result[1, 2, :] == numpy.zeros((a_length)))
-        assert numpy.all(result[1, 3, :] != numpy.zeros((a_length)))
+        flipped_result = K.eval(tensors.masked_batch_dot(K.variable(tensor_b),
+                                                         K.variable(tensor_a),
+                                                         K.variable(mask_b),
+                                                         K.variable(mask_a)))
+        assert numpy.all(result == flipped_result)
