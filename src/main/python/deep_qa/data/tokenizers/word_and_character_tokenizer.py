@@ -66,13 +66,18 @@ class WordAndCharacterTokenizer(Tokenizer):
         (..., sentence_length, embedding_dim * 2).
         """
         # pylint: disable=protected-access
+        # So that we end up with even embeddings across different inputs, we'll use half the
+        # `embedding_size` in the given `TextTrainer`.
+        embedding_size = int(text_trainer.embedding_size / 2)
         # This is happening before any masking is done, so we don't need to worry about the
         # mask_split_axis argument to VectorMatrixSplit.
         words, characters = VectorMatrixSplit(split_axis=-1)(input_layer)
         word_embedding = text_trainer._get_embedded_input(words,
+                                                          embedding_size=embedding_size,
                                                           embedding_name='word_' + embedding_name,
                                                           vocab_name='words')
         character_embedding = text_trainer._get_embedded_input(characters,
+                                                               embedding_size=embedding_size,
                                                                embedding_name='character_' + embedding_name,
                                                                vocab_name='characters')
 
@@ -82,6 +87,9 @@ class WordAndCharacterTokenizer(Tokenizer):
         # will carry that information, so the output mask returned by the TimeDistributed layer
         # here will be ignored.
         word_encoder = FixedTimeDistributed(text_trainer._get_word_encoder())
+        # We might need to TimeDistribute this again, if our input has ndim higher than 3.
+        for _ in range(3, K.ndim(characters)):
+            word_encoder = FixedTimeDistributed(word_encoder, name="timedist_" + word_encoder.name)
         word_encoding = word_encoder(character_embedding)
 
         merge_mode = lambda inputs: K.concatenate(inputs, axis=-1)
@@ -90,11 +98,21 @@ class WordAndCharacterTokenizer(Tokenizer):
             output_shape[-1] *= 2
             return tuple(output_shape)
         merge_mask = lambda masks: masks[0]
+
+        # If you're embedding multiple inputs in your model, we need the final merge layer here to
+        # have a unique name each time.  In order to get a unique name, we use the name of the
+        # input layer.  Except sometimes Keras adds funny things to the end of the input layer, so
+        # we'll strip those off.
+        input_name = input_layer.name
+        if ':' in input_name:
+            input_name = input_name.split(':')[0]
+        if input_name.split('_')[-1].isdigit():
+            input_name = input_name.split('_')[-1]
         final_embedded_input = merge([word_embedding, word_encoding],
                                      mode=merge_mode,
                                      output_shape=merge_shape,
                                      output_mask=merge_mask,
-                                     name='combined_word_embedding')
+                                     name='combined_word_embedding_for_' + input_name)
         return final_embedded_input
 
     @overrides

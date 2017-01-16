@@ -352,7 +352,12 @@ class Trainer:
         for instance_index, instance in enumerate(self.debug_dataset.instances):
             instance_output_dict = {}
             for layer_name, output in output_dict.items():
-                instance_output_dict[layer_name] = output[instance_index]
+                if layer_name == 'masks':
+                    instance_output_dict['masks'] = {}
+                    for mask_name, mask_output in output.items():
+                        instance_output_dict['masks'][mask_name] = mask_output[instance_index]
+                else:
+                    instance_output_dict[layer_name] = output[instance_index]
             instance_info = self._instance_debug_output(instance, instance_output_dict)
             debug_output_file.write(instance_info + '\n')
         debug_output_file.close()
