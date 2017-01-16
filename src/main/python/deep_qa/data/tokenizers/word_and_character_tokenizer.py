@@ -107,7 +107,7 @@ class WordAndCharacterTokenizer(Tokenizer):
         if ':' in input_name:
             input_name = input_name.split(':')[0]
         if input_name.split('_')[-1].isdigit():
-            input_name = input_name.split('_')[-1]
+            input_name = '_'.join(input_name.split('_')[:-1])
         final_embedded_input = merge([word_embedding, word_encoding],
                                      mode=merge_mode,
                                      output_shape=merge_shape,
