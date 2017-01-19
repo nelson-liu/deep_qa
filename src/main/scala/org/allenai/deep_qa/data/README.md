@@ -14,7 +14,12 @@ in the Python
 [`scripts/` directory](https://github.com/allenai/deep_qa/tree/master/src/main/python/scripts).
 After generating the NewsQA dataset, please use the script to clean the data and
 prepare it for use in the pipeline; run `python clean_newsqa.py -h` for more
-information.
+information. You **must** use Python 2.x to run this script, as instructed by
+[the NewsQA repo](https://github.com/Maluuba/newsqa#requirements).
+
+Specifically, this script parses the NewsQA CSVs with the Pandas library and
+replaces all the newlines (both LF and CRLF) with spaces (so each passage is one
+contiguous line).
 
 ## Who Did What
 
