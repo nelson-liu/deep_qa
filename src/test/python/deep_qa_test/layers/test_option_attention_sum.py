@@ -18,8 +18,8 @@ class TestOptionAttentionSum(TestCase):
         max_num_words_per_option = 2
 
         document_indices_input = Input(shape=(document_indices_length,),
-                                        dtype='int32',
-                                        name="document_indices_input")
+                                       dtype='int32',
+                                       name="document_indices_input")
         document_probabilities_input = Input(shape=(document_probabilities_length,),
                                              dtype='float32',
                                              name="document_probabilities_input")
@@ -51,8 +51,8 @@ class TestOptionAttentionSum(TestCase):
         max_num_words_per_option = 2
 
         document_indices_input = Input(shape=(document_indices_length,),
-                                        dtype='int32',
-                                        name="document_indices_input")
+                                       dtype='int32',
+                                       name="document_indices_input")
         document_probabilities_input = Input(shape=(document_probabilities_length,),
                                              dtype='float32',
                                              name="document_probabilities_input")
