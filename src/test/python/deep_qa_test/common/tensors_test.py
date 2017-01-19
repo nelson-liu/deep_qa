@@ -143,7 +143,6 @@ class TestTensors:
                                                          K.variable(mask_a)))
         assert numpy.all(result == flipped_result)
 
-
     def test_l1_normalize(self):
         # test 1D case
         vector_1d = K.variable(numpy.array([[2, 1, 5, 7]]))
