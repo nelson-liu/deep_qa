@@ -3,13 +3,29 @@ from keras.layers import Layer
 
 
 class OptionAttentionSum(Layer):
-    '''
-    This Layer takes four inputs: a tensor of document indices, a tensor of document probabilities,
-    a tensor of answer options, and a string describing how to calculate the probability of options
-    that consist of multiple words. We compute the probability of each of the answer options in
-    the fashion described in the attention sum reader paper (Kadlec et. al 2016).
-    '''
+    """
+    This Layer takes four inputs: a tensor of document indices, a tensor of
+    document probabilities, a tensor of answer options, and a string describing
+    how to calculate the probability of options that consist of multiple words.
+    We compute the probability of each of the answer options in the fashion
+    described in the paper "Text Comprehension with the Attention Sum
+    Reader Network" (Kadlec et. al 2016).
+    """
     def __init__(self, multiword_option_mode="mean", **kwargs):
+        """
+        Construct a new OptionAttentionSum layer.
+
+        Parameters
+        ----------
+        multiword_option_mode: str, optional (default="mean")
+            Describes how to calculate the probability of options
+            that contain multiple words. If "mean", the probability of
+            the option is taken to be the mean of the probabilities of
+            its constituent words. If "sum", the probability of the option
+            is taken to be the sum of the probabilities of its constituent
+            words.
+        """
+
         if multiword_option_mode != "mean" and multiword_option_mode != "sum":
             raise ValueError("multiword_option_mode must be 'mean' or "
                              "'sum', got {}.".format(multiword_option_mode))
@@ -32,20 +48,30 @@ class OptionAttentionSum(Layer):
         Parameters
         ----------
         Inputs: List of Tensors
-            The inputs to the layer must be passed in as a list to the ``call`` function.
-            The inputs expected are a Tensor of document indicies, a Tensor of document
-            probabilities, and a options (in that order).
-            The documents indicies tensor is a 2D tensor of shape (batch size, max document
-            length in words), where each row represents which words compose the document.
-            The document probabilities tensor is a 2D Tensor of shape (batch size, max
-            document length in words), where each row represents which words compose the document.
-            The options tensor is of shape (?, max number of options, max number of words
-            in option) representing the possible answer options.
+            The inputs to the layer must be passed in as a list to the
+            ``call`` function. The inputs expected are a Tensor of
+            document indicies, a Tensor of document probabilities, and
+            a Tensor of options (in that order).
+            The documents indicies tensor is a 2D tensor of shape
+            (batch size, max document length in words), where each row
+            represents which words compose the document.
+            The document probabilities tensor is a 2D Tensor of shape
+            (batch size, max document length in words), where each row
+            represents which words compose the document.
+            The options tensor is of shape (batch size, max number of options,
+            max number of words in option) representing the possible answer
+            options.
+        mask: Tensor or None, optional (default=None)
+            Tensor of shape (batch size, max number of options) representing
+            which options are padding and thus have a 0 in the associated
+            mask position.
 
         Returns
         -------
         options_probabilities : Tensor
-            Tensor with shape (batch size, max number of options).
+            Tensor with shape (batch size, max number of options) with floats,
+            where each float is the probability of the option as calculated by
+            ``self.multiword_option_mode``.
         """
         document_indicies, document_probabilities, options = inputs
         expanded_indicies = K.expand_dims(K.expand_dims(document_indicies, 1), 1)
@@ -59,30 +85,36 @@ class OptionAttentionSum(Layer):
                                                 K.int_shape(options)[2], axis=2)
 
         expanded_options = K.expand_dims(options, 3)
-        tiled_options = K.repeat_elements(expanded_options, K.int_shape(document_indicies)[-1], axis=3)
+        tiled_options = K.repeat_elements(expanded_options,
+                                          K.int_shape(document_indicies)[-1], axis=3)
 
-        # generate a binary tensor of the same shape as
-        # tiled_options and tiled_indicies indicating if a option is at the index
-        options_words_mask = K.cast(K.equal(tiled_options, tiled_indicies), "float32")
+        # generate a binary tensor of the same shape as tiled_options /
+        # tiled_indicies indicating if index is option or padding
+        options_words_mask = K.cast(K.equal(tiled_options, tiled_indicies),
+                                    "float32")
 
-        # apply mask to the probabilities to select the indices for option words
+        # apply mask to the probabilities to select the
+        # indices for probabilities that correspond with option words
         selected_probabilities = options_words_mask * tiled_probabilities
 
-        # sum up the probabilities to get probability for options words
+        # sum up the probabilities to get aggregate probability for
+        # each options constituent words
         options_word_probabilities = K.sum(selected_probabilities, axis=3)
 
-        sum_option_words_probabilities = K.sum(options_word_probabilities, axis=2)
+        sum_option_words_probabilities = K.sum(options_word_probabilities,
+                                               axis=2)
 
         if self.multiword_option_mode == "mean":
-            # here we figure out how many words (excluding padding) are in each option
+            # figure out how many words (excluding padding) are in each option
             # generate mask on the input option
-            option_mask = K.cast(K.not_equal(options, K.zeros_like(options)), "float32")
+            option_mask = K.cast(K.not_equal(options, K.zeros_like(options)),
+                                 "float32")
             # num words in each option
             divisor = K.sum(option_mask, axis=2)
         else:
-            # since we're taking the sum, just divide by 1
+            # since we're taking the sum, just divide all sums by 1
             divisor = K.ones_like(sum_option_words_probabilities)
 
-        # now divide the sums by the divisor, which varies depending on multiword_option_mode
+        # now divide the sums by the divisor we generated aboce
         option_probabilities = sum_option_words_probabilities / divisor
         return option_probabilities
