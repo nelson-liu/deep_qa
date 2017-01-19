@@ -3,19 +3,25 @@ from keras.layers import Layer
 from overrides import overrides
 from ..common.tensors import l1_normalize
 
+
 class L1Normalize(Layer):
-    '''
-    This Layer normalizes a tensor by its L1 norm.  This could just be a `Lambda` layer that calls our
-    `tensors.l1_normalize` function, except that `Lambda` layers do not properly handle masked
-    input.
-    The expected input to this layer is a tensor of shape `(batch_size, num_options)`, with a mask
-    of the same shape.  We also accept an input tensor of shape `(batch_size, num_options, 1)`,
-    which we will squeeze to be `(batch_size, num_options)` (though the mask must still be
-    `(batch_size, num_options)`).
-    We give no output mask, as we expect this to only be used at the end of the model, to get a
-    final probability distribution over class labels.  If you need this to propagate the mask for
-    your model, it would be pretty easy to change it to optionally do so - submit a PR.
-    '''
+    """
+    This Layer normalizes a tensor by its L1 norm. This could just be a
+    ``Lambda`` layer that calls our ``tensors.l1_normalize`` function,
+    except that ``Lambda`` layers do not properly handle masked input.
+
+    The expected input to this layer is a tensor of shape
+    ``(batch_size, x)``, with an optional mask of the same shape.
+    We also accept as input a tensor of shape ``(batch_size, x, 1)``,
+    which will be squeezed to shape ``(batch_size, x)``
+    (though the mask must still be of shape ``(batch_size, x)``).
+
+    We give no output mask, as we expect this to only be used at the end of
+    the model, to get a final probability distribution over class labels. If
+    you need this to propagate the mask for your model, it would be pretty
+    easy to change it to optionally do so - submit a PR.
+    """
+
     def __init__(self, **kwargs):
         self.supports_masking = True
         super(L1Normalize, self).__init__(**kwargs)
@@ -31,11 +37,10 @@ class L1Normalize(Layer):
         return (input_shape[0], input_shape[1])
 
     @overrides
-    def call(self, x, mask=None):
-        # input shape: (batch_size, num_options, 1)
-        if K.ndim(x) == 3:
-            x = K.squeeze(x, axis=2)
-        if K.ndim(x) != 2:
-            raise RuntimeError("L1Normalize only supports inputs of shape (batch_size, "
-                               "num_options) or (batch_size, num_options, 1)")
-        return l1_normalize(x, mask)
+    def call(self, tensor_to_normalize, mask=None):
+        if K.ndim(tensor_to_normalize) == 3:
+            tensor_to_normalize = K.squeeze(tensor_to_normalize, axis=2)
+        if K.ndim(tensor_to_normalize) != 2:
+            raise ValueError("L1Normalize layer only supports inputs of shape "
+                             "(batch_size, x) or (batch_size, x, 1)")
+        return l1_normalize(tensor_to_normalize, mask)
