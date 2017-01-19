@@ -99,7 +99,7 @@ class OptionAttentionSum(Layer):
                                           K.int_shape(document_indices)[-1], axis=3)
 
         # This generates a binary tensor of the same shape as tiled_options /
-        # tiled_indices that indicates if index is option or padding
+        # tiled_indices that indicates if index is option or padding.
         options_words_mask = K.cast(K.equal(tiled_options, tiled_indices),
                                     "float32")
 
