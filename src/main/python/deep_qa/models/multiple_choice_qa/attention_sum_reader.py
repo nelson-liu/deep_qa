@@ -17,8 +17,8 @@ class AttentionSumReader(TextTrainer):
     document and question words with two separate Bidirectional GRUs, and then
     takes the dotproduct of the question embedding with the document embedding
     of each word in the document. This create an attention over words in the
-    document, and it then selects the word with the highest summed weight as
-    the answer.
+    document, and it then selects the option with the highest summed or mean
+    weight as the answer.
     """
     def __init__(self, params: Dict[str, Any]):
         self.max_question_length = params.pop('max_question_length', None)
@@ -55,49 +55,49 @@ class AttentionSumReader(TextTrainer):
         """
         # First we create input layers and pass the inputs through embedding layers.
 
-        # ? = batch size
-        # shape: (?, max question length in words), say (?, 8)
+        # shape: (batch size, max question length in words)
         question_input = Input(shape=self._get_sentence_shape(self.max_question_length),
                                dtype='int32', name="question_input")
-        # shape: (?, max document length in words), say (?, 7)
+        # shape: (batch size, max document length in words)
         document_input = Input(shape=self._get_sentence_shape(self.max_passage_length),
                                dtype='int32',
                                name="document_input")
-        # shape: (?, max number of options, max number of words in option), say (?, 3, 2)
+        # shape: (batch size, max number of options, max number of words in option)
         options_input = Input(shape=(self.num_options,) + self._get_sentence_shape(self.max_option_length),
                               dtype='int32', name="options_input")
-        # shape: (?, max question length in words, embedding size), (?, 8, 5)
+        # shape: (batch size, max question length in words, embedding size)
         question_embedding = self._embed_input(question_input)
 
-        # shape: (?, max document length in words, embedding size), (?, 7, 5)
+        # shape: (batch size, max document length in words, embedding size)
         document_embedding = self._embed_input(document_input)
 
         # Then we encode the question embeddings with some encoder.
         question_encoder = self._get_sentence_encoder()
-        # shape: (?, 2xembed size), (?, 10)
+        # shape: (batch size, 2*embedding size)
         encoded_question = question_encoder(question_embedding)
 
         # encode the document with some seq2seq encoder
         seq2seq_input_shape = (self._get_sentence_shape(self.max_passage_length) + (self.embedding_size,))
         document_encoder = self._get_seq2seq_encoder(input_shape=seq2seq_input_shape)
-        # shape: (?, ?, 2xembed size), (?, ?, 10) should be (?, max_document_length, 10)
+        # shape: (batch size, max document length in words, 2*embedding size)
         encoded_document = document_encoder(document_embedding)
 
-        # take the dotproduct of `encoded_question` and each word in `encoded_document`
-        # shape: (?, max_document_length) or (?, 7)
+        # take dotproduct of `encoded_question` and each word vector
+        # in `encoded_document`
+        # shape: (batch size, max docuent length in words)
         document_probabilities = SimilaritySoftmax(name='question_document_softmax')([encoded_question,
                                                                                       encoded_document])
         # sum together the weights of words that match each option
         options_sum_layer = OptionAttentionSum(self.multiword_option_mode,
                                                name="options_probability_sum")
-        # shape should be (?, max_number_of_options), or (?, 3) in this case
+        # shape: (batch size, max number of options)
         options_probabilities = options_sum_layer([document_input,
                                                    document_probabilities, options_input])
         # normalize the option_probabilities by dividing each
-        # element by L1 norm (sum) of vector.
+        # element by L1 norm (sum) of the tensor.
         l1_norm_layer = L1Normalize()
 
-        # shape should be (?, max_number_of_options), or (?, 3) in this case
+        # shape: (batch size, max number of options)
         option_normalized_probabilities = l1_norm_layer(options_probabilities)
         return DeepQaModel(input=[question_input, document_input, options_input],
                            output=option_normalized_probabilities)
@@ -126,8 +126,8 @@ class AttentionSumReader(TextTrainer):
         """
         Set the padding lengths of the model.
         """
-        # superclass complains that there is no word_sequence_length
-        # key, should probably patch up API
+        # TODO superclass complains that there is no word_sequence_length
+        # key, so we set it to None here. Should probably patch up API
         max_lengths["word_sequence_length"] = None
         super(AttentionSumReader, self)._set_max_lengths(max_lengths)
         self.max_question_length = max_lengths['num_question_words']
