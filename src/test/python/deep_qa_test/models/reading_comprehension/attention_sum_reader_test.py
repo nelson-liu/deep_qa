@@ -3,7 +3,7 @@ from unittest import TestCase
 import os
 import shutil
 
-from deep_qa.models.multiple_choice_qa.attention_sum_reader import AttentionSumReader
+from deep_qa.models.reading_comprehension.attention_sum_reader import AttentionSumReader
 from ...common.constants import TEST_DIR
 from ...common.models import get_model, write_who_did_what_files
 

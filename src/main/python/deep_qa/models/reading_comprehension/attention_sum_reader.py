@@ -15,8 +15,8 @@ class AttentionSumReader(TextTrainer):
     This TextTrainer implements the Attention Sum Reader model described by
     Kadlec et. al 2016. It takes a question and document as input, encodes the
     document and question words with two separate Bidirectional GRUs, and then
-    takes the dotproduct of the question embedding with the document embedding
-    of each word in the document. This create an attention over words in the
+    takes the dot product of the question embedding with the document embedding
+    of each word in the document. This creates an attention over words in the
     document, and it then selects the option with the highest summed or mean
     weight as the answer.
     """
@@ -55,53 +55,57 @@ class AttentionSumReader(TextTrainer):
         """
         # First we create input layers and pass the inputs through embedding layers.
 
-        # shape: (batch size, max question length in words)
+        # shape: (batch size, question_length)
         question_input = Input(shape=self._get_sentence_shape(self.max_question_length),
                                dtype='int32', name="question_input")
-        # shape: (batch size, max document length in words)
+        # shape: (batch size, document_length)
         document_input = Input(shape=self._get_sentence_shape(self.max_passage_length),
                                dtype='int32',
                                name="document_input")
-        # shape: (batch size, max number of options, max number of words in option)
+        # shape: (batch size, max number of options, num_options)
         options_input = Input(shape=(self.num_options,) + self._get_sentence_shape(self.max_option_length),
                               dtype='int32', name="options_input")
-        # shape: (batch size, max question length in words, embedding size)
+        # shape: (batch size, question_length, embedding size)
         question_embedding = self._embed_input(question_input)
 
-        # shape: (batch size, max document length in words, embedding size)
+        # shape: (batch size, document_length, embedding size)
         document_embedding = self._embed_input(document_input)
 
-        # Then we encode the question embeddings with some encoder.
+        # We encode the question embeddings with some encoder.
         question_encoder = self._get_sentence_encoder()
         # shape: (batch size, 2*embedding size)
         encoded_question = question_encoder(question_embedding)
 
-        # encode the document with some seq2seq encoder
-        seq2seq_input_shape = (self._get_sentence_shape(self.max_passage_length) + (self.embedding_size,))
+        # We encode the document with a seq2seq encoder. Note that
+        # this is not the same encoder as used for the question
+        # TODO(nelson): Enable using the same encoder for both
+        # document and question.
+        seq2seq_input_shape = self._get_sentence_shape(self.max_passage_length) + (self.embedding_size,)
         document_encoder = self._get_seq2seq_encoder(input_shape=seq2seq_input_shape)
-        # shape: (batch size, max document length in words, 2*embedding size)
+        # shape: (batch size, document_length, 2*embedding size)
         encoded_document = document_encoder(document_embedding)
 
-        # take dotproduct of `encoded_question` and each word vector
-        # in `encoded_document`
+        # Here we take the dot product of `encoded_question` and each word
+        # vector in `encoded_document`.
         # shape: (batch size, max docuent length in words)
         document_probabilities = SimilaritySoftmax(name='question_document_softmax')([encoded_question,
                                                                                       encoded_document])
-        # sum together the weights of words that match each option
+        # We sum together the weights of words that match each option.
         options_sum_layer = OptionAttentionSum(self.multiword_option_mode,
                                                name="options_probability_sum")
-        # shape: (batch size, max number of options)
+        # shape: (batch size, num_options)
         options_probabilities = options_sum_layer([document_input,
                                                    document_probabilities, options_input])
-        # normalize the option_probabilities by dividing each
-        # element by L1 norm (sum) of the tensor.
+        # We normalize the option_probabilities by dividing each
+        # element by L1 norm (sum) of the whole tensor.
         l1_norm_layer = L1Normalize()
 
-        # shape: (batch size, max number of options)
+        # shape: (batch size, num_options)
         option_normalized_probabilities = l1_norm_layer(options_probabilities)
         return DeepQaModel(input=[question_input, document_input, options_input],
                            output=option_normalized_probabilities)
 
+    @overrides
     def _instance_type(self):
         """
         Return the instance type that the model trains on.
@@ -113,7 +117,6 @@ class AttentionSumReader(TextTrainer):
         """
         Return a dictionary with the appropriate padding lengths.
         """
-        # set the ones that i add myself, and do the same for _set_max_lengths
         max_lengths = super(AttentionSumReader, self)._get_max_lengths()
         max_lengths['num_question_words'] = self.max_question_length
         max_lengths['num_passage_words'] = self.max_passage_length
@@ -126,8 +129,9 @@ class AttentionSumReader(TextTrainer):
         """
         Set the padding lengths of the model.
         """
-        # TODO superclass complains that there is no word_sequence_length
-        # key, so we set it to None here. Should probably patch up API
+        # TODO(nelson): superclass complains that there is no
+        # word_sequence_length key, so we set it to None here.
+        # We should probably patch up / organize the API.
         max_lengths["word_sequence_length"] = None
         super(AttentionSumReader, self)._set_max_lengths(max_lengths)
         self.max_question_length = max_lengths['num_question_words']
