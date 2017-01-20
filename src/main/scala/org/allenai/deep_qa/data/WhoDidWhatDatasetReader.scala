@@ -30,6 +30,7 @@ class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWh
 
       passageNode = mc \ "contextart"
       passage = passageNode.text
+
       answerOptionNodes = mc \ "choice"
       answerOptions = answerOptionNodes.map((answerOption: scala.xml.Node) => answerOption.text)
 
