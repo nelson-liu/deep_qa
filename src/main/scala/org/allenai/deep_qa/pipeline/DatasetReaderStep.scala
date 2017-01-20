@@ -40,14 +40,6 @@ class DatasetReaderStep(
   override val inProgressFile = outputs.head.dropRight(4) + s"_in_progress"
 
   override def _runStep() {
-    // We replace non-breaking spaces (&nbsp;) in input files with regular spaces.
-    logger.info(s"""Removing non-breaking spaces in: ${inputFile}""")
-    val command = s"""sed -i 's/&nbsp;/ /g' ${inputFile}"""
-    val process = Process(command)
-    val exitCode = process.!
-    if (exitCode != 0) {
-      throw new RuntimeException("Subprocess returned non-zero exit code: $exitCode")
-    }
     val dataset = reader.readFile(inputFile)
     dataset.writeToFiles(outputFiles, indexSentences, fileUtil)
   }

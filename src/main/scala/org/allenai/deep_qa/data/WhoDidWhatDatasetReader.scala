@@ -4,10 +4,20 @@ import com.mattg.util.FileUtil
 
 import scala.collection.mutable
 import scala.xml
-
+import scala.sys.process.Process
 
 class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWhatInstance] {
   override def readFile(filename: String): Dataset[WhoDidWhatInstance] = {
+    // We replace non-breaking spaces (&nbsp;) in input files with regular spaces
+    // and back up the original file at inputFile.bak
+    logger.info(s"""Removing non-breaking spaces in ${inputFile}, backing up original input file at ${inputFile}.bak""")
+    val command = s"""sed -i.bak 's/&nbsp;/ /g' ${inputFile}"""
+    val process = Process(command)
+    val exitCode = process.!
+    if (exitCode != 0) {
+      throw new RuntimeException("Subprocess returned non-zero exit code: $exitCode")
+    }
+
     val xml = scala.xml.Utility.trim(scala.xml.XML.loadString(fileUtil.readFileContents(filename)))
     val instanceTuples = for {
       mc <- xml \ "mc"
@@ -20,7 +30,6 @@ class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWh
 
       passageNode = mc \ "contextart"
       passage = passageNode.text
-
       answerOptionNodes = mc \ "choice"
       answerOptions = answerOptionNodes.map((answerOption: scala.xml.Node) => answerOption.text)
 
