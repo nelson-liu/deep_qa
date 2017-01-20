@@ -9,9 +9,9 @@ documented here.
 The default version of the NewsQA dataset (as of 1/19/17) is very difficult to
 parse in our Scala data pipeline due to the irregular mixing of LF and CRLF line
 endings. As a result, we have provided a file named
-[`clean_newsqa.py`](https://github.com/allenai/deep_qa/blob/master/src/main/python/scripts/clean_newsqa.py)
+[`clean_newsqa.py`](../../../../../../../src/main/python/scripts/clean_newsqa.py)
 in the Python
-[`scripts/` directory](https://github.com/allenai/deep_qa/tree/master/src/main/python/scripts).
+[`scripts/` directory](../../../../../../../src/main/python/scripts).
 After generating the NewsQA dataset, please use the script to clean the data and
 prepare it for use in the pipeline; run `python clean_newsqa.py -h` for more
 information. You **must** use Python 2.x to run this script, as instructed by
