@@ -10,8 +10,8 @@ class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWh
   override def readFile(filename: String): Dataset[WhoDidWhatInstance] = {
     // We replace non-breaking spaces (&nbsp;) in input files with regular spaces
     // and back up the original file at inputFile.bak
-    logger.info(s"""Removing non-breaking spaces in ${inputFile}, backing up original input file at ${inputFile}.bak""")
-    val command = s"""sed -i.bak 's/&nbsp;/ /g' ${inputFile}"""
+    logger.info(s"""Removing non-breaking spaces in ${filename}, backing up original input file at ${filename}.bak""")
+    val command = s"""sed -i.bak 's/&nbsp;/ /g' ${filename}"""
     val process = Process(command)
     val exitCode = process.!
     if (exitCode != 0) {
