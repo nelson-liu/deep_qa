@@ -1,17 +1,18 @@
 package org.allenai.deep_qa.data
 
 import com.mattg.util.FileUtil
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection.mutable
 import scala.xml
 import scala.sys.process.Process
 
-class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWhatInstance] {
+class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWhatInstance] with LazyLogging{
   override def readFile(filename: String): Dataset[WhoDidWhatInstance] = {
     // We replace non-breaking spaces (&nbsp;) in input files with regular spaces
     // and back up the original file at inputFile.bak
     logger.info(s"""Removing non-breaking spaces in ${filename}, backing up original input file at ${filename}.bak""")
-    val command = s"""sed -i.bak 's/&nbsp;/ /g' ${filename}"""
+    val command = Seq("sed", "-i.bak", "s/&nbsp;/ /g", filename)
     val process = Process(command)
     val exitCode = process.!
     if (exitCode != 0) {
