@@ -7,7 +7,7 @@ import scala.collection.mutable
 import scala.xml
 import scala.sys.process.Process
 
-class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWhatInstance] with LazyLogging{
+class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWhatInstance] with LazyLogging {
   override def readFile(filename: String): Dataset[WhoDidWhatInstance] = {
     // We replace non-breaking spaces (&nbsp;) in input files with regular spaces
     // and back up the original file at inputFile.bak
