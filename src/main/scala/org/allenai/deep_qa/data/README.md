@@ -1,8 +1,26 @@
 # Datasets
 
 At times, we have made changes to the default generated versions of various
-datasets in order to make adding them into the pipeline. These changes are
-documented here.
+datasets in order to make adding them into the pipeline easier. These changes 
+are documented below.
+
+## All Datasets
+
+The presence of non-breaking spaces (`&nbsp;`) generally indicates some sort of
+improper parse in the dataset and in some cases can cause the data to be
+incompatible with our pipeline. For example, the default version of the Who Did
+What dataset (as of 1/19/17) has non-breaking spaces in the text. The function
+we use to parse the XML, `scala.xml.XML.loadString`, does not support these
+characters. Thus, in the pipeline, we automatically run the following command on
+all raw datafiles to replace the non-breaking spaces with normal spaces:
+
+```
+sed -i 's/&nbsp;/ /g' <input_file>
+```
+
+This command uses the `sed` stream editor to replace all occurences of `&nbsp;`
+with a space in-place.
+
 
 ## NewsQA 
 
@@ -20,19 +38,3 @@ information. You **must** use Python 2.x to run this script, as instructed by
 Specifically, this script parses the NewsQA CSVs with the Pandas library and
 replaces all the newlines (both LF and CRLF) with spaces (so each passage is one
 contiguous line).
-
-## Who Did What
-
-The default version of the Who Did What dataset (as of 1/19/17) has non-breaking
-spaces in the text (`&nbsp;`). The function we use to parse the XML,
-`scala.xml.XML.loadString`, does not support these characters. Thus, run the
-following command to replace the non-breaking spaces with normal spaces:
-
-```
-sed -i.bak 's/&nbsp;/ /g' <split>.xml
-```
-
-Where <split>.xml is one of the original generated Who Did What XML files. This
-command uses the `sed` stream editor to replace all occurences of `&nbsp;` with
-a space in place, and generates a backup of the original named
-`<split>.xml.bak`.

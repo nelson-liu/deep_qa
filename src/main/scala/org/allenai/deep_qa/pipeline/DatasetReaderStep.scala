@@ -7,6 +7,9 @@ import org.json4s._
 
 import org.allenai.deep_qa.data.DatasetReader
 
+import scala.sys.process.Process
+import scala.sys.process.ProcessLogger
+
 /**
  * This Step is a SentenceProducer that reads some external dataset and converts it into a format
  * usable by our pipeline, by means of a DatasetReader.  This is for doing things like running
@@ -37,6 +40,14 @@ class DatasetReaderStep(
   override val inProgressFile = outputs.head.dropRight(4) + s"_in_progress"
 
   override def _runStep() {
+    // We replace non-breaking spaces (&nbsp;) in input files with regular spaces.
+    logger.info(s"""Removing non-breaking spaces in: ${inputFile}""")
+    val command = s"""sed -i 's/&nbsp;/ /g' ${inputFile}"""
+    val process = Process(command)
+    val exitCode = process.!
+    if (exitCode != 0) {
+      throw new RuntimeException("Subprocess returned non-zero exit code: $exitCode")
+    }
     val dataset = reader.readFile(inputFile)
     dataset.writeToFiles(outputFiles, indexSentences, fileUtil)
   }
