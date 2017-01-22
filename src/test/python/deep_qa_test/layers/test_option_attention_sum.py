@@ -44,6 +44,16 @@ class TestOptionAttentionSum(TestCase):
         result = model.predict([document_indices, document_probabilities, options])
         assert_array_almost_equal(result, np.array([[0.11, 0.205, 0.315]]))
 
+        # test batch case
+        batch_document_indices = np.array([[1, 2, 3, 4, 1, 2], [1, 2, 3, 4, 1, 2]])
+        batch_document_probabilities = np.array([[.1, .2, .3, .4, 0.01, 0.03],
+                                                 [.1, .2, .3, .4, 0.01, 0.03]])
+        batch_options = np.array([[[1, 2], [3, 4], [1, 2]], [[1, 1], [3, 1], [4, 2]]])
+        result = model.predict([batch_document_indices, batch_document_probabilities,
+                                batch_options])
+        assert_array_almost_equal(result, np.array([[0.17, 0.35, 0.17],
+                                                    [0.11, 0.205, 0.315]]))
+
     def test_sum_mode(self):
         document_probabilities_length = 6
         document_indices_length = document_probabilities_length
@@ -77,6 +87,16 @@ class TestOptionAttentionSum(TestCase):
         result = model.predict([document_indices, document_probabilities, options])
         assert_array_almost_equal(result, np.array([[0.22, 0.41, 0.63]]))
 
+        # test batch case
+        batch_document_indices = np.array([[1, 2, 3, 4, 1, 2], [1, 2, 3, 4, 1, 2]])
+        batch_document_probabilities = np.array([[.1, .2, .3, .4, 0.01, 0.03],
+                                                 [.1, .2, .3, .4, 0.01, 0.03]])
+        batch_options = np.array([[[1, 2], [3, 4], [1, 2]], [[1, 1], [3, 1], [4, 2]]])
+        result = model.predict([batch_document_indices, batch_document_probabilities,
+                                batch_options])
+        assert_array_almost_equal(result, np.array([[0.34, 0.70, 0.34],
+                                                    [0.22, 0.41, 0.63]]))
+
     def test_multiword_option_mode_validation(self):
         self.assertRaises(ConfigurationError, OptionAttentionSum, "summean")
 
@@ -97,3 +117,12 @@ class TestOptionAttentionSum(TestCase):
                                                                           [0, 0, 0], [0, 0, 0]]],
                                                                         dtype="int32"))])
         assert_array_equal(K.eval(result), np.array([[1, 0, 0, 0]]))
+
+        # test batch case
+        result = option_attention_sum.compute_mask(["_", "_",
+                                                    K.variable(np.array([[[1, 2, 0], [2, 3, 3],
+                                                                          [0, 0, 0], [0, 0, 0]],
+                                                                         [[1, 1, 0], [3, 3, 3],
+                                                                          [0, 0, 3], [0, 0, 0]]],
+                                                                        dtype="int32"))])
+        assert_array_equal(K.eval(result), np.array([[1, 1, 0, 0], [1, 1, 1, 0]]))

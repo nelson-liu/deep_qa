@@ -222,7 +222,7 @@ def l1_normalize(tensor_to_normalize, mask=None):
     if mask is not None:
         tensor_to_normalize = switch(mask, tensor_to_normalize,
                                      K.zeros_like(tensor_to_normalize))
-    norm = K.sum(tensor_to_normalize, keepdims=True)
+    norm = K.sum(tensor_to_normalize, axis=1, keepdims=True)
     normalized_tensor = tensor_to_normalize / norm
     float32_normalized_tensor = K.cast(normalized_tensor, "float32")
     return float32_normalized_tensor
