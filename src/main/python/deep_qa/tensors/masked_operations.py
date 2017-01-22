@@ -72,9 +72,26 @@ def masked_softmax(vector, mask):
     acceptable; you'll just get a regular softmax).
 
     We assume that both `vector` and `mask` (if given) have shape (batch_size, vector_dim).
+
+    In the case that the input vector is completely masked, this function returns an array
+    of ``0.0``. This behavior may cause ``NaN`` if this is used as the last layer of a model
+    that uses categorial cross-entropy loss.
     """
-    exponentiated = K.exp(vector)
+    # We calculate masked softmax in a numerically stable fashion, as done
+    # in https://github.com/rkadlec/asreader/blob/master/asreader/custombricks/softmax_mask_bricks.py
     if mask is not None:
-        exponentiated = switch(mask, exponentiated, K.zeros_like(exponentiated))
-    exp_sum = K.sum(exponentiated, axis=1, keepdims=True)
-    return switch(tile_scalar(exp_sum, exponentiated), exponentiated / exp_sum, K.zeros_like(exponentiated))
+        # Here we get normalized log probabilities for
+        # enhanced numerical stability.
+        mask = K.cast(mask, "float32")
+        input_masked = mask * vector
+        shifted = mask * (input_masked - K.max(input_masked, axis=1,
+                                               keepdims=True))
+        # We add epsilon to avoid numerical instability when
+        # the sum in the log yields 0.
+        normalization_constant = K.log(K.sum(mask * K.exp(shifted), axis=1,
+                                             keepdims=True) + K.epsilon())
+        normalized_log_probabilities = mask * (shifted - normalization_constant)
+        return mask * K.exp(normalized_log_probabilities)
+    else:
+        # There is no mask, so we use the provided ``K.softmax`` function.
+        return K.softmax(vector)

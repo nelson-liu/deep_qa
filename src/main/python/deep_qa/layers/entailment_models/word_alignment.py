@@ -55,6 +55,7 @@ class WordAlignmentEntailment(Layer):
                 # (batch_size, source_length, target_length)
                 s2t_mask = K.expand_dims(float_source_mask, dim=-1) * K.expand_dims(float_target_mask, dim=1)
                 flattened_s2t_mask = last_dim_flatten(s2t_mask)
+                # pylint: disable=redefined-variable-type
                 flattened_s2t_attention = masked_softmax(flattened_products_with_source, flattened_s2t_mask)
             else:
                 # One of the two inputs is masked, and the other isn't. How did this happen??
