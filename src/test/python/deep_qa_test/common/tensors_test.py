@@ -151,7 +151,7 @@ class TestTensors:
                                                 0.33333333, 0.46666666]]))
         assert_almost_equal(1.0, numpy.sum(vector_1d_normalized), decimal=6)
 
-        # test it works for batch size greater than 1
+        # test batched case
         vector_1d = K.variable(numpy.array([[2, 1, 5, 7], [2, 2, 2, 2]]))
         vector_1d_normalized = K.eval(tensors.l1_normalize(vector_1d))
         assert_array_almost_equal(vector_1d_normalized,
