@@ -1,7 +1,7 @@
 from keras import backend as K
 from keras.layers import Layer
 from ..common.checks import ConfigurationError
-from ..common.tensors import switch
+from ..tensors.backend import switch
 
 
 class OptionAttentionSum(Layer):
