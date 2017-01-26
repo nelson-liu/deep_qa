@@ -66,7 +66,7 @@ class TestAttentionLayer:
 
         result = model.predict([vector, matrix])
         assert_almost_equal(result, np.array([[0.52871835, 0.47128162],
-                                                    [0.52871835, 0.47128162]]))
+                                              [0.52871835, 0.47128162]]))
 
     def test_batched_masked(self):
         # Testing general masked non-batched case.
@@ -76,7 +76,7 @@ class TestAttentionLayer:
         mask = K.variable(np.array([[1.0, 1.0, 0.0], [1.0, 0.0, 1.0]]))
         result = K.eval(Attention().call([vector, matrix], mask=["_", mask]))
         assert_almost_equal(result, np.array([[0.52871835, 0.47128162, 0.0],
-                                                    [0.50749944, 0.0, 0.49250056]]))
+                                              [0.50749944, 0.0, 0.49250056]]))
 
         # Test the case where a mask is all 0s and an input is all 0s.
         vector = K.variable(np.array([[0.0, 0.0, 0.0], [0.3, 0.1, 0.5]]))
@@ -85,7 +85,7 @@ class TestAttentionLayer:
         mask = K.variable(np.array([[1.0, 1.0, 0.0], [0.0, 0.0, 0.0]]))
         result = K.eval(Attention().call([vector, matrix], mask=["_", mask]))
         assert_almost_equal(result, np.array([[0.5, 0.5, 0.0],
-                                                    [0.0, 0.0, 0.0]]))
+                                              [0.0, 0.0, 0.0]]))
 
     def test_call_works_on_simple_input(self):
         sentence_length = 2

@@ -1,6 +1,6 @@
 from keras import backend as K
 
-from .backend import tile_scalar, switch
+from .backend import switch
 
 
 def masked_batch_dot(tensor_a, tensor_b, mask_a, mask_b):

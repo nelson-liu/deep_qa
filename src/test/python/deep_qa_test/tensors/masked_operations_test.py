@@ -189,7 +189,7 @@ class TestMaskedOperations:
         vector_1d = K.variable(numpy.array([[2, 1, 5, 7]]))
         vector_1d_mask = K.variable(numpy.array([[1, 1, 0, 1]]))
         vector_1d_normalized = K.eval(l1_normalize(vector_1d,
-                                                           vector_1d_mask))
+                                                   vector_1d_mask))
         assert_array_almost_equal(vector_1d_normalized,
                                   numpy.array([[0.2, 0.1,
                                                 0.0, 0.7]]))
@@ -198,7 +198,7 @@ class TestMaskedOperations:
         vector_1d = K.variable(numpy.array([[1.0, 2.0, 3.0, 4.0]]))
         vector_1d_mask = K.variable(numpy.array([[1, 1, 0, 1]]))
         vector_1d_normalized = K.eval(l1_normalize(vector_1d,
-                                                           vector_1d_mask))
+                                                   vector_1d_mask))
         assert_array_almost_equal(vector_1d_normalized,
                                   numpy.array([[0.14285715, 0.2857143,
                                                 0, 0.5714286]]))
@@ -210,7 +210,7 @@ class TestMaskedOperations:
         vector_1d_zeros = K.variable(numpy.array([[0, 0, 0, 0]]))
         vector_1d_zeros_mask = K.variable(numpy.array([[1, 1, 0, 1]]))
         vector_1d_zeros_normalized = K.eval(l1_normalize(vector_1d_zeros,
-                                                                 vector_1d_zeros_mask))
+                                                         vector_1d_zeros_mask))
         assert_array_almost_equal(vector_1d_zeros_normalized,
                                   numpy.array([[0.3333333, 0.3333333,
                                                 0.0, 0.3333333]]))
@@ -218,7 +218,7 @@ class TestMaskedOperations:
         vector_1d_zeros = K.variable(numpy.array([[0, 0, 0, 0]]))
         vector_1d_zeros_mask = K.variable(numpy.array([[0, 0, 0, 0]]))
         vector_1d_zeros_normalized = K.eval(l1_normalize(vector_1d_zeros,
-                                                                 vector_1d_zeros_mask))
+                                                         vector_1d_zeros_mask))
         assert_array_almost_equal(vector_1d_zeros_normalized,
                                   numpy.array([[0.25, 0.25,
                                                 0.25, 0.25]]))
@@ -255,7 +255,7 @@ class TestMaskedOperations:
         vector_1d_zeros = K.variable(numpy.array([[0.0, 0.0, 0.0, 0.0]]))
         vector_1d_zeros_mask = K.variable(numpy.array([[0, 0, 0, 0]]))
         vector_1d_zeros_normalized = K.eval(l1_normalize(vector_1d_zeros,
-                                                                 vector_1d_zeros_mask))
+                                                         vector_1d_zeros_mask))
         assert_array_almost_equal(vector_1d_zeros_normalized,
                                   numpy.array([[0.25, 0.25, 0.25, 0.25]]))
 
@@ -264,7 +264,7 @@ class TestMaskedOperations:
         vector_1d_zeros = K.variable(numpy.array([[2, 1, 5, 7]]))
         vector_1d_zeros_mask = K.variable(numpy.array([[0, 0, 0, 0]]))
         vector_1d_zeros_normalized = K.eval(l1_normalize(vector_1d_zeros,
-                                                                 vector_1d_zeros_mask))
+                                                         vector_1d_zeros_mask))
         assert_array_almost_equal(vector_1d_zeros_normalized,
                                   numpy.array([[0.25, 0.25, 0.25, 0.25]]))
 
