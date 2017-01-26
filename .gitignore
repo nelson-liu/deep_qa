@@ -18,4 +18,3 @@ tmp*/
 *.temp
 .coverage
 _build
-.DS_Store
