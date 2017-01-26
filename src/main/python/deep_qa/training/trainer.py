@@ -43,11 +43,11 @@ class Trainer:
             os.makedirs(parent_directory, exist_ok=True)
 
         # Preferred backend to use for training. If a different backend is detected, we still
-        # run the training but warn the user.
+        # train but we also warn the user.
         self.preferred_backend = params.pop('preferred_backend', None)
         if self.preferred_backend and self.preferred_backend != K.backend():
-            logger.warn("Preferred backend is %s, but current backend is %s." %
-                        (self.preferred_backend, K.backend()))
+            logger.warning("Preferred backend is %s, but current backend is %s.",
+                           (self.preferred_backend, K.backend()))
 
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
