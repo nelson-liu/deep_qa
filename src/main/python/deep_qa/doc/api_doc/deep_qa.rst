@@ -8,3 +8,4 @@ Full API Documentation
     deep_qa.layers
     deep_qa.models
     deep_qa.training
+    deep_qa.tensors

@@ -55,7 +55,7 @@ This library has several main components:
    layers/core_layers
    layers/encoders
    layers/entailment_models
-   layers/softmaxes
+   layers/attention
 
 .. toctree::
    :caption: Models
@@ -80,13 +80,20 @@ This library has several main components:
    data/tokenizers
 
 .. toctree::
+   :caption: Tensor Utils
+   :hidden:
+
+   tensors/about_tensors
+   tensors/core_tensors
+   tensors/similarity_functions
+
+.. toctree::
    :caption: Common Utils
    :hidden:
 
    common/about_common
    common/checks
    common/params
-   common/tensors
 
 .. toctree::
    :caption: Trainer Utils

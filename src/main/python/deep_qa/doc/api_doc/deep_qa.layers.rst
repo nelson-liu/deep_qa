@@ -5,7 +5,7 @@ deep_qa.layers
 
     deep_qa.layers.encoders
     deep_qa.layers.entailment_models
-    deep_qa.layers.softmaxes
+    deep_qa.layers.attention
 
 deep_qa.layers.adaptive_recurrence
 ----------------------------------

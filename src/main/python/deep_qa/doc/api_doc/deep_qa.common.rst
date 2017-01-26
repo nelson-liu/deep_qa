@@ -16,11 +16,3 @@ deep_qa.common.params
     :members:
     :undoc-members:
     :show-inheritance:
-
-deep_qa.common.tensors
-----------------------
-
-.. automodule:: deep_qa.common.tensors
-    :members:
-    :undoc-members:
-    :show-inheritance:
