@@ -13,7 +13,7 @@ Top Level Design
 The below diagram gives a top level abstraction of what comprises a memory
 network. It follows several basic steps:
 
-.. image:: ../../../../../../doc/module_breakdown.png
+.. image:: ../img/module_breakdown.png
 
 * Encode the Question and Background Knowledge using a sentence encoder. This
   might be an LSTM, BOW, or something more complex, such as a TreeLSTM.
