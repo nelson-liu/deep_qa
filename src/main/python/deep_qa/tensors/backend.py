@@ -168,13 +168,13 @@ def l1_normalize(tensor_to_normalize, mask=None):
 
     # We apply the mask to the tensor and take the sum
     # of the values in each row.
-    row_sum = K.sum(mask*tensor_to_normalize, axis=-1, keepdims=True)
+    row_sum = K.sum(mask * tensor_to_normalize, axis=-1, keepdims=True)
 
     # We divide the tensor by the sum of the elements in the rows,
     # and then apply the mask. This is the result a naive
     # implementation would yield; we instead return the uniform distribution
     # in a host of special cases (see the docstring and tests for more detail).
-    real_result = (tensor_to_normalize / row_sum) * mask
+    normal_result = (tensor_to_normalize / row_sum) * mask
 
     mask_row_sum = K.sum(mask, axis=1, keepdims=True)
 
@@ -190,6 +190,5 @@ def l1_normalize(tensor_to_normalize, mask=None):
     temp_mask = switch(mask_row_sum+row_sum, mask, K.ones_like(mask))
 
     uniform = (K.ones_like(mask)/(divisor)) * temp_mask
-    normalized_tensors = switch(row_sum, real_result, uniform)
-    float32_normalized_tensors = K.cast(normalized_tensors, "float32")
-    return float32_normalized_tensors
+    normalized_tensors = switch(row_sum, normal_result, uniform)
+    return normalized_tensors

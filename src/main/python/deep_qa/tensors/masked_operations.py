@@ -91,7 +91,8 @@ def masked_softmax(vector, mask):
         normalization_constant = K.log(K.sum(mask * K.exp(shifted), axis=1,
                                              keepdims=True) + K.epsilon())
         normalized_log_probabilities = mask * (shifted - normalization_constant)
-        return mask * K.exp(normalized_log_probabilities)
+        unmasked_probabilities = K.exp(normalized_log_probabilities)
+        return switch(mask, unmasked_probabilities, K.zeros_like(unmasked_probabilities))
     else:
         # There is no mask, so we use the provided ``K.softmax`` function.
         return K.softmax(vector)
