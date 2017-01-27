@@ -34,6 +34,7 @@ sys.path.insert(0, os.path.abspath('../src/main/python/'))
 # ones.
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.doctest',
+              'sphinx.ext.linkcode',
               'numpydoc',
               'sphinx.ext.autosummary'
 ]
@@ -184,3 +185,27 @@ epub_copyright = copyright
 epub_exclude_files = ['search.html']
 
 
+
+# Resolve function for the linkcode extension.
+def linkcode_resolve(domain, info):
+    def find_line():
+        # try to find the correct line number, based on code from numpy:
+        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
+        obj = sys.modules[info['module']]
+        for part in info['fullname'].split('.'):
+            obj = getattr(obj, part)
+        import inspect
+        fn = inspect.getsourcefile(obj)
+        source, lineno = inspect.findsource(obj)
+        return lineno + 1
+
+    if domain != 'py' or not info['module']:
+        return None
+    filename = info['module'].replace('.', '/')
+    # tag = 'master' if 'dev' in release else ('v' + release)
+    tag = 'master'
+    url = "https://github.com/allenai/deep_qa/blob/%s/src/main/python/%s.py" % (tag, filename)
+    try:
+        return url + '#L%d' % find_line()
+    except Exception:
+        return url
