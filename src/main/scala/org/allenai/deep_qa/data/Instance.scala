@@ -135,3 +135,20 @@ case class SpanPredictionInstance(
     Seq(Seq(s"${question}\t${passage}${labelString}"))
   }
 }
+
+/**
+  * An Instance created for the task of (non-cloze) multiple choice
+  * reading comprehension. Used by Johannes' dataset.
+  */
+case class MCReadingComprehensionInstance(
+  passage: String,
+  question: String,
+  answerOptions: Seq[String],
+  override val label: Option[Int]
+) extends Instance {
+  def asStrings(): Seq[Seq[String]] = {
+    val answerString = answerOptions.mkString("###")
+    val labelString = label.map(l => s"\t$l").getOrElse("")
+    Seq(Seq(s"$passage\t$question\t$answerString" + labelString))
+  }
+}
