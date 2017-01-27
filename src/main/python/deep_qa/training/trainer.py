@@ -524,7 +524,8 @@ class Trainer:
         print(model_config, file=model_config_file)
         model_config_file.close()
 
-    def _make_backend_warning(self, preferred_backend, actual_backend):
+    @staticmethod
+    def _make_backend_warning(preferred_backend, actual_backend):
         warning_info = ("@ Preferred backend is %s, but "
                         "current backend is %s. @" % (preferred_backend,
                                                       actual_backend))
