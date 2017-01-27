@@ -45,9 +45,23 @@ class Trainer:
         # Preferred backend to use for training. If a different backend is detected, we still
         # train but we also warn the user.
         self.preferred_backend = params.pop('preferred_backend', None)
-        if self.preferred_backend and self.preferred_backend != K.backend():
-            logger.warning("Preferred backend is %s, but current backend is %s.",
-                           self.preferred_backend, K.backend())
+        if self.preferred_backend and self.preferred_backend.lower() != K.backend():
+            warning_info = ("@ Preferred backend is %s, but "
+                            "current backend is %s. @" % (self.preferred_backend.lower(),
+                                                          K.backend()))
+            end_row = "@" * len(warning_info)
+            warning_row_spaces = len(warning_info) - len("@ WARNING: @")
+            left_warning_row_spaces = right_warning_row_spaces = warning_row_spaces // 2
+            if warning_row_spaces % 2 == 1:
+                # left and right have uneven spacing
+                right_warning_row_spaces += 1
+            left_warning_row = "\n@" + " " * left_warning_row_spaces
+            right_warning_row = " " * right_warning_row_spaces + "@\n"
+            warning_message = ("\n" + end_row +
+                               left_warning_row + " WARNING: " + right_warning_row +
+                               warning_info +
+                               "\n" + end_row)
+            logger.warning(warning_message)
 
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
