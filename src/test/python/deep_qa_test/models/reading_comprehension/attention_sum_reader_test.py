@@ -20,16 +20,16 @@ class TestAttentionSumReader(TestCase):
         args = {
                 "encoder": {
                         "type": "bi_gru",
-                        "output_dim": 7
+                        "output_dim": 5
                 },
                 "seq2seq_encoder": {
                         "type": "bi_gru",
                         "encoder_params": {
-                                "output_dim": 7
+                                "output_dim": 5
                         },
                         "wrapper_params": {}
                 },
-                "embedding_size": 5,
+                "embedding_size": 3,
         }
         solver = get_model(AttentionSumReader, args)
         solver.train()
