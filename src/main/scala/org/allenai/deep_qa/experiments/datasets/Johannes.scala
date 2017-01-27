@@ -10,7 +10,7 @@ object JohannesDatasets {
 
   def johannesFile(johannesDir: String, split: String, version: String="1.1"): JValue = {
     val outputDirectory = johannesDir + "processed/"
-    val inputFile = johannesDir + s"$v{version}/"+ s"${split}-v${version}.json"
+    val inputFile = johannesDir + s"v${version}/"+ s"${split}-v${version}.json"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
     ("reader" -> "johannes") ~
