@@ -20,7 +20,6 @@
 import sphinx_rtd_theme
 import os
 import sys
-from os.path import relpath, dirname
 import inspect
 sys.path.insert(0, os.path.abspath('../src/main/python/'))
 
@@ -190,6 +189,9 @@ epub_exclude_files = ['search.html']
 def linkcode_resolve(domain, info):
     """
     Determine the URL corresponding to Python object
+    This code is from
+    https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L290
+    and https://github.com/Lasagne/Lasagne/pull/262
     """
     if domain != 'py':
         return None
@@ -225,5 +227,5 @@ def linkcode_resolve(domain, info):
     else:
         linespec = ""
 
-    filename = info['module'].replace('.', '/') 
+    filename = info['module'].replace('.', '/')
     return "http://github.com/allenai/deep_qa/blob/master/src/main/python/%s.py%s" % (filename, linespec)
