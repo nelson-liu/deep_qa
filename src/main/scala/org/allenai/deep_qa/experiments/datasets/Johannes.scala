@@ -8,7 +8,7 @@ import org.json4s.JsonDSL._
  */
 object JohannesDatasets {
 
-  def johannesFile(johannesDir: String, split: String, version: String="1.1"): JValue = {
+  def johannesFile(johannesDir: String, split: String, version: String="1.0"): JValue = {
     val outputDirectory = johannesDir + "processed/"
     val inputFile = johannesDir + s"v${version}/"+ s"${split}-v${version}.json"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
@@ -29,5 +29,7 @@ object JohannesDatasets {
   val trainDataset = johannesDataset(baseDir, "train")
   val devFile = johannesFile(baseDir, "dev")
   val devDataset = johannesDataset(baseDir, "dev")
-}
+  val testFile = johannesFile(baseDir, "test")
+  val test = johannesDataset(baseDir, "test")
 
+}
