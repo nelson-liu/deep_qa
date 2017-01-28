@@ -20,6 +20,8 @@
 import sphinx_rtd_theme
 import os
 import sys
+from os.path import relpath, dirname
+import inspect
 sys.path.insert(0, os.path.abspath('../src/main/python/'))
 
 
@@ -184,28 +186,44 @@ epub_copyright = copyright
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
-
-
-# Resolve function for the linkcode extension.
+# make github links resolve
 def linkcode_resolve(domain, info):
-    def find_line():
-        # try to find the correct line number, based on code from numpy:
-        # https://github.com/numpy/numpy/blob/master/doc/source/conf.py#L286
-        obj = sys.modules[info['module']]
-        for part in info['fullname'].split('.'):
-            obj = getattr(obj, part)
-        import inspect
-        fn = inspect.getsourcefile(obj)
-        source, lineno = inspect.findsource(obj)
-        return lineno + 1
-
-    if domain != 'py' or not info['module']:
+    """
+    Determine the URL corresponding to Python object
+    """
+    if domain != 'py':
         return None
-    filename = info['module'].replace('.', '/')
-    # tag = 'master' if 'dev' in release else ('v' + release)
-    tag = 'master'
-    url = "https://github.com/allenai/deep_qa/blob/%s/src/main/python/%s.py" % (tag, filename)
+
+    modname = info['module']
+    fullname = info['fullname']
+
+    submod = sys.modules.get(modname)
+    if submod is None:
+        return None
+
+    obj = submod
+    for part in fullname.split('.'):
+        try:
+            obj = getattr(obj, part)
+        except:
+            return None
+
     try:
-        return url + '#L%d' % find_line()
-    except Exception:
-        return url
+        fn = inspect.getsourcefile(obj)
+    except:
+        fn = None
+    if not fn:
+        return None
+
+    try:
+        source, lineno = inspect.getsourcelines(obj)
+    except:
+        lineno = None
+
+    if lineno:
+        linespec = "#L%d-L%d" % (lineno, lineno + len(source) - 1)
+    else:
+        linespec = ""
+
+    filename = info['module'].replace('.', '/') 
+    return "http://github.com/allenai/deep_qa/blob/master/src/main/python/%s.py%s" % (filename, linespec)
