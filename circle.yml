@@ -5,7 +5,6 @@ machine:
 
 dependencies:
   cache_directories:
-    - "~/.cache/pip"
     - "~/download"
   # Check whether the doc build is required, install build dependencies and
   # run sphinx to build the doc.
@@ -18,6 +17,8 @@ test:
     - |
       export PATH="$MINICONDA_PATH/bin:$PATH"
       source activate $CONDA_ENV_NAME
+      # we could run doctests here in the future
+      # make doctests
 general:
   # Open the built docs to the CircleCI API
   artifacts:
