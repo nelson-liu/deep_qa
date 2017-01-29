@@ -74,16 +74,15 @@ class TextTrainer(Trainer):
         # one of the keys in `encoders`) to determine the type of the encoder, then pass the
         # remaining args to the encoder constructor.
         # Hint: Use lstm or cnn for sentences, treelstm for logical forms, and bow for either.
-        self.encoder_params = params.pop('encoder', {})
-
+        self.encoder_params = params.pop('encoder', {'default': {}})
         # With some text_encodings, you can have separate sentence encoders and word encoders
         # (where sentence encoders combine word vectors into sentence vectors, and word encoders
         # combine character vectors into sentence vectors).  If you want to have separate encoders,
         # here's your chance to specify the word encoder.
         self.word_encoder_params = params.pop('word_encoder', self.encoder_params)
 
-        self.seq2seq_encoder_params = params.pop('seq2seq_encoder', {"encoder_params": {},
-                                                                     "wrapper_params": {}})
+        self.seq2seq_encoder_params = params.pop('seq2seq_encoder', {'default': {"encoder_params": {},
+                                                                                 "wrapper_params": {}}})
 
         super(TextTrainer, self).__init__(params)
 
@@ -94,9 +93,9 @@ class TextTrainer(Trainer):
         # don't want to set them now, because they use max length information that only gets set
         # after reading the training data.
         self.embedding_layers = {}
-        self.sentence_encoder_layer = None
-        self.word_encoder_layer = None
-        self.seq2seq_encoder_layer = None
+        self.sentence_encoder_layers = {}
+        self.word_encoder_layers = {}
+        self.seq2seq_encoder_layers = {}
         self._sentence_encoder_model = None
 
     @overrides
@@ -183,6 +182,7 @@ class TextTrainer(Trainer):
                         self.embedding_layers[embedding_name] = (None, layer)
                     else:
                         self.embedding_layers[embedding_name] = (layer, None)
+            # TODO(nelson): fix this for multiple encoders
             elif layer.name == "sentence_encoder":
                 logger.info("  Found sentence encoder")
                 self.sentence_encoder_layer = layer
@@ -360,34 +360,35 @@ class TextTrainer(Trainer):
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
-    def _get_sentence_encoder(self):
+    def _get_sentence_encoder(self, encoder_name="default"):
         """
         A sentence encoder takes as input a sequence of word embeddings, and returns as output a
         single vector encoding the sentence.  This is typically either a simple RNN or an LSTM, but
         could be more complex, if the "sentence" is actually a logical form.
         """
-        if self.sentence_encoder_layer is None:
-            self.sentence_encoder_layer = self._get_new_sentence_encoder()
-        return self.sentence_encoder_layer
+        if encoder_name not in self.sentence_encoder_layers:
+            self.sentence_encoder_layers[encoder_name] = self._get_new_sentence_encoder(encoder_name="default")
+        return self.sentence_encoder_layers[encoder_name]
 
-    def _get_new_sentence_encoder(self, name="sentence_encoder"):
+    def _get_new_sentence_encoder(self, encoder_name="default"):
         # The code that follows would be destructive to self.encoder_params (lots of calls to
         # params.pop()), but we may need to create several encoders.  So we'll make a copy and use
         # that instead of self.encoder_params.
-        return self._get_new_encoder(deepcopy(self.encoder_params), name)
+        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_name]), encoder_name)
 
-    def _get_word_encoder(self):
+    def _get_word_encoder(self, word_encoder_name="default"):
         """
         This is like a sentence encoder, but for sentences; we don't just use
         self._get_sentence_encoder() for this, because we allow different models to be specified
         for this.
         """
-        if self.word_encoder_layer is None:
-            self.word_encoder_layer = self._get_new_word_encoder()
-        return self.word_encoder_layer
+        if word_encoder_name not in self.word_encoder_layers:
+            self.word_encoder_layers[word_encoder_name] = self._get_new_word_encoder(word_encoder_name="default")
+        return self.word_encoder_layers[word_encoder_name]
 
-    def _get_new_word_encoder(self, name="word_encoder"):
-        return self._get_new_encoder(deepcopy(self.word_encoder_params), name)
+    def _get_new_word_encoder(self, word_encoder_name="default"):
+        return self._get_new_encoder(deepcopy(self.word_encoder_params[word_encoder_name]),
+                                     word_encoder_name)
 
     def _get_new_encoder(self, params: Dict[str, Any], name: str):
         encoder_type = get_choice_with_default(params, "type", list(encoders.keys()))
@@ -397,16 +398,17 @@ class TextTrainer(Trainer):
         set_regularization_params(encoder_type, params)
         return encoders[encoder_type](**params)
 
-    def _get_seq2seq_encoder(self, input_shape):
+    def _get_seq2seq_encoder(self, input_shape, seq2seq_encoder_name="default"):
         """
         A seq2seq encoder takes as input a sequence of word embeddings, and returns as output a
         sequence of vectors.
         """
-        if self.seq2seq_encoder_layer is None:
-            params = deepcopy(self.seq2seq_encoder_params)
+
+        if seq2seq_encoder_name not in self.seq2seq_encoder_layers:
+            params = deepcopy(self.seq2seq_encoder_params[seq2seq_encoder_name])
             params["wrapper_params"]["input_shape"] = input_shape
-            self.seq2seq_encoder_layer = self._get_new_seq2seq_encoder(params)
-        return self.seq2seq_encoder_layer
+            self.seq2seq_encoder_layers[seq2seq_encoder_name] = self._get_new_seq2seq_encoder(params)
+        return self.seq2seq_encoder_layers[seq2seq_encoder_name]
 
     def _get_new_seq2seq_encoder(self, params: Dict[str, Any], name="seq2seq_encoder"):
         encoder_params = params["encoder_params"]
