@@ -10,7 +10,7 @@ dependencies:
   # run sphinx to build the doc.
   override:
     - bash build_tools/circle/build_doc.sh:
-        timeout: 3600 # seconds
+        timeout: 3600 # max seconds to build the doc
 
 test:
   override:
