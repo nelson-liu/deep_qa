@@ -26,9 +26,9 @@ object JohannesDatasets {
   val baseDir = "/efs/data/dlfa/turk_johannes_questions/"
 
   val trainFile = johannesFile(baseDir, "train")
-  val trainDataset = johannesDataset(baseDir, "train")
+  val train = johannesDataset(baseDir, "train")
   val devFile = johannesFile(baseDir, "dev")
-  val devDataset = johannesDataset(baseDir, "dev")
+  val dev = johannesDataset(baseDir, "dev")
   val testFile = johannesFile(baseDir, "test")
   val test = johannesDataset(baseDir, "test")
 }
