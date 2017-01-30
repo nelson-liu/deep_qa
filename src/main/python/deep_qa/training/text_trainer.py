@@ -360,35 +360,36 @@ class TextTrainer(Trainer):
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
-    def _get_sentence_encoder(self, encoder_name="default"):
+    def _get_sentence_encoder(self, encoder_type="default"):
         """
         A sentence encoder takes as input a sequence of word embeddings, and returns as output a
         single vector encoding the sentence.  This is typically either a simple RNN or an LSTM, but
         could be more complex, if the "sentence" is actually a logical form.
         """
-        if encoder_name not in self.sentence_encoder_layers:
-            self.sentence_encoder_layers[encoder_name] = self._get_new_sentence_encoder(encoder_name="default")
-        return self.sentence_encoder_layers[encoder_name]
+        if encoder_type not in self.sentence_encoder_layers:
+            encoder_layer_name = encoder_type + "_sentence_encoder"
+            new_sentence_encoder = self._get_new_sentence_encoder(encoder_type, encoder_layer_name)
+            self.sentence_encoder_layers[encoder_type] = new_sentence_encoder
+        return self.sentence_encoder_layers[encoder_type]
 
-    def _get_new_sentence_encoder(self, encoder_name="default"):
-        # The code that follows would be destructive to self.encoder_params (lots of calls to
-        # params.pop()), but we may need to create several encoders.  So we'll make a copy and use
-        # that instead of self.encoder_params.
-        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_name]), encoder_name)
+    def _get_new_sentence_encoder(self, encoder_type="default", name="sentence_encoder"):
+        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_type]), name)
 
-    def _get_word_encoder(self, word_encoder_name="default"):
+    def _get_word_encoder(self, encoder_type="default"):
         """
         This is like a sentence encoder, but for sentences; we don't just use
         self._get_sentence_encoder() for this, because we allow different models to be specified
         for this.
         """
-        if word_encoder_name not in self.word_encoder_layers:
-            self.word_encoder_layers[word_encoder_name] = self._get_new_word_encoder(word_encoder_name="default")
-        return self.word_encoder_layers[word_encoder_name]
+        if encoder_type not in self.word_encoder_layers:
+            encoder_layer_name = encoder_type + "_word_encoder"
+            new_word_encoder = self._get_new_encoder(deepcopy(self.word_encoder_params[encoder_type]),
+                                                     encoder_layer_name)
+            self.word_encoder_layers[encoder_type] = new_word_encoder
+        return self.word_encoder_layers[encoder_type]
 
-    def _get_new_word_encoder(self, word_encoder_name="default"):
-        return self._get_new_encoder(deepcopy(self.word_encoder_params[word_encoder_name]),
-                                     word_encoder_name)
+    def _get_new_word_encoder(self, encoder_type="default", name="word_encoder"):
+        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_type]), name)
 
     def _get_new_encoder(self, params: Dict[str, Any], name: str):
         encoder_type = get_choice_with_default(params, "type", list(encoders.keys()))
@@ -398,17 +399,18 @@ class TextTrainer(Trainer):
         set_regularization_params(encoder_type, params)
         return encoders[encoder_type](**params)
 
-    def _get_seq2seq_encoder(self, input_shape, seq2seq_encoder_name="default"):
+    def _get_seq2seq_encoder(self, input_shape, encoder_type="default"):
         """
         A seq2seq encoder takes as input a sequence of word embeddings, and returns as output a
         sequence of vectors.
         """
 
-        if seq2seq_encoder_name not in self.seq2seq_encoder_layers:
-            params = deepcopy(self.seq2seq_encoder_params[seq2seq_encoder_name])
+        if encoder_type not in self.seq2seq_encoder_layers:
+            encoder_layer_name = encoder_type + "_seq2seq_encoder"
+            params = deepcopy(self.seq2seq_encoder_params[encoder_type])
             params["wrapper_params"]["input_shape"] = input_shape
-            self.seq2seq_encoder_layers[seq2seq_encoder_name] = self._get_new_seq2seq_encoder(params)
-        return self.seq2seq_encoder_layers[seq2seq_encoder_name]
+            self.seq2seq_encoder_layers[encoder_type] = self._get_new_seq2seq_encoder(params, encoder_layer_name)
+        return self.seq2seq_encoder_layers[encoder_type]
 
     def _get_new_seq2seq_encoder(self, params: Dict[str, Any], name="seq2seq_encoder"):
         encoder_params = params["encoder_params"]
