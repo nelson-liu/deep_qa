@@ -182,16 +182,15 @@ class TextTrainer(Trainer):
                         self.embedding_layers[embedding_name] = (None, layer)
                     else:
                         self.embedding_layers[embedding_name] = (layer, None)
-            # TODO(nelson): fix this for multiple encoders
-            elif layer.name == "sentence_encoder":
-                logger.info("  Found sentence encoder")
-                self.sentence_encoder_layer = layer
-            elif layer.name == "timedist_sentence_encoder":
-                logger.info("  Found sentence encoder")
-                if self.sentence_encoder_layer is None:
-                    self.sentence_encoder_layer = layer
-                else:
-                    logger.warning("  FOUND DUPLICATE SENTENCE ENCODER LAYER!  NOT SURE WHAT TO DO!")
+            if '_sentence_encoder' in layer.name:
+                sentence_encoder_type = layer.name.replace("_sentence_encoder", "")
+                self.sentence_encoder_layers[sentence_encoder_type] = layer
+            if '_word_encoder' in layer.name:
+                word_encoder_type = layer.name.replace("_word_encoder", "")
+                self.word_encoder_layers[word_encoder_type] = layer
+            if '_seq2seq_encoder' in layer.name:
+                seq2seq_encoder_type = layer.name.replace("_seq2seq_encoder", "")
+                self.seq2seq_encoder_layers[seq2seq_encoder_type] = layer
 
     def get_sentence_vector(self, sentence: str):
         """

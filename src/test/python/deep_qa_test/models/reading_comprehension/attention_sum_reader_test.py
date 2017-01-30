@@ -26,11 +26,11 @@ class TestAttentionSumReader(TestCase):
                 },
                 "seq2seq_encoder": {
                         "default": {
-                               "type": "bi_gru",
-                               "encoder_params": {
-                                       "output_dim": 7
-                               },
-                               "wrapper_params": {}
+                                "type": "bi_gru",
+                                "encoder_params": {
+                                        "output_dim": 7
+                                },
+                                "wrapper_params": {}
                         }
                 },
                 "embedding_size": 5,
