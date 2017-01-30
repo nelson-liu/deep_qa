@@ -19,7 +19,7 @@ import scala.sys.process.ProcessLogger
   * The output file format is "[question][tab][choices][tab][label]" or
   * "[index][tab][question][tab][choices][tab][label]".
  */
-class NoPassageMC(
+class DropFirstColumnStep(
   val params: JValue,
   val fileUtil: FileUtil
 ) extends Step(None, fileUtil) with SentenceProducer {
@@ -44,7 +44,7 @@ class NoPassageMC(
 
   override def _runStep() {
     fileUtil.mkdirsForFile(outputFile)
-    val outputLines = fileUtil.flatMapLinesFromFile(sentencesFile, line => {
+    val outputLines = fileUtil.mapLinesFromFile(sentencesFile, line => {
       val fields = line.split("\t")
       val (index, sentences) = if (fields(0).forall(_.isDigit)) {
         (Some(fields(0).toInt), fields.drop(1))
@@ -52,7 +52,7 @@ class NoPassageMC(
         (None, fields)
       }
       val indexString = index.map(_.toString + "\t").getOrElse("")
-      Seq(indexString + fields.mkString("\t"))
+      indexString + sentences.drop(1).mkString("\t")
     })
     fileUtil.writeLinesToFile(outputFile, outputLines)
   }

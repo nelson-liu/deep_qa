@@ -12,13 +12,15 @@ import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
 
 /**
-  * This Step is a SentenceProducer that reads a file with MCReadingComprehensionInstances
-  * and removes the passages from them, turning it into a file with the format of a
-  * QuestionAnswerInstance. It does this by simply dropping the first column.
-  * Expected file format is "[passage][tab][question][tab][choices][tab][label]" or .
-  * "[index][tab][passage][tab][question][tab][choices][tab][label]".
-  * The output file format is "[question][tab][choices][tab][label]" or
-  * "[index][tab][question][tab][choices][tab][label]".
+  * This Step is a SentenceProducer that combines a QuestionAnswerInstance
+  * with background sentences from a BackgroundCorpusSearcher.
+  * The QuestionAnswerInstance input file has the format
+  * "[index][tab][question][tab][options][tab][label]", and the file with
+  * background sentences has the format
+  * "[index][tab][background1][tab][background2][tab]...". The output file
+  * is in the format of a MCReadingComprehensionInstance with
+  * "[index][tab][passage][tab][question][tab][options][tab][label]".
+  * The background sentences compose the passage in this case.
  */
 class QABackgroundToMC(
   val params: JValue,
@@ -41,7 +43,10 @@ class QABackgroundToMC(
     case Some(filename) => filename
   }
 
-  override val inputs: Set[(String, Option[Step])] = Set((sentencesFile, Some(sentenceProducer)))
+  override val inputs: Set[(String, Option[Step])] = Set(
+    (sentencesFile, Some(sentenceProducer)),
+    (backgroundFile, Some(backgroundProducer))
+  )
   override val outputs = Set(outputFile)
   override val paramFile = outputs.head.dropRight(4) + "_params.json"
   override val inProgressFile = outputs.head.dropRight(4) + "_in_progress"
@@ -51,18 +56,18 @@ class QABackgroundToMC(
     // make a map from indexes to paragraphs
     val passageMap = fileUtil.mapLinesFromFile(backgroundFile, line => {
       val fields = line.split("\t")
-      val index = fields(0)
+      val index = fields(0).toInt
       val passage = fields.drop(1).mkString(" ")
       (index, passage)
     }).toMap
 
-    val outputLines = fileUtil.flatMapLinesFromFile(sentencesFile, line => {
+    val outputLines = fileUtil.mapLinesFromFile(sentencesFile, line => {
       val fields = line.split("\t")
-      val index = fields(0)
+      val index = fields(0).toInt
       val sentence = fields.drop(1)
       // retrieve the passage corresponding to the index from the map
       val passage = passageMap.get(index)
-      Seq(index + "\t" + passage + "\t" + fields.mkString("\t"))
+      index.toString + "\t" + passage + "\t" + sentence.mkString("\t")
     })
     fileUtil.writeLinesToFile(outputFile, outputLines)
   }
