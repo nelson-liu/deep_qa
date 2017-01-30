@@ -1,11 +1,11 @@
 package org.allenai.deep_qa.data
 
-import com.mattg.util.FakeFileUtil
+import com.mattg.util.FileUtil
 import org.scalatest._
 
 class JohannesDatasetReaderSpec extends FlatSpecLike with Matchers {
 
-  val fileUtil = new FakeFileUtil
+  val fileUtil = new FileUtil
   val support1 = "Mesophiles grow best in moderate temperature, typically between 25\u00b0C and " +
     "40\u00b0C (77\u00b0F and 104\u00b0F). Mesophiles are often found living in or on the bodies of " +
     "humans or other animals. The optimal growth temperature of many pathogenic mesophiles is " +
@@ -39,13 +39,15 @@ class JohannesDatasetReaderSpec extends FlatSpecLike with Matchers {
       |                                "correct_answer": "coriolis effect"
       |                }
       |]""".stripMargin
-  fileUtil.addFileToBeRead(datasetFile, datasetFileContents)
+  fileUtil.mkdirsForFile(datasetFile)
+  fileUtil.writeContentsToFile(datasetFile, datasetFileContents)
   val reader = new JohannesDatasetReader(fileUtil)
   // Note that the label is the index of the correct answer in the sorted sequence of options.
   val options1 = Seq("gymnosperms", "mesophilic organisms", "protozoa", "viruses")
   val options2 = Seq("centrifugal effect", "coriolis effect", "muon effect", "tropical effect")
   "readFile" should "return a correct dataset" in {
     val dataset = reader.readFile(datasetFile)
+    fileUtil.deleteFile(datasetFile)
 
     dataset.instances.size should be(2)
     dataset.instances(0) should be(MCReadingComprehensionInstance(support1, question1, options1, Some(1)))
