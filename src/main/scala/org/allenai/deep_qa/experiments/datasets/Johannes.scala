@@ -4,7 +4,7 @@ import org.json4s._
 import org.json4s.JsonDSL._
 
 /**
- * This object contains a bunch of JValue specifications for SQuAD data files.
+ * This object contains a bunch of JValue specifications for Johannes' datasets' data files.
  */
 object JohannesDatasets {
 
@@ -31,5 +31,4 @@ object JohannesDatasets {
   val devDataset = johannesDataset(baseDir, "dev")
   val testFile = johannesFile(baseDir, "test")
   val test = johannesDataset(baseDir, "test")
-
 }

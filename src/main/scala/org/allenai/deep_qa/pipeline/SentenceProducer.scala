@@ -70,6 +70,7 @@ object SentenceProducer {
       // use tuples as input, as it requires SentenceProducers.  I need it to require something of
       // which SentenceProducer is a subclass...
       case JString("sentence to tuple") => new SentenceToTuple(params, fileUtil)
+      case JString("no passage mc") => new NoPassageMC(params, fileUtil)
       case jval => throw new IllegalStateException(s"unrecognized SentenceProducer parameters: $jval")
     }
   }
