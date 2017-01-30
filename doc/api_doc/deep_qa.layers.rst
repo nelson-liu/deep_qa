@@ -24,6 +24,14 @@ deep_qa.layers.additive
     :undoc-members:
     :show-inheritance:
 
+deep_qa.layers.bigru_index_seleector
+------------------------------------
+
+.. automodule:: deep_qa.layers.bigru_index_seleector
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep_qa.layers.complex_concat
 -----------------------------
 

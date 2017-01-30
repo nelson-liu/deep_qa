@@ -1,7 +1,7 @@
 from keras import backend as K
 from keras.layers import Layer
 from overrides import overrides
-
+from ...common.checks import ConfigurationError
 from ...tensors.backend import switch
 
 
@@ -57,6 +57,12 @@ class WeightedSum(Layer):
 
     @overrides
     def call(self, inputs, mask=None):
+        if not isinstance(inputs, list):
+            raise ConfigurationError("Inputs must be a "
+                                     "list, got {}.".format(type(inputs)))
+        if not isinstance(mask, list):
+            raise ConfigurationError("Mask must be a "
+                                     "list, got {}.".format(type(mask)))
         matrix, attention_vector = inputs
         matrix = self._expand_matrix_if_necessary(matrix, attention_vector)
         matrix_mask = mask[0]

@@ -5,7 +5,7 @@
 
 # Neural net and related libraries.
 # We need at least keras 1.2.0 due to the use of `keras.backend.int_shape()`
-keras>=1.2.0
+keras>=1.2.1
 h5py
 scikit-learn
 theano
@@ -24,6 +24,9 @@ tensorflow
 grpcio
 grpcio-tools
 pyhocon
+
+# Used to pickle more complex structures
+dill
 
 # Type checking for python
 typing
