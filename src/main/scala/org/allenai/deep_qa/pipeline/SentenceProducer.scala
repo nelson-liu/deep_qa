@@ -71,6 +71,7 @@ object SentenceProducer {
       // which SentenceProducer is a subclass...
       case JString("sentence to tuple") => new SentenceToTuple(params, fileUtil)
       case JString("no passage mc") => new NoPassageMC(params, fileUtil)
+      case JString("qa and background to mc") => new QABackgroundToMC(params, fileUtil)
       case jval => throw new IllegalStateException(s"unrecognized SentenceProducer parameters: $jval")
     }
   }
