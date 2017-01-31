@@ -1,15 +1,16 @@
 {
     "model_class": "GatedAttentionReader",
     "model_serialization_prefix": "models/multiple_choice_qa/gareader",
+    "num_gated_attention_layers": 3,
     "preferred_backend": "theano",
     "encoder": {
         "type": "bi_gru",
-        "output_dim": 128
+        "output_dim": 64
     },
     "seq2seq_encoder": {
         "type": "bi_gru",
         "encoder_params": {
-            "output_dim": 128
+            "output_dim": 64
         },
         "wrapper_params": {}
     },
@@ -18,8 +19,8 @@
                  },
     "embedding_dropout": 0.0,
     "patience": 1,
-    "embedding_size": 128,
-    "num_epochs": 5,
+    "embedding_size": 100,
+    "num_epochs": 10,
     "validation_files": ["/efs/data/dlfa/who_did_what/processed/strict/val.tsv"],
     "train_files": ["/efs/data/dlfa/who_did_what/processed/strict/train.tsv"]
 }
