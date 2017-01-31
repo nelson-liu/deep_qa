@@ -367,6 +367,7 @@ class TextTrainer(Trainer):
         return self.encoder_layers[name]
 
     def _get_word_encoder(self, name="word"):
+        # TODO(matt): fix word character tokenizer to use _get_encoder
         if name not in self.encoder_layers:
             encoder_layer_name = name + "_encoder"
             new_encoder = self._get_new_encoder(deepcopy(self.encoder_params[name]), encoder_layer_name)
