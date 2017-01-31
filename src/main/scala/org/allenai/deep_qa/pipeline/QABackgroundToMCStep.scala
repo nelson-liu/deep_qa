@@ -25,9 +25,9 @@ import scala.sys.process.ProcessLogger
 class QABackgroundToMCStep(
   val params: JValue,
   val fileUtil: FileUtil
-) extends Step(None, fileUtil) with SentenceProducer {
+) extends Step(Some(params), fileUtil) with SentenceProducer {
   implicit val formats = DefaultFormats
-  override val name = "No Passage MC"
+  override val name = "QA Background To MC Step"
 
   val validParams = baseParams ++ Seq("sentences", "background", "output file")
   JsonHelper.ensureNoExtras(params, name, validParams)
@@ -66,7 +66,7 @@ class QABackgroundToMCStep(
       val index = fields(0).toInt
       val sentence = fields.drop(1)
       // retrieve the passage corresponding to the index from the map
-      val passage = passageMap.get(index)
+      val passage = passageMap.getOrElse(index, "")
       index.toString + "\t" + passage + "\t" + sentence.mkString("\t")
     })
     fileUtil.writeLinesToFile(outputFile, outputLines)
