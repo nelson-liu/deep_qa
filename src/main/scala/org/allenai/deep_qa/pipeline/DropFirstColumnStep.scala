@@ -22,7 +22,7 @@ import scala.sys.process.ProcessLogger
 class DropFirstColumnStep(
   val params: JValue,
   val fileUtil: FileUtil
-) extends Step(None, fileUtil) with SentenceProducer {
+) extends Step(Some(params), fileUtil) with SentenceProducer {
   implicit val formats = DefaultFormats
   override val name = "No Passage MC"
 
@@ -31,6 +31,7 @@ class DropFirstColumnStep(
 
   val sentenceProducer = SentenceProducer.create(params \ "sentences", fileUtil)
   val sentencesFile = sentenceProducer.outputFile
+  override val indexSentences = sentenceProducer.indexSentences
 
   override val outputFile = JsonHelper.extractAsOption[String](params, "output file") match {
     case None => sentencesFile.dropRight(4) + "_no_passage.tsv"
