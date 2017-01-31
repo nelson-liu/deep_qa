@@ -72,11 +72,11 @@ class MultipleTrueFalseMemoryNetwork(MemoryNetwork):
         return (self.num_options, self.max_knowledge_length) + self._get_sentence_shape()
 
     @overrides
-    def _get_sentence_encoder(self, encoder_type="default"):
+    def _get_encoder(self, name="default"):
         # TODO(matt): add tests for saving and loading these models, to be sure that these names
         # actually work as expected.  There are currently some Keras bugs stopping those tests from
         # working, though.
-        base_sentence_encoder = super(MultipleTrueFalseMemoryNetwork, self)._get_sentence_encoder(encoder_type)
+        base_sentence_encoder = super(MultipleTrueFalseMemoryNetwork, self)._get_encoder(name)
         return EncoderWrapper(base_sentence_encoder, name="timedist_%s" % base_sentence_encoder.name)
 
     @overrides

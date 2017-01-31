@@ -53,6 +53,6 @@ class QuestionAnswerMemoryNetwork(MemoryNetwork):
         # for a closer re-implementation of prior memory networks.
         answer_input = Input(shape=(self.num_options, self.max_answer_length), dtype='int32', name="answer_input")
         answer_embedding = self._embed_input(answer_input)
-        answer_encoder = EncoderWrapper(self._get_new_sentence_encoder(), name="answer_encoder")
+        answer_encoder = EncoderWrapper(self._get_encoder(), name="answer_encoder")
         encoded_answers = answer_encoder(answer_embedding)
         return ([answer_input], self._get_entailment_model().classify(combined_input, encoded_answers))

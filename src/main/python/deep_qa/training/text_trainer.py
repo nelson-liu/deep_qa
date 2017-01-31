@@ -74,12 +74,11 @@ class TextTrainer(Trainer):
         # one of the keys in `encoders`) to determine the type of the encoder, then pass the
         # remaining args to the encoder constructor.
         # Hint: Use lstm or cnn for sentences, treelstm for logical forms, and bow for either.
-        self.encoder_params = params.pop('encoder', {'default': {}})
+        self.encoder_params = params.pop('encoder', {'default': {}, 'word': {}})
         # With some text_encodings, you can have separate sentence encoders and word encoders
         # (where sentence encoders combine word vectors into sentence vectors, and word encoders
         # combine character vectors into sentence vectors).  If you want to have separate encoders,
-        # here's your chance to specify the word encoder.
-        self.word_encoder_params = params.pop('word_encoder', self.encoder_params)
+        # this is your chance.
 
         self.seq2seq_encoder_params = params.pop('seq2seq_encoder', {'default': {"encoder_params": {},
                                                                                  "wrapper_params": {}}})
@@ -93,8 +92,7 @@ class TextTrainer(Trainer):
         # don't want to set them now, because they use max length information that only gets set
         # after reading the training data.
         self.embedding_layers = {}
-        self.sentence_encoder_layers = {}
-        self.word_encoder_layers = {}
+        self.encoder_layers = {}
         self.seq2seq_encoder_layers = {}
         self._sentence_encoder_model = None
 
@@ -152,7 +150,7 @@ class TextTrainer(Trainer):
         layers and initializing their variables.
 
         Note that this specifically looks for the layers defined by _get_embedded_sentence_input
-        and _get_sentence_encoder.  If you change any of that in a subclass, or add other layers
+        and _get_encoder.  If you change any of that in a subclass, or add other layers
         that are re-used, you must override this method, or loading models will break.  Similarly,
         if you change code in those two methods (e.g., making the sentence encoder into two
         layers), this method must be changed accordingly.
@@ -182,15 +180,12 @@ class TextTrainer(Trainer):
                         self.embedding_layers[embedding_name] = (None, layer)
                     else:
                         self.embedding_layers[embedding_name] = (layer, None)
-            if '_sentence_encoder' in layer.name:
-                sentence_encoder_type = layer.name.replace("_sentence_encoder", "")
-                self.sentence_encoder_layers[sentence_encoder_type] = layer
-            if '_word_encoder' in layer.name:
-                word_encoder_type = layer.name.replace("_word_encoder", "")
-                self.word_encoder_layers[word_encoder_type] = layer
             if '_seq2seq_encoder' in layer.name:
                 seq2seq_encoder_type = layer.name.replace("_seq2seq_encoder", "")
                 self.seq2seq_encoder_layers[seq2seq_encoder_type] = layer
+            elif 'encoder' in layer.name:
+                sentence_encoder_type = layer.name.replace("_sentence_encoder", "")
+                self.encoder_layers[sentence_encoder_type] = layer
 
     def get_sentence_vector(self, sentence: str):
         """
@@ -359,36 +354,24 @@ class TextTrainer(Trainer):
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
-    def _get_sentence_encoder(self, encoder_type="default"):
+    def _get_encoder(self, name="default"):
         """
         A sentence encoder takes as input a sequence of word embeddings, and returns as output a
         single vector encoding the sentence.  This is typically either a simple RNN or an LSTM, but
         could be more complex, if the "sentence" is actually a logical form.
         """
-        if encoder_type not in self.sentence_encoder_layers:
-            encoder_layer_name = encoder_type + "_sentence_encoder"
-            new_sentence_encoder = self._get_new_sentence_encoder(encoder_type, encoder_layer_name)
-            self.sentence_encoder_layers[encoder_type] = new_sentence_encoder
-        return self.sentence_encoder_layers[encoder_type]
+        if name not in self.encoder_layers:
+            encoder_layer_name = name + "_encoder"
+            new_encoder = self._get_new_encoder(deepcopy(self.encoder_params[name]), encoder_layer_name)
+            self.encoder_layers[name] = new_encoder
+        return self.encoder_layers[name]
 
-    def _get_new_sentence_encoder(self, encoder_type="default", name="sentence_encoder"):
-        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_type]), name)
-
-    def _get_word_encoder(self, encoder_type="default"):
-        """
-        This is like a sentence encoder, but for sentences; we don't just use
-        self._get_sentence_encoder() for this, because we allow different models to be specified
-        for this.
-        """
-        if encoder_type not in self.word_encoder_layers:
-            encoder_layer_name = encoder_type + "_word_encoder"
-            new_word_encoder = self._get_new_encoder(deepcopy(self.word_encoder_params[encoder_type]),
-                                                     encoder_layer_name)
-            self.word_encoder_layers[encoder_type] = new_word_encoder
-        return self.word_encoder_layers[encoder_type]
-
-    def _get_new_word_encoder(self, encoder_type="default", name="word_encoder"):
-        return self._get_new_encoder(deepcopy(self.encoder_params[encoder_type]), name)
+    def _get_word_encoder(self, name="word"):
+        if name not in self.encoder_layers:
+            encoder_layer_name = name + "_encoder"
+            new_encoder = self._get_new_encoder(deepcopy(self.encoder_params[name]), encoder_layer_name)
+            self.encoder_layers[name] = new_encoder
+        return self.encoder_layers[name]
 
     def _get_new_encoder(self, params: Dict[str, Any], name: str):
         encoder_type = get_choice_with_default(params, "type", list(encoders.keys()))
@@ -398,18 +381,18 @@ class TextTrainer(Trainer):
         set_regularization_params(encoder_type, params)
         return encoders[encoder_type](**params)
 
-    def _get_seq2seq_encoder(self, input_shape, encoder_type="default"):
+    def _get_seq2seq_encoder(self, input_shape, name="default"):
         """
         A seq2seq encoder takes as input a sequence of word embeddings, and returns as output a
         sequence of vectors.
         """
 
-        if encoder_type not in self.seq2seq_encoder_layers:
-            encoder_layer_name = encoder_type + "_seq2seq_encoder"
-            params = deepcopy(self.seq2seq_encoder_params[encoder_type])
+        if name not in self.seq2seq_encoder_layers:
+            encoder_layer_name = name + "_seq2seq_encoder"
+            params = deepcopy(self.seq2seq_encoder_params[name])
             params["wrapper_params"]["input_shape"] = input_shape
-            self.seq2seq_encoder_layers[encoder_type] = self._get_new_seq2seq_encoder(params, encoder_layer_name)
-        return self.seq2seq_encoder_layers[encoder_type]
+            self.seq2seq_encoder_layers[name] = self._get_new_seq2seq_encoder(params, encoder_layer_name)
+        return self.seq2seq_encoder_layers[name]
 
     def _get_new_seq2seq_encoder(self, params: Dict[str, Any], name="seq2seq_encoder"):
         encoder_params = params["encoder_params"]
@@ -436,7 +419,7 @@ class TextTrainer(Trainer):
         """
         sentence_input = Input(shape=(self.max_sentence_length,), dtype='int32', name="sentence_input")
         embedded_input = self._embed_input(sentence_input)
-        encoder_layer = self._get_sentence_encoder()
+        encoder_layer = self._get_encoder()
         encoded_input = encoder_layer(embedded_input)
         self._sentence_encoder_model = DeepQaModel(input=sentence_input, output=encoded_input)
 

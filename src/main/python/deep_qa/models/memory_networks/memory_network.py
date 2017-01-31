@@ -200,7 +200,7 @@ class MemoryNetwork(TextTrainer):
         params['name'] = name
         params['encoding_dim'] = self.embedding_size
         params['knowledge_length'] = self.max_knowledge_length
-        params['question_encoder'] = self._get_sentence_encoder()
+        params['question_encoder'] = self._get_encoder()
         params['has_multiple_backgrounds'] = self.has_multiple_backgrounds
         return knowledge_encoders[knowledge_encoder_type](params)
 
@@ -332,7 +332,7 @@ class MemoryNetwork(TextTrainer):
         knowledge_embedding = self._embed_input(knowledge_input)
 
         # Step 3: Encode the two embedded inputs.
-        question_encoder = self._get_sentence_encoder()
+        question_encoder = self._get_encoder()
         encoded_question = question_encoder(question_embedding)  # (samples, encoding_dim)
 
         knowledge_encoder = self._get_knowledge_encoder()

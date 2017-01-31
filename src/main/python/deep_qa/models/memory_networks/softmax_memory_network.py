@@ -63,7 +63,7 @@ class SoftmaxMemoryNetwork(MemoryNetwork):
         question_embedding = self._embed_input(question_input, embedding_name="embedding_B")
 
         # Step 3: Encode the two embedded inputs using the sentence encoder.
-        question_encoder = self._get_sentence_encoder()
+        question_encoder = self._get_encoder()
         encoded_question = question_encoder(question_embedding)  # (samples, word_dim)
 
 
