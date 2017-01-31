@@ -76,7 +76,7 @@ class SoftmaxMemoryNetwork(MemoryNetwork):
         knowledge_combiner = self._get_knowledge_combiner(0)
         knowledge_axis = self._get_knowledge_axis()
         for i in range(self.num_memory_layers):
-            knowledge_encoder = self._get_knowledge_encoder(name='knowledge_encoder_A' + str(i))
+            knowledge_encoder = self._get_knowledge_encoder(question_encoder, name='knowledge_encoder_A' + str(i))
             knowledge_embedding = self._embed_input(knowledge_input, embedding_name="embedding_A" + str(i))
             encoded_knowledge = knowledge_encoder(knowledge_embedding)
 
@@ -89,7 +89,8 @@ class SoftmaxMemoryNetwork(MemoryNetwork):
             knowledge_selector = self._get_knowledge_selector(i)
             attention_weights = knowledge_selector(merged_encoded_rep)
 
-            output_knowledge_encoder = self._get_knowledge_encoder(name='knowledge_encoder_A' + str(i+1))
+            output_knowledge_encoder = self._get_knowledge_encoder(question_encoder,
+                                                                   name='knowledge_encoder_A' + str(i+1))
             output_embedding = self._embed_input(knowledge_input, embedding_name="embedding_A" + str(i+1))
             encoded_output_knowledge = output_knowledge_encoder(output_embedding)
 
