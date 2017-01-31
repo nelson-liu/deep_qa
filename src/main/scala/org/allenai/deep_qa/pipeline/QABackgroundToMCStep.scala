@@ -22,7 +22,7 @@ import scala.sys.process.ProcessLogger
   * "[index][tab][passage][tab][question][tab][options][tab][label]".
   * The background sentences compose the passage in this case.
  */
-class QABackgroundToMC(
+class QABackgroundToMCStep(
   val params: JValue,
   val fileUtil: FileUtil
 ) extends Step(None, fileUtil) with SentenceProducer {
