@@ -29,6 +29,7 @@ class MultipleTrueFalseSimilarity(MultipleTrueFalseMemoryNetwork):
         knowledge_embedding = self._embed_input(knowledge_input)
 
         question_encoder = self._get_encoder()
+        question_encoder = self._time_distribute_question_encoder(question_encoder)
         knowledge_encoder = EncoderWrapper(question_encoder, name='knowledge_encoder')
         encoded_question = question_encoder(question_embedding)  # (samples, num_options, encoding_dim)
         # (samples, num_options, knowledge_length, encoding_dim)
