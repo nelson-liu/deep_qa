@@ -96,14 +96,20 @@ class GatedAttentionReader(TextTrainer):
             # shape: (batch size, document_length, 2*seq2seq_hidden_state)
             # Note that the size of the last dimension of the input to the next layer
             # is not necessarily the embedding size.
-            document_embedding = gated_attention_layer([question_embedding, document_embedding])
+            document_embedding = gated_attention_layer([encoded_question, encoded_document])
             gated_attention_dropout = Dropout(self.gated_attention_dropout)
             document_embedding = gated_attention_dropout([document_embedding])
 
+        # Get a final encoding of the question from a biGRU that does not return
+        # the sequence, and use it to calculate attention over the document.
+        final_question_encoder = self._get_new_encoder(self._get_encoder_params(),
+                                                       "final_question_encoder")
+        final_encoded_question = final_question_encoder(question_embedding)
         # take the softmax of the document_embedding after it has been passed
         # through gated attention layers to get document probabilities
         # shape: (batch size, max document length in words)
-        document_probabilities = MaskedSoftmax()[document_embedding]
+        document_probabilities = Attention(name='question_document_softmax')([final_encoded_question,
+                                                                              document_embedding])
 
         # We sum together the weights of words that match each option
         # and use the multiword_option_mode to determine how to calculate
@@ -124,6 +130,10 @@ class GatedAttentionReader(TextTrainer):
 
     def _get_seq2seq_params(self):
         params = deepcopy(self.seq2seq_encoder_params)
+        return params
+
+    def _get_encoder_params(self):
+        params = deepcopy(self.encoder_params)
         return params
 
     @overrides

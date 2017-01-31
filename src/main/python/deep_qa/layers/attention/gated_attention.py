@@ -1,6 +1,8 @@
 from keras import backend as K
 from keras.layers import Layer
-
+from ...common.checks import ConfigurationError
+from ...layers.attention.matrix_attention import MatrixAttention
+from ...tensors.masked_operations import masked_batch_dot
 from ...tensors.similarity_functions import similarity_functions
 
 
@@ -24,12 +26,8 @@ class GatedAttention(Layer):
         # We need to wait until below to actually handle this, because self.name gets set in
         # super.__init__.
         # allowed gating functions are "*" (multiply), "+" (sum), and "||" (concatenate)
-        gating_function = kwargs.pop('gating_function', "*")
+        self.gating_function = kwargs.pop('gating_function', "*")
         super(GatedAttention, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        self.trainable_weights = self.similarity_function.initialize_weights(input_shape)
-        super(GatedAttention, self).build(input_shape)
 
     def compute_mask(self, inputs, mask=None):
         # pylint: disable=unused-argument
@@ -37,11 +35,36 @@ class GatedAttention(Layer):
         return None
 
     def get_output_shape_for(self, input_shapes):
-        return (input_shapes[1][0], input_shapes[1][1])
+        return (input_shapes[1][0], input_shapes[1][1], input_shapes[1][2])
 
     def call(self, inputs, mask=None):
-        vector, matrix = inputs
-        matrix_mask = mask[1]
-        num_rows = K.int_shape(matrix)[1]
-        tiled_vector = K.repeat_elements(K.expand_dims(vector, dim=1), num_rows, axis=1)
-        similarities = self.similarity_function.compute_similarity(tiled_vector, matrix)
+        # question matrix is of shape (batch, question length, biGRU hidden length)
+        # document matrix is of shape (batch, document length, biGRU hidden length)
+        question_matrix, document_matrix = inputs
+
+        matrix_attention = MatrixAttention()
+        matrix_attention.build([K.int_shape(question_matrix), K.int_shape(document_matrix)])
+
+        # question document attention is of shape (batch, document length, question length)
+        question_document_attention = matrix_attention.call([document_matrix, question_matrix])
+
+        # permuted question matrix is of shape (batch, biGRU hidden length, question length)
+        permuted_question_matrix = K.permute_dimensions(question_matrix, (0, 2, 1))
+
+        # question update is of shape (batch, document length, biGRU hidden length)
+        question_update = masked_batch_dot(question_document_attention,
+                                           permuted_question_matrix,
+                                           None, None)
+
+        # use the gating function to calculate the new document representation
+        if self.gating_function == "*":
+            # shape (batch, document length, biGRU hidden length)
+            return question_update * document_matrix
+        if self.gating_function == "+":
+            # shape (batch, document length, biGRU hidden length)
+            return question_update + document_matrix
+        if self.gating_function == "||":
+            # shape (batch, document length, biGRU hidden length*2)
+            return K.concatenate(question_update, document_matrix)
+        raise ConfigurationError("Invalid gating function "
+                                 "found {}".format(self.gating_function))
