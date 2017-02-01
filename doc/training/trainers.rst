@@ -11,7 +11,7 @@ Trainer
     :show-inheritance:
 
 TextTrainer
-------------
+-----------
 
 .. automodule:: deep_qa.training.text_trainer
     :members:
