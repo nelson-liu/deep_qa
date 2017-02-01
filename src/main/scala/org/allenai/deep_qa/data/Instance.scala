@@ -108,15 +108,14 @@ case class SnliInstance(
   */
 case class WhoDidWhatInstance(
   passage: String,
-  leftContext: String,
-  rightContext: String,
+  question: String,
   answerOptions: Seq[String],
   override val label: Option[Int]
 ) extends Instance {
   def asStrings(): Seq[Seq[String]] = {
     val answerString = answerOptions.mkString("###")
     val labelString = label.map(l => s"\t$l").getOrElse("")
-    Seq(Seq(s"$passage\t$leftContext\t$rightContext\t$answerString" + labelString))
+    Seq(Seq(s"$passage\t$question\t$answerString" + labelString))
   }
 }
 
