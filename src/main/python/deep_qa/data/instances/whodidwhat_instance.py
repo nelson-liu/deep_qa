@@ -58,12 +58,8 @@ class WhoDidWhatInstance(QuestionPassageInstance):
         """
         Reads a WhoDidWhatInstance object from a line.  The format has one of two options:
 
-        (1) [example index][tab][passage][tab][left_context][tab][right_context][tab][options][tab][label]
-        (2) [passage][tab][left_context][tab][right_context][tab][options][tab][label]
-
-        To form the cloze-style question, [left_context] is concatenated with "XXX",
-        and then with [right_context]. "XXX" is the blank to be filled with one
-        of the answer options.
+        (1) [example index][tab][passage][tab][options][tab][label]
+        (2) [passage][tab][options][tab][label]
 
         The `answer_options` column is assumed formatted as: [option]###[option]###[option]...
         That is, we split on three hashes ("###").
@@ -72,20 +68,17 @@ class WhoDidWhatInstance(QuestionPassageInstance):
         """
         fields = line.split("\t")
 
-        if len(fields) == 6:
-            index_string, passage, left_context, right_context, options, label_string = fields
+        if len(fields) == 5:
+            index_string, passage, question, options, label_string = fields
             index = int(index_string)
-        elif len(fields) == 5:
-            passage, left_context, right_context, options, label_string = fields
+        elif len(fields) == 4:
+            passage, question, options, label_string = fields
             index = None
         else:
             raise RuntimeError("Unrecognized line format: " + line)
         # get the answer options
         answer_options = options.split("###")
         label = int(label_string)
-
-        # form the question from left and right contexts, keeping spacing consistent
-        question = "{} XXX {}".format(left_context, right_context).strip()
 
         return cls(question, passage, answer_options, label, index)
 

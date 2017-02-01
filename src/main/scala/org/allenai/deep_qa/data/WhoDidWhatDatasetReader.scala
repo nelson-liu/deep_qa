@@ -40,7 +40,11 @@ class WhoDidWhatDatasetReader(fileUtil: FileUtil) extends DatasetReader[WhoDidWh
     } yield (passage, leftContext, rightContext, answerOptions, label)
 
     val instances = instanceTuples.map { case (passage, leftContext, rightContext, answerOptions, label) => {
-      WhoDidWhatInstance(passage, leftContext, rightContext, answerOptions, Some(label))
+      // To form the cloze-style question, [left_context] is concatenated with "XXX",
+      // and then with [right_context]. "XXX" is the blank to be filled with one
+      // of the answer options.
+      val question = s"${leftContext} XXX ${rightContext}".trim
+      WhoDidWhatInstance(passage, question, answerOptions, Some(label))
     }}
     Dataset(instances)
   }

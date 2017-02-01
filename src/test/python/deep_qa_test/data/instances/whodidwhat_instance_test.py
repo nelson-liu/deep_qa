@@ -9,12 +9,12 @@ from deep_qa.data.instances.whodidwhat_instance import WhoDidWhatInstance, Index
 
 class TestWhoDidWhatInstance:
     @staticmethod
-    def instance_to_line(question: str, left_context: str, right_context: str,
+    def instance_to_line(passage: str, question: str,
                          options: str, label: int, index=None):
         line = ''
         if index is not None:
             line += str(index) + '\t'
-        line += question + '\t' + left_context + '\t' + right_context + '\t' + options + '\t'+ str(label)
+        line += passage + '\t' + question + '\t' + options + '\t'+ str(label)
         return line
 
     def test_words_has_question_passage_options(self):
@@ -28,14 +28,12 @@ class TestWhoDidWhatInstance:
 
     def test_read_from_line_handles_five_column(self):
         passage = "Dogs eat cats from Nevada in Washington ."
-        left_context = "Cats from Nevada are eaten by dogs in"
-        right_context = "."
+        question = "Cats from Nevada are eaten by dogs in XXX ."
         options_str = "Nevada###Washington"
         label = 1
-        line = self.instance_to_line(passage, left_context, right_context, options_str, label)
+        line = self.instance_to_line(passage, question, options_str, label)
         instance = WhoDidWhatInstance.read_from_line(line)
 
-        question = "Cats from Nevada are eaten by dogs in XXX ."
         assert instance.question_text == question
         assert instance.passage_text == passage
         options = ["Nevada", "Washington"]
@@ -45,15 +43,13 @@ class TestWhoDidWhatInstance:
 
     def test_read_from_line_handles_six_column(self):
         passage = "Dogs eat cats from Nevada in Washington ."
-        left_context = "Cats from Nevada are eaten by dogs in"
-        right_context = "."
+        question = "Cats from Nevada are eaten by dogs in XXX ."
         options_str = "Nevada###Washington"
         label = 1
         index = 42
-        line = self.instance_to_line(passage, left_context, right_context, options_str, label, index)
+        line = self.instance_to_line(passage, question, options_str, label, index)
         instance = WhoDidWhatInstance.read_from_line(line)
 
-        question = "Cats from Nevada are eaten by dogs in XXX ."
         assert instance.question_text == question
         assert instance.passage_text == passage
         options = ["Nevada", "Washington"]
