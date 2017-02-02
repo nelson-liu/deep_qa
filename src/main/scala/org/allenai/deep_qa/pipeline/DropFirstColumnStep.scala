@@ -11,13 +11,14 @@ import scala.sys.process.Process
 import scala.sys.process.ProcessLogger
 
 /**
-  * This Step is a SentenceProducer that reads a file with MCReadingComprehensionInstances
-  * and removes the passages from them, turning it into a file with the format of a
-  * QuestionAnswerInstance. It does this by simply dropping the first column.
+  * This Step is a SentenceProducer that reads a file and simply drops the first column.
   * Expected file format is "[passage][tab][question][tab][choices][tab][label]" or .
   * "[index][tab][passage][tab][question][tab][choices][tab][label]".
   * The output file format is "[question][tab][choices][tab][label]" or
   * "[index][tab][question][tab][choices][tab][label]".
+  * This is used, for example, with McQuestionAnswerInstances
+  * to removes the passages from them, turning it into a file with the format of a
+  * QuestionAnswerInstance.
  */
 class DropFirstColumnStep(
   val params: JValue,
