@@ -23,9 +23,9 @@ class McQuestionAnswerInstance(QuestionPassageInstance):
 
     def __str__(self):
         return ('McQuestionAnswerInstance({}, {}, {}, {})'.format(self.question_text,
-                                                            self.passage_text,
-                                                            '|'.join(self.answer_options),
-                                                            str(self.label)))
+                                                                  self.passage_text,
+                                                                  '|'.join(self.answer_options),
+                                                                  str(self.label)))
 
     @overrides
     def words(self) -> Dict[str, List[str]]:
@@ -51,7 +51,7 @@ class McQuestionAnswerInstance(QuestionPassageInstance):
         option_indices = [self._index_text(option, data_indexer) for option in
                           self.answer_options]
         return IndexedMcQuestionAnswerInstance(question_indices, passage_indices,
-                                         option_indices, self.label, self.index)
+                                               option_indices, self.label, self.index)
 
     @classmethod
     def read_from_line(cls, line: str, default_label: bool=None):
@@ -90,8 +90,9 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
                  option_indices: List[List[int]],
                  label: List[int],
                  index: int=None):
-        super(IndexedMcQuestionAnswerInstance, self).__init__(question_indices, passage_indices,
-                                                        label, index)
+        super(IndexedMcQuestionAnswerInstance, self).__init__(question_indices,
+                                                              passage_indices,
+                                                              label, index)
         self.option_indices = option_indices
 
     @classmethod
@@ -150,6 +151,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
             max_lengths['word_sequence_length'] = max_lengths['num_option_words']
             padded_options.append(self.pad_word_sequence(indices, max_lengths))
         self.option_indices = padded_options
+
 
     @overrides
     def as_training_data(self):

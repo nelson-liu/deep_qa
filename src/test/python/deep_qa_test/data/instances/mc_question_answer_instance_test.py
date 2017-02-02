@@ -4,7 +4,8 @@ from unittest import TestCase
 import numpy as np
 
 from deep_qa.data.data_indexer import DataIndexer
-from deep_qa.data.instances.mc_question_answer_instance import McQuestionAnswerInstance, IndexedMcQuestionAnswerInstance
+from deep_qa.data.instances.mc_question_answer_instance import McQuestionAnswerInstance
+from deep_qa.data.instances.mc_question_answer_instance import IndexedMcQuestionAnswerInstance
 
 
 class TestMcQuestionAnswerInstance:
