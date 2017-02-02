@@ -42,6 +42,7 @@ object JohannesDatasets {
 
   val baseDir = "/efs/data/dlfa/turk_johannes_questions/"
 
+  // Train files
   val trainFile = johannesFile(baseDir, "train")
   val train = johannesDataset(baseDir, "train")
   val mcTrainFile = makeMCFile(trainFile)
@@ -55,6 +56,17 @@ object JohannesDatasets {
     ("sentences" -> mcTrainFile) ~
     ("background" -> mcTrainBuscBackgroundFile)
 
+  val mcTrainLuceneBackgroundFile = makePassageBackgroundFile(
+    mcTrainFile,
+    "question and answer",
+    AristoDefaultCorpora.aristoDefaultElasticSearchIndex(3)
+  )
+  val readingComprehensionTrainWithLuceneBackgroundFile: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+    ("sentences" -> mcTrainFile) ~
+    ("background" -> mcTrainLuceneBackgroundFile)
+
+  // Dev Files
   val devFile = johannesFile(baseDir, "dev")
   val dev = johannesDataset(baseDir, "dev")
   val mcDevFile = makeMCFile(devFile)
@@ -68,6 +80,17 @@ object JohannesDatasets {
     ("sentences" -> mcDevFile) ~
     ("background" -> mcDevBuscBackgroundFile)
 
+  val mcDevLuceneBackgroundFile = makePassageBackgroundFile(
+    mcDevFile,
+    "question and answer",
+    AristoDefaultCorpora.aristoDefaultElasticSearchIndex(3)
+  )
+  val readingComprehensionDevWithLuceneBackgroundFile: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+    ("sentences" -> mcDevFile) ~
+    ("background" -> mcDevLuceneBackgroundFile)
+
+  // Test Files
   val testFile = johannesFile(baseDir, "test")
   val test = johannesDataset(baseDir, "test")
   val mcTestFile = makeMCFile(testFile)
@@ -81,6 +104,18 @@ object JohannesDatasets {
     ("sentences" -> mcTestFile) ~
     ("background" -> mcTestBuscBackgroundFile)
 
+  val mcTestLuceneBackgroundFile = makePassageBackgroundFile(
+    mcTestFile,
+    "question and answer",
+    AristoDefaultCorpora.aristoDefaultElasticSearchIndex(3)
+  )
+  val readingComprehensionTestWithLuceneBackgroundFile: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+    ("sentences" -> mcTestFile) ~
+    ("background" -> mcTestLuceneBackgroundFile)
+
+
+  // Datasets
   val mcTrainWithBuscBackground: JValue = ScienceDatasets.makeBackgroundDataset(
     mcTrainFile,
     "question and answer",
