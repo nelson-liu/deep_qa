@@ -228,21 +228,19 @@ object ScienceCorpora {
     ("elastic search index port" -> 9300) ~
     ("elastic search cluster name" -> "aristo-es") ~
     ("elastic search index name" -> Seq("busc"))
-}
 
-object AristoDefaultCorpora {
   def aristoDefaultElasticSearchIndex(numResults: Int): JValue =
     ("num passages per query" -> numResults) ~
-  ("elastic search index url" -> "aristo-es1.dev.ai2") ~
-  ("elastic search index port" -> 9300) ~
-  ("elastic search cluster name" -> "aristo-es") ~
-  ("elastic search index name" -> Seq(
-    "barrons",
-    "websentences",
-    "ck12biov44",
-    "waterloo",
-    "wikipedia",
-    "simplewikipedia")
+    ("elastic search index url" -> "aristo-es1.dev.ai2") ~
+    ("elastic search index port" -> 9300) ~
+    ("elastic search cluster name" -> "aristo-es") ~
+    ("elastic search index name" -> Seq(
+      "barrons",
+      "websentences",
+      "ck12biov44",
+      "waterloo",
+      "wikipedia",
+      "simplewikipedia")
   )
 }
 
