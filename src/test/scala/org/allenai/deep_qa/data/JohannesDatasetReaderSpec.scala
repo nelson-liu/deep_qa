@@ -50,7 +50,7 @@ class JohannesDatasetReaderSpec extends FlatSpecLike with Matchers {
     fileUtil.deleteFile(datasetFile)
 
     dataset.instances.size should be(2)
-    dataset.instances(0) should be(MCReadingComprehensionInstance(support1, question1, options1, Some(1)))
-    dataset.instances(1) should be(MCReadingComprehensionInstance(support2, question2, options2, Some(1)))
+    dataset.instances(0) should be(McQuestionAnswerInstance(support1, question1, options1, Some(1)))
+    dataset.instances(1) should be(McQuestionAnswerInstance(support2, question2, options2, Some(1)))
   }
 }

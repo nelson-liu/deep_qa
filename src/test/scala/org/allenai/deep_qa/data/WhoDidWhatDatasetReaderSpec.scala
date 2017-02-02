@@ -134,7 +134,7 @@ class WhoDidWhatDatasetReaderSpec extends FlatSpecLike with Matchers {
     fileUtil.deleteFile(datasetFile + ".bak")
 
     dataset.instances.size should be(2)
-    dataset.instances(0) should be(WhoDidWhatInstance(passage1, question1, answers1, Some(0)))
-    dataset.instances(1) should be(WhoDidWhatInstance(passage2, question2, answers2, Some(0)))
+    dataset.instances(0) should be(McQuestionAnswerInstance(passage1, question1, answers1, Some(0)))
+    dataset.instances(1) should be(McQuestionAnswerInstance(passage2, question2, answers2, Some(0)))
   }
 }

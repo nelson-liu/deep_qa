@@ -104,22 +104,6 @@ case class SnliInstance(
 }
 
 /**
-  * An Instance created from the Who Did What (WDW) dataset.
-  */
-case class WhoDidWhatInstance(
-  passage: String,
-  question: String,
-  answerOptions: Seq[String],
-  override val label: Option[Int]
-) extends Instance {
-  def asStrings(): Seq[Seq[String]] = {
-    val answerString = answerOptions.mkString("###")
-    val labelString = label.map(l => s"\t$l").getOrElse("")
-    Seq(Seq(s"$passage\t$question\t$answerString" + labelString))
-  }
-}
-
-/**
   * An Instance created for the task of span prediction from a passage
   * given a question. Used for Stanford Question Answering Dataset (SQuAD)
   * and NewsQA dataset.
@@ -136,10 +120,11 @@ case class SpanPredictionInstance(
 }
 
 /**
-  * An Instance created for the task of (non-cloze) multiple choice
-  * reading comprehension. Used by Johannes' dataset.
+  * An Instance created for the task of multiple choice
+  * reading comprehension. Used by Johannes' dataset and
+  * the Who Did What dataset.
   */
-case class MCReadingComprehensionInstance(
+case class McQuestionAnswerInstance(
   passage: String,
   question: String,
   answerOptions: Seq[String],

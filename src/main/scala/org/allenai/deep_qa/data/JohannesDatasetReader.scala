@@ -7,8 +7,8 @@ import org.json4s._
 import org.json4s.Formats
 import org.json4s.native.JsonMethods.parse
 
-class JohannesDatasetReader(fileUtil: FileUtil) extends DatasetReader[MCReadingComprehensionInstance] {
-  override def readFile(filename: String): Dataset[MCReadingComprehensionInstance] = {
+class JohannesDatasetReader(fileUtil: FileUtil) extends DatasetReader[McQuestionAnswerInstance] {
+  override def readFile(filename: String): Dataset[McQuestionAnswerInstance] = {
     val json = parse(fileUtil.readFileContents(filename))
     val instanceTuples = for {
       JObject(mcQuestion) <- json
@@ -24,7 +24,7 @@ class JohannesDatasetReader(fileUtil: FileUtil) extends DatasetReader[MCReadingC
       distractor2, distractor3, correct_answer) => {
       val options = Seq(distractor1, distractor2, distractor3, correct_answer).sorted
       val label = options.indexOf(correct_answer)
-      MCReadingComprehensionInstance(passage, question, options, Some(label))
+      McQuestionAnswerInstance(passage, question, options, Some(label))
     }}
     Dataset(instances)
   }
