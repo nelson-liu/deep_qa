@@ -6,10 +6,10 @@ from .question_passage_instance import IndexedQuestionPassageInstance, QuestionP
 from ..data_indexer import DataIndexer
 
 
-class WhoDidWhatInstance(QuestionPassageInstance):
+class McQuestionAnswerInstance(QuestionPassageInstance):
     """
-    A WhoDidWhatInstance is a QuestionPassageInstance that represents a (question,
-    passage, answer_options) tuple from the WhoDidWhatInstance dataset, with an
+    A McQuestionAnswerInstance is a QuestionPassageInstance that represents a (question,
+    passage, answer_options) tuple from the McQuestionAnswerInstance dataset, with an
     associated label indicating the index of the correct answer choice.
     """
     def __init__(self,
@@ -18,18 +18,18 @@ class WhoDidWhatInstance(QuestionPassageInstance):
                  answer_options: List[str],
                  label: int,
                  index: int=None):
-        super(WhoDidWhatInstance, self).__init__(question, passage, label, index)
+        super(McQuestionAnswerInstance, self).__init__(question, passage, label, index)
         self.answer_options = answer_options
 
     def __str__(self):
-        return ('WhoDidWhatInstance({}, {}, {}, {})'.format(self.question_text,
+        return ('McQuestionAnswerInstance({}, {}, {}, {})'.format(self.question_text,
                                                             self.passage_text,
                                                             '|'.join(self.answer_options),
                                                             str(self.label)))
 
     @overrides
     def words(self) -> Dict[str, List[str]]:
-        words = super(WhoDidWhatInstance, self).words()
+        words = super(McQuestionAnswerInstance, self).words()
         for option in self.answer_options:
             option_words = self._words_from_text(option)
             for namespace in words:
@@ -40,7 +40,7 @@ class WhoDidWhatInstance(QuestionPassageInstance):
     def _index_label(self, label: Tuple[int, int]) -> List[int]:
         """
         Specify how to index `self.label`, which is needed to convert the
-        WhoDidWhatInstance into an IndexedInstance (conversion handled in superclass).
+        McQuestionAnswerInstance into an IndexedInstance (conversion handled in superclass).
         """
         return self.label
 
@@ -50,21 +50,21 @@ class WhoDidWhatInstance(QuestionPassageInstance):
         passage_indices = self._index_text(self.passage_text, data_indexer)
         option_indices = [self._index_text(option, data_indexer) for option in
                           self.answer_options]
-        return IndexedWhoDidWhatInstance(question_indices, passage_indices,
+        return IndexedMcQuestionAnswerInstance(question_indices, passage_indices,
                                          option_indices, self.label, self.index)
 
     @classmethod
     def read_from_line(cls, line: str, default_label: bool=None):
         """
-        Reads a WhoDidWhatInstance object from a line.  The format has one of two options:
+        Reads a McQuestionAnswerInstance object from a line.  The format has one of two options:
 
-        (1) [example index][tab][passage][tab][options][tab][label]
-        (2) [passage][tab][options][tab][label]
+        (1) [example index][tab][passage][tab][question][tab][options][tab][label]
+        (2) [passage][tab][question][tab][options][tab][label]
 
-        The `answer_options` column is assumed formatted as: [option]###[option]###[option]...
-        That is, we split on three hashes ("###").
+        The ``answer_options`` column is assumed formatted as: ``[option]###[option]###[option]...``
+        That is, we split on three hashes (``"###"``).
 
-        default_label is ignored, but we keep the argument to match the interface.
+        ``default_label`` is ignored, but we keep the argument to match the interface.
         """
         fields = line.split("\t")
 
@@ -83,14 +83,14 @@ class WhoDidWhatInstance(QuestionPassageInstance):
         return cls(question, passage, answer_options, label, index)
 
 
-class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
+class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
     def __init__(self,
                  question_indices: List[int],
                  passage_indices: List[int],
                  option_indices: List[List[int]],
                  label: List[int],
                  index: int=None):
-        super(IndexedWhoDidWhatInstance, self).__init__(question_indices, passage_indices,
+        super(IndexedMcQuestionAnswerInstance, self).__init__(question_indices, passage_indices,
                                                         label, index)
         self.option_indices = option_indices
 
@@ -109,7 +109,7 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         """
         option_lengths = [self._get_word_sequence_lengths(option) for option in self.option_indices]
 
-        lengths = super(IndexedWhoDidWhatInstance, self).get_lengths()
+        lengths = super(IndexedMcQuestionAnswerInstance, self).get_lengths()
 
         # the number of options
         lengths['num_options'] = len(self.option_indices)
@@ -136,7 +136,7 @@ class IndexedWhoDidWhatInstance(IndexedQuestionPassageInstance):
         number of answer options, the answer options (in terms of numbers or words in each),
         as well as the individual words in the answer options.
         """
-        super(IndexedWhoDidWhatInstance, self).pad(max_lengths)
+        super(IndexedMcQuestionAnswerInstance, self).pad(max_lengths)
 
         # pad the number of options
         num_options = max_lengths['num_options']

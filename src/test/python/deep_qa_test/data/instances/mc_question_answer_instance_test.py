@@ -4,10 +4,10 @@ from unittest import TestCase
 import numpy as np
 
 from deep_qa.data.data_indexer import DataIndexer
-from deep_qa.data.instances.whodidwhat_instance import WhoDidWhatInstance, IndexedWhoDidWhatInstance
+from deep_qa.data.instances.mc_question_answer_instance import McQuestionAnswerInstance, IndexedMcQuestionAnswerInstance
 
 
-class TestWhoDidWhatInstance:
+class TestMcQuestionAnswerInstance:
     @staticmethod
     def instance_to_line(passage: str, question: str,
                          options: str, label: int, index=None):
@@ -18,9 +18,9 @@ class TestWhoDidWhatInstance:
         return line
 
     def test_words_has_question_passage_options(self):
-        instance = WhoDidWhatInstance("Cats from Nevada are eaten by dogs in XXX .",
-                                      "Dogs eat cats from Nevada in Washington .",
-                                      ["Nevada", "Washington"], 1)
+        instance = McQuestionAnswerInstance("Cats from Nevada are eaten by dogs in XXX .",
+                                            "Dogs eat cats from Nevada in Washington .",
+                                            ["Nevada", "Washington"], 1)
         assert instance.words() == {'words': ['cats', 'from', 'nevada', 'are', 'eaten', 'by',
                                               'dogs', 'in', 'xxx', '.', 'dogs', 'eat', 'cats',
                                               'from', 'nevada', 'in', 'washington', '.', 'nevada',
@@ -32,7 +32,7 @@ class TestWhoDidWhatInstance:
         options_str = "Nevada###Washington"
         label = 1
         line = self.instance_to_line(passage, question, options_str, label)
-        instance = WhoDidWhatInstance.read_from_line(line)
+        instance = McQuestionAnswerInstance.read_from_line(line)
 
         assert instance.question_text == question
         assert instance.passage_text == passage
@@ -48,7 +48,7 @@ class TestWhoDidWhatInstance:
         label = 1
         index = 42
         line = self.instance_to_line(passage, question, options_str, label, index)
-        instance = WhoDidWhatInstance.read_from_line(line)
+        instance = McQuestionAnswerInstance.read_from_line(line)
 
         assert instance.question_text == question
         assert instance.passage_text == passage
@@ -58,9 +58,9 @@ class TestWhoDidWhatInstance:
         assert instance.index == index
 
     def test_to_indexed_instance_converts_correctly(self):
-        instance = WhoDidWhatInstance("Cats from Nevada are eaten by dogs in XXX .",
-                                      "Dogs eat cats from Nevada in Washington .",
-                                      ["Nevada", "Washington"], 1)
+        instance = McQuestionAnswerInstance("Cats from Nevada are eaten by dogs in XXX .",
+                                            "Dogs eat cats from Nevada in Washington .",
+                                            ["Nevada", "Washington"], 1)
         data_indexer = DataIndexer()
         cats_index = data_indexer.add_word_to_index("cats")
         are_index = data_indexer.add_word_to_index("are")
@@ -92,10 +92,10 @@ class TestWhoDidWhatInstance:
 
 class TestIndexedQuestionAnswerInstance(TestCase):
     def setUp(self):
-        self.instance = IndexedWhoDidWhatInstance([1, 2, 3, 5, 6],
-                                                  [2, 3, 4, 5, 6, 7],
-                                                  [[2], [3, 5], [6]],
-                                                  1)
+        self.instance = IndexedMcQuestionAnswerInstance([1, 2, 3, 5, 6],
+                                                        [2, 3, 4, 5, 6, 7],
+                                                        [[2], [3, 5], [6]],
+                                                        1)
 
     def test_get_lengths_returns_three_correct_lengths(self):
         assert self.instance.get_lengths() == {
