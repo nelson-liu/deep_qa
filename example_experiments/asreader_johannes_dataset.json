@@ -18,12 +18,14 @@
         }
     },
     "optimizer": {"type": "adam",
-                  "clipnorm": 10.0
+                  "clipnorm": 10.0,
+                  "lr": 0.0005
                  },
     "embedding_dropout": 0.0,
-    "patience": 1,
+    "patience": 0,
     "embedding_size": 256,
-    "num_epochs": 5,
+    "num_epochs": 1,
     "validation_files": ["/efs/data/dlfa/turk_johannes_questions/processed/dev_no_passage_with_background_as_passages.tsv"],
-    "train_files": ["/efs/data/dlfa/turk_johannes_questions/processed/train_no_passage_with_background_as_passages.tsv"]
+    "train_files": ["/efs/data/dlfa/turk_johannes_questions/processed/train_no_passage_with_background_as_passages.tsv"],
+    "test_files": ["/efs/data/dlfa/turk_johannes_questions/processed/test_no_passage_with_background_as_passages.tsv"]
 }

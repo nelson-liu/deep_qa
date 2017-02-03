@@ -73,6 +73,9 @@ class Trainer:
         # the `keras_validation_split` parameter to split the training data for validation.
         self.validation_files = params.pop('validation_files', None)
 
+        # If not None, evaluate the model on this set.
+        self.test_files = params.pop('test_files', None)
+
         optimizer_params = params.pop('optimizer', 'adam')
         self.optimizer = optimizer_from_params(optimizer_params)
         self.loss = params.pop('loss', 'categorical_crossentropy')
@@ -122,6 +125,9 @@ class Trainer:
         self.validation_dataset = None
         self.validation_input = None
         self.validation_labels = None
+        self.test_dataset = None
+        self.test_input = None
+        self.test_labels = None
         self.debug_dataset = None
         self.debug_input = None
 
@@ -243,6 +249,12 @@ class Trainer:
             self.validation_input, self.validation_labels = self._prepare_data(self.validation_dataset,
                                                                                for_train=False)
 
+        if self.test_files:
+            logger.info("Getting test data")
+            self.test_dataset = self._load_dataset_from_files(self.test_files)
+            self.test_input, self.test_labels = self._prepare_data(self.test_dataset,
+                                                                   for_train=False)
+
         # We need to actually do pretraining _after_ we've loaded the training data, though, as we
         # need to build the models to be consistent between training and pretraining.  The training
         # data tells us a max sentence length, which we need for the pretrainer.
@@ -288,6 +300,14 @@ class Trainer:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
         history = self.model.fit(self.train_input, self.train_labels, **kwargs)
+
+        # If there are test files, we evaluate on the test data now.
+        if self.test_files:
+            logger.info("Evaluating model on test set.")
+            scores = self.model.evaluate(self.test_input, self.test_labels)
+            for idx, metric in enumerate(self.model.metrics_names):
+                print("{}: {}".format(metric, scores[idx]))
+
         # After finishing training, we save the best weights and
         # any auxillary files, such as the model config.
 

@@ -22,18 +22,13 @@ from deep_qa.models import concrete_models
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
-def main():
-    if len(sys.argv) != 2:
-        print('USAGE: run_model.py [param_file]')
-        sys.exit(-1)
 
+def main(model_params):
     log_keras_version_info()
-    param_file = sys.argv[1]
-    params = ConfigFactory.parse_file(param_file)
 
-    model_type = get_choice(params, 'model_class', concrete_models.keys())
+    model_type = get_choice(model_params, 'model_class', concrete_models.keys())
     model_class = concrete_models[model_type]
-    model = model_class(params)
+    model = model_class(model_params)
 
     if model.can_train():
         logger.info("Training model")
@@ -44,8 +39,16 @@ def main():
         model.load_model()
 
 
+def parse():
+    if len(sys.argv) != 2:
+        print('USAGE: run_model.py [param_file]')
+        sys.exit(-1)
+    param_file = sys.argv[1]
+    parsed_params = ConfigFactory.parse_file(param_file)
+    return parsed_params
+
 if __name__ == "__main__":
     ensure_pythonhashseed_set()
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
                         level=logging.INFO)
-    main()
+    main(parse())
