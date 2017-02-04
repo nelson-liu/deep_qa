@@ -8,16 +8,16 @@ import org.json4s.JsonDSL._
  */
 object Models {
   val multipleTrueFalseMemoryNetwork: JValue =
-    ("solver_class" -> "MultipleTrueFalseMemoryNetworkSolver")
+    ("model_class" -> "MultipleTrueFalseMemoryNetwork")
 
   val softmaxMemoryNetwork: JValue =
-    ("solver_class" -> "SoftmaxMemoryNetworkSolver")
+    ("model_class" -> "SoftmaxMemoryNetwork")
 
-  val quesitonAnswerMemoryNetwork: JValue =
-    ("solver_class" -> "QuestionAnswerMemoryNetworkSolver")
+  val questionAnswerMemoryNetwork: JValue =
+    ("model_class" -> "QuestionAnswerMemoryNetwork")
 
   val trueFalseMemoryNetwork: JValue =
-    ("solver_class" -> "MemoryNetworkSolver")
+    ("model_class" -> "MemoryNetwork")
 
   val basicMemoryNetworkComponents: JValue =
     ("knowledge_selector" -> ("type" -> "dot_product")) ~
@@ -32,9 +32,10 @@ object Models {
     ("num_memory_layers" -> 1)
 
   val decomposableAttentionSolver: JValue =
-    ("solver_class" -> "DecomposableAttentionSolver")
+    ("model_class" -> "DecomposableAttention")
+
   val multipleTrueFalseDecomposableAttentionSolver: JValue =
-    ("solver_class" -> "MultipleTrueFalseDecomposableAttentionSolver")
+    ("model_class" -> "MultipleTrueFalseDecomposableAttention")
 
   def endToEndMemoryNetwork(encoder: String, numMemoryLayers: Int): JValue =
     softmaxMemoryNetwork merge
@@ -44,6 +45,11 @@ object Models {
     ("encoder" -> ("type" -> encoder)) ~
     ("num_memory_layers" -> numMemoryLayers)
 
+  val attentionSumReader: JValue =
+    ("model_class" -> "AttentionSumReader")
+
+  val gatedAttentionReader: JValue =
+    ("model_class" -> "GatedAttentionReader")
 }
 
 object Debug {

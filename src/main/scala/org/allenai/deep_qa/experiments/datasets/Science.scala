@@ -77,11 +77,44 @@ object ScienceDatasets {
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
+  val omnibusQaGradeFourTrainBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeFourTrainSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeFourTrainSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeFourTrainBuscBackgroundFile)
+
   val omnibusQaGradeFourDevQuestionsWithBuscBackground: JValue = makeBackgroundDataset(
     ScienceFiles.omnibusGradeFourDevSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
+
+  val omnibusQaGradeFourDevBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeFourDevSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val omnibusQaGradeFourTestBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeFourTestSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val readingComprehensionOmnibusQaGradeFourDevQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeFourDevSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeFourDevBuscBackgroundFile)
+
+  val readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeFourTestSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeFourTestBuscBackgroundFile)
 
   val omnibusQaGradeEightTrainQuestionsWithBuscBackground: JValue = makeBackgroundDataset(
     ScienceFiles.omnibusGradeEightTrainSentences_questionAndAnswer,
@@ -89,11 +122,44 @@ object ScienceDatasets {
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
+  val omnibusQaGradeEightTrainBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeEightTrainSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val readingComprehensionOmnibusQaGradeEightTrainQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeEightTrainSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeEightTrainBuscBackgroundFile)
+
   val omnibusQaGradeEightDevQuestionsWithBuscBackground: JValue = makeBackgroundDataset(
     ScienceFiles.omnibusGradeEightDevSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
+
+  val omnibusQaGradeEightDevBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeEightDevSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val omnibusQaGradeEightTestBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+    ScienceFiles.omnibusGradeEightTestSentences_questionAndAnswer,
+    "question and answer",
+    ScienceCorpora.buscElasticSearchIndex(3)
+  )
+
+  val readingComprehensionOmnibusQaGradeEightDevQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeEightDevSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeEightDevBuscBackgroundFile)
+
+  val readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground: JValue =
+    ("sentence producer type" -> "qa and background to mc") ~
+      ("sentences" -> ScienceFiles.omnibusGradeEightTestSentences_questionAndAnswer) ~
+      ("background" -> omnibusQaGradeEightTestBuscBackgroundFile)
 
   val diagramQaQuestionsWithBuscBackground: JValue = makeBackgroundDataset(
     ScienceFiles.ai2diagramSentences_questionAndAnswer,
@@ -191,6 +257,12 @@ object ScienceFiles {
       "/efs/data/dlfa/processed/omnibus_4_dev/question_and_answer/questions.tsv"
     )
 
+  val omnibusGradeFourTestSentences_questionAndAnswer: JValue =
+    makeQuestionAnswerFile(
+      "/efs/data/dlfa/questions/omnibus_4_test.tsv",
+      "/efs/data/dlfa/processed/omnibus_4_test/question_and_answer/questions.tsv"
+    )
+
   val omnibusGradeEightTrainSentences_questionAndAnswer: JValue =
     makeQuestionAnswerFile(
       "/efs/data/dlfa/questions/omnibus_8_train.tsv",
@@ -202,6 +274,13 @@ object ScienceFiles {
       "/efs/data/dlfa/questions/omnibus_8_dev.tsv",
       "/efs/data/dlfa/processed/omnibus_8_dev/question_and_answer/questions.tsv"
     )
+
+  val omnibusGradeEightTestSentences_questionAndAnswer: JValue =
+    makeQuestionAnswerFile(
+      "/efs/data/dlfa/questions/omnibus_8_test.tsv",
+      "/efs/data/dlfa/processed/omnibus_8_test/question_and_answer/questions.tsv"
+    )
+
 
   val ai2diagramSentences_questionAndAnswer: JValue =
     makeQuestionAnswerFile(
