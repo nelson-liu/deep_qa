@@ -18,14 +18,20 @@ object JohannesDatasetExperiments {
     validationDataset: JValue
   ): JValue = {
     ("name" -> name) ~
-    ("model params" -> modelParams) ~
-    ("dataset" -> trainingDataset) ~
-    ("validation dataset" -> validationDataset)
+      ("model params" -> modelParams) ~
+      ("dataset" -> trainingDataset) ~
+      ("validation dataset" -> validationDataset)
   }
 
+  // Turn SciQ reading comprehension train file with BUSC background to a dataset.
   val johannesTrainDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
       ("data files" -> Seq(JohannesDatasets.readingComprehensionTrainWithBuscBackgroundFile))
+
+  /*
+   * Turn Omnibus-8 reading comprehension train, test, and dev files
+   * with BUSC background to datasets.
+   */
 
   val omnibusEightTrainReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
@@ -39,6 +45,11 @@ object JohannesDatasetExperiments {
     ("dataset type" -> "from sentence producers") ~
       ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground))
 
+  /*
+   * Turn Omnibus-4 reading comprehension train, test, and dev files
+   * with BUSC background to datasets.
+   */
+
   val omnibusFourTrainReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
       ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground))
@@ -50,6 +61,11 @@ object JohannesDatasetExperiments {
   val omnibusFourTestReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
       ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground))
+
+  /*
+   * Create combined datasets with Omnibus4Train + SciQ Train and
+   * Omnibus8Train + SciQ Train.
+   */
 
   val combinedJohannesTrainOmnibusEightTrainDataset: JValue =
     ("dataset type" -> "combined") ~
