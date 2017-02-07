@@ -9,9 +9,10 @@ import numpy
 from deep_qa.models.text_classification.true_false_model import TrueFalseModel
 from deep_qa.models.multiple_choice_qa.question_answer_similarity import QuestionAnswerSimilarity
 from ..common.constants import TEST_DIR
+from ..common.constants import PRETRAINED_VECTORS_GZIP
 from ..common.models import get_model
 from ..common.models import write_question_answer_memory_network_files
-from ..common.models import write_true_false_model_files
+from ..common.models import write_true_false_model_files, write_pretrained_vector_files
 from ..common.test_markers import requires_tensorflow
 
 
@@ -121,4 +122,17 @@ class TestTextTrainer(TestCase):
     def test_tensorboard_logs_does_not_crash(self):
         write_true_false_model_files()
         model = get_model(TrueFalseModel, {'tensorboard_log': TEST_DIR})
+        model.train()
+
+    def test_pretrained_embeddings_with_characters_and_words_works_correctly(self):
+        write_true_false_model_files()
+        write_pretrained_vector_files()
+        args = {
+                'embedding_size': 8,
+                'pretrained_embeddings_file': PRETRAINED_VECTORS_GZIP,
+                'fine_tune_embeddings': False,
+                'project_embeddings': False,
+                'tokenizer': {'type': 'words and characters'},
+        }
+        model = get_model(TrueFalseModel, args)
         model.train()
