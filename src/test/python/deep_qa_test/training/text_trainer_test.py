@@ -124,7 +124,7 @@ class TestTextTrainer(TestCase):
         model = get_model(TrueFalseModel, {'tensorboard_log': TEST_DIR})
         model.train()
 
-    def test_pretrained_embeddings_with_characters_and_words_works_correctly(self):
+    def test_pretrained_embeddings_works_correctly(self):
         write_true_false_model_files()
         write_pretrained_vector_files()
         args = {
@@ -132,7 +132,6 @@ class TestTextTrainer(TestCase):
                 'pretrained_embeddings_file': PRETRAINED_VECTORS_GZIP,
                 'fine_tune_embeddings': False,
                 'project_embeddings': False,
-                'tokenizer': {'type': 'words and characters'},
-        }
+            }
         model = get_model(TrueFalseModel, args)
         model.train()
