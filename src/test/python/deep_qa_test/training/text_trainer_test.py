@@ -132,6 +132,6 @@ class TestTextTrainer(TestCase):
                 'pretrained_embeddings_file': PRETRAINED_VECTORS_GZIP,
                 'fine_tune_embeddings': False,
                 'project_embeddings': False,
-            }
+                }
         model = get_model(TrueFalseModel, args)
         model.train()
