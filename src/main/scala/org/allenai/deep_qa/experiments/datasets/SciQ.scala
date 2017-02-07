@@ -4,23 +4,24 @@ import org.json4s._
 import org.json4s.JsonDSL._
 
 /**
- * This object contains a bunch of JValue specifications for Johannes' datasets' data files.
+ * This object contains a bunch of JValue specifications for the
+ * SciQ dataset's data files.
  */
-object JohannesDatasets {
+object SciQDatasets {
 
-  def johannesFile(johannesDir: String, split: String, version: String="1.0"): JValue = {
-    val outputDirectory = johannesDir + "processed/"
-    val inputFile = johannesDir + s"v${version}/"+ s"${split}-v${version}.json"
+  def sciQFile(sciQDir: String, split: String, version: String="1.0"): JValue = {
+    val outputDirectory = sciQDir + "processed/"
+    val inputFile = sciQDir + s"v${version}/"+ s"${split}-v${version}.json"
     val outputFiles = Seq(outputDirectory + s"${split}.tsv")
     ("sentence producer type" -> "dataset reader") ~
-      ("reader" -> "johannes") ~
+      ("reader" -> "sciq") ~
       ("create sentence indices" -> true) ~
       ("input file" -> inputFile) ~
       ("output files" -> outputFiles)
   }
 
-  def johannesDataset(johannesDir: String, split: String, version: String="1.0"): JValue = {
-    val file = johannesFile(johannesDir, split, version)
+  def sciQDataset(sciQDir: String, split: String, version: String="1.0"): JValue = {
+    val file = sciQFile(sciQDir, split, version)
     ("data files" -> List(file))
   }
 
@@ -40,11 +41,11 @@ object JohannesDatasets {
       ("sentence format" -> sentenceFormat)
   }
 
-  val baseDir = "/efs/data/dlfa/turk_johannes_questions/"
+  val baseDir = "/efs/data/dlfa/sciq/"
 
   // Train files
-  val trainFile = johannesFile(baseDir, "train")
-  val train = johannesDataset(baseDir, "train")
+  val trainFile = sciQFile(baseDir, "train")
+  val train = sciQDataset(baseDir, "train")
   val mcTrainFile = makeMcFile(trainFile)
   val mcTrainBuscBackgroundFile = makePassageBackgroundFile(
     mcTrainFile,
@@ -73,8 +74,8 @@ object JohannesDatasets {
   )
 
   // Dev Files
-  val devFile = johannesFile(baseDir, "dev")
-  val dev = johannesDataset(baseDir, "dev")
+  val devFile = sciQFile(baseDir, "dev")
+  val dev = sciQDataset(baseDir, "dev")
   val mcDevFile = makeMcFile(devFile)
   val mcDevBuscBackgroundFile = makePassageBackgroundFile(
     mcDevFile,
@@ -102,8 +103,8 @@ object JohannesDatasets {
     ScienceCorpora.buscElasticSearchIndex(3)
   )
   // Test Files
-  val testFile = johannesFile(baseDir, "test")
-  val test = johannesDataset(baseDir, "test")
+  val testFile = sciQFile(baseDir, "test")
+  val test = sciQDataset(baseDir, "test")
   val mcTestFile = makeMcFile(testFile)
   val mcTestBuscBackgroundFile = makePassageBackgroundFile(
     mcTestFile,

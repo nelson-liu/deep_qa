@@ -1,6 +1,6 @@
 package org.allenai.deep_qa.experiments
 
-import org.allenai.deep_qa.experiments.datasets.JohannesDatasets
+import org.allenai.deep_qa.experiments.datasets.SciQDatasets
 import org.allenai.deep_qa.experiments.datasets.ScienceDatasets
 import org.allenai.deep_qa.pipeline.Evaluator
 
@@ -8,7 +8,7 @@ import com.mattg.util.FileUtil
 import org.json4s.JsonDSL._
 import org.json4s._
 
-object JohannesDatasetExperiments {
+object SciQDatasetExperiments {
   val fileUtil = new FileUtil
 
   def experiment(
@@ -24,9 +24,9 @@ object JohannesDatasetExperiments {
   }
 
   // Turn SciQ reading comprehension train file with BUSC background to a dataset.
-  val johannesTrainDataset: JValue =
+  val sciQTrainDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(JohannesDatasets.readingComprehensionTrainWithBuscBackgroundFile))
+      ("data files" -> Seq(SciQDatasets.readingComprehensionTrainWithBuscBackgroundFile))
 
   /*
    * Turn Omnibus-8 reading comprehension train, test, and dev files
@@ -67,15 +67,15 @@ object JohannesDatasetExperiments {
    * Omnibus8Train + SciQ Train.
    */
 
-  val combinedJohannesTrainOmnibusEightTrainDataset: JValue =
+  val combinedSciQTrainOmnibusEightTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(johannesTrainDataset, omnibusEightTrainReadingComprehensionDataset))~
-      ("output directory" -> s"/efs/data/dlfa/processed/omnibus_8_train_and_johannes_train_combined/")
+      ("datasets" -> Seq(sciQTrainDataset, omnibusEightTrainReadingComprehensionDataset))~
+      ("output directory" -> s"/efs/data/dlfa/processed/omnibus_8_train_and_sciq_train_combined/")
 
-  val combinedJohannesTrainOmnibusFourTrainDataset: JValue =
+  val combinedSciQTrainOmnibusFourTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(johannesTrainDataset, omnibusFourTrainReadingComprehensionDataset))~
-      ("output directory" -> s"/efs/data/dlfa/processed/omnibus_4_train_and_johannes_train_combined/")
+      ("datasets" -> Seq(sciQTrainDataset, omnibusFourTrainReadingComprehensionDataset))~
+      ("output directory" -> s"/efs/data/dlfa/processed/omnibus_4_train_and_sciq_train_combined/")
 
   def omnibusGradeFourExperiment(
     name: String,
@@ -103,10 +103,10 @@ object JohannesDatasetExperiments {
     )
   }
 
-  def combinedJohannesOmnibusGradeFourExperiment(
+  def combinedSciQOmnibusGradeFourExperiment(
     name: String,
     modelParams: JValue,
-    trainingDataset: JValue=combinedJohannesTrainOmnibusFourTrainDataset
+    trainingDataset: JValue=combinedSciQTrainOmnibusFourTrainDataset
   ): JValue = {
     experiment(
       name,
@@ -116,10 +116,10 @@ object JohannesDatasetExperiments {
     )
   }
 
-  def combinedJohannesOmnibusGradeEightExperiment(
+  def combinedSciQOmnibusGradeEightExperiment(
     name: String,
     modelParams: JValue,
-    trainingDataset: JValue=combinedJohannesTrainOmnibusEightTrainDataset
+    trainingDataset: JValue=combinedSciQTrainOmnibusEightTrainDataset
   ): JValue = {
     experiment(
       name,
@@ -238,14 +238,14 @@ object JohannesDatasetExperiments {
       omnibusFourTrainReadingComprehensionDataset
     )
 
-    val asReaderOmnibusFourWithJohannesDataset = omnibusGradeFourExperiment(
-      "ASReader omnibus four plus Johannes' Dataset",
+    val asReaderOmnibusFourWithSciQDataset = omnibusGradeFourExperiment(
+      "ASReader omnibus four plus SciQ Dataset",
       attentionSumReader,
-      combinedJohannesTrainOmnibusFourTrainDataset
+      combinedSciQTrainOmnibusFourTrainDataset
     )
 
-    val models = Seq(asReaderOmnibusFourDefault, asReaderOmnibusFourWithJohannesDataset)
-    new Evaluator(Some("ASReader_omnibus_four_plus_johannes_dataset"), models, fileUtil).runPipeline()
+    val models = Seq(asReaderOmnibusFourDefault, asReaderOmnibusFourWithSciQDataset)
+    new Evaluator(Some("ASReader_omnibus_four_plus_sciq_dataset"), models, fileUtil).runPipeline()
   }
 
   def runASReaderOmnibusEightExperiment() {
@@ -255,14 +255,14 @@ object JohannesDatasetExperiments {
       omnibusEightTrainReadingComprehensionDataset
     )
 
-    val asReaderOmnibusEightWithJohannesDataset = omnibusGradeEightExperiment(
-      "ASReader omnibus eight plus Johannes' Dataset",
+    val asReaderOmnibusEightWithSciQDataset = omnibusGradeEightExperiment(
+      "ASReader omnibus eight plus SciQ Dataset",
       attentionSumReader,
-      combinedJohannesTrainOmnibusEightTrainDataset
+      combinedSciQTrainOmnibusEightTrainDataset
     )
 
-    val models = Seq(asReaderOmnibusEightDefault, asReaderOmnibusEightWithJohannesDataset)
-    new Evaluator(Some("ASReader_omnibus_eight_plus_johannes_dataset"), models, fileUtil).runPipeline()
+    val models = Seq(asReaderOmnibusEightDefault, asReaderOmnibusEightWithSciQDataset)
+    new Evaluator(Some("ASReader_omnibus_eight_plus_sciq_dataset"), models, fileUtil).runPipeline()
   }
 
     def runGAReaderOmnibusFourExperiment() {
@@ -272,14 +272,14 @@ object JohannesDatasetExperiments {
       omnibusFourTrainReadingComprehensionDataset
     )
 
-    val gaReaderOmnibusFourWithJohannesDataset = omnibusGradeFourExperiment(
-      "GAReader omnibus four plus Johannes' Dataset",
+    val gaReaderOmnibusFourWithSciQDataset = omnibusGradeFourExperiment(
+      "GAReader omnibus four plus SciQ Dataset",
       gatedAttentionReader,
-      combinedJohannesTrainOmnibusFourTrainDataset
+      combinedSciQTrainOmnibusFourTrainDataset
     )
 
-    val models = Seq(gaReaderOmnibusFourDefault, gaReaderOmnibusFourWithJohannesDataset)
-    new Evaluator(Some("GAReader_omnibus_four_plus_johannes_dataset"), models, fileUtil).runPipeline()
+    val models = Seq(gaReaderOmnibusFourDefault, gaReaderOmnibusFourWithSciQDataset)
+    new Evaluator(Some("GAReader_omnibus_four_plus_sciq_dataset"), models, fileUtil).runPipeline()
   }
 
   def runGAReaderOmnibusEightExperiment() {
@@ -289,14 +289,14 @@ object JohannesDatasetExperiments {
       omnibusEightTrainReadingComprehensionDataset
     )
 
-    val gaReaderOmnibusEightWithJohannesDataset = omnibusGradeEightExperiment(
-      "GAReader omnibus eight plus Johannes' Dataset",
+    val gaReaderOmnibusEightWithSciQDataset = omnibusGradeEightExperiment(
+      "GAReader omnibus eight plus SciQ Dataset",
       gatedAttentionReader,
-      combinedJohannesTrainOmnibusEightTrainDataset
+      combinedSciQTrainOmnibusEightTrainDataset
     )
 
-    val models = Seq(gaReaderOmnibusEightDefault, gaReaderOmnibusEightWithJohannesDataset)
-    new Evaluator(Some("GAReader_omnibus_eight_plus_johannes_dataset"), models, fileUtil).runPipeline()
+    val models = Seq(gaReaderOmnibusEightDefault, gaReaderOmnibusEightWithSciQDataset)
+    new Evaluator(Some("GAReader_omnibus_eight_plus_sciq_dataset"), models, fileUtil).runPipeline()
   }
 
 }

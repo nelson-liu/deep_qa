@@ -102,19 +102,19 @@ object ScienceDatasets {
    * Fourth Grade BUSC Background Files
    */
 
-  val omnibusQaGradeFourTrainBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeFourTrainBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeFourTrainSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
-  val omnibusQaGradeFourDevBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeFourDevBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeFourDevSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
-  val omnibusQaGradeFourTestBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeFourTestBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeFourTestSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
@@ -159,19 +159,19 @@ object ScienceDatasets {
    * Eighth Grade BUSC Background Files
    */
 
-  val omnibusQaGradeEightTrainBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeEightTrainBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeEightTrainSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
-  val omnibusQaGradeEightDevBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeEightDevBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeEightDevSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
 
-  val omnibusQaGradeEightTestBuscBackgroundFile: JValue = JohannesDatasets.makePassageBackgroundFile(
+  val omnibusQaGradeEightTestBuscBackgroundFile: JValue = SciQDatasets.makePassageBackgroundFile(
     ScienceFiles.omnibusGradeEightTestSentences_questionAndAnswer,
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
