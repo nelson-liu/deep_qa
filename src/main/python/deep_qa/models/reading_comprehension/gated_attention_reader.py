@@ -60,6 +60,8 @@ class GatedAttentionReader(TextTrainer):
         question_input_shape = self._get_sentence_shape(self.max_question_length)
         question_input = Input(shape=question_input_shape,
                                dtype='int32', name="question_input")
+
+        # if using character embeddings, split off the question word indices.
         if len(question_input_shape) > 1:
             question_indices = VectorMatrixSplit(split_axis=-1)(question_input)[0]
         else:
@@ -70,6 +72,8 @@ class GatedAttentionReader(TextTrainer):
         document_input = Input(shape=self._get_sentence_shape(self.max_passage_length),
                                dtype='int32',
                                name="document_input")
+
+        # if using character embeddings, split off the document word indices.
         if len(document_input_shape) > 1:
             document_indices = VectorMatrixSplit(split_axis=-1)(document_input)[0]
         else:
@@ -79,6 +83,8 @@ class GatedAttentionReader(TextTrainer):
                                self._get_sentence_shape(self.max_option_length))
         options_input = Input(shape=options_input_shape,
                               dtype='int32', name="options_input")
+
+        # if using character embeddings, split off the option word indices.
         if len(options_input_shape) > 2:
             options_indices = VectorMatrixSplit(split_axis=-1)(options_input)[0]
         else:
