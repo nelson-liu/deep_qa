@@ -5,6 +5,7 @@
     "embedding_size": 200,
     "model_class": "GatedAttentionReader",
     "cloze_token": "XXX",
+    "max_word_length": 15,
     "model_serialization_prefix": "models/multiple_choice_qa/gareader_wdw",
     "num_gated_attention_layers": 3,
     "preferred_backend": "theano",
