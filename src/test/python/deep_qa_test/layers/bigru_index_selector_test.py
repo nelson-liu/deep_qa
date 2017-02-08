@@ -34,7 +34,7 @@ class TestBiGRUIndexSelector():
                                    [[0.4, 0.6], [0.7, 0.1], [0.3, 0.1], [0.9, 0.5], [0.4, 0.7]]])
         gru_b_input = numpy.array([[[0.7, 0.2], [0.9, 0.1], [0.3, 0.8], [0.2, 0.6], [0.7, 0.2]],
                                    [[0.2, 0.1], [0.3, 0.6], [0.2, 0.8], [0.3, 0.6], [0.4, 0.4]]])
-        expected_output = numpy.array([[0.9, 0.2, 0.9, 0.1], [0.7, 0.1, 0.3, 0.6]])
+        expected_output = numpy.array([[0.9, 0.2, 0.2, 0.6], [0.7, 0.1, 0.3, 0.6]])
 
         # Testing the general single-batch case.
         result = model.predict([document_indices, gru_f_input, gru_b_input])
