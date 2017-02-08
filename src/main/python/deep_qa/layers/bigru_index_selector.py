@@ -48,14 +48,13 @@ class BiGRUIndexSelector(Layer):
         # TODO(nelson): deal with case where cloze token appears multiple times
         # in a question.
         word_indices, gru_f, gru_b = inputs
-        gru_b_reversed = K.reverse(gru_b, axes=[1])
         index_mask = K.cast(K.equal((K.ones_like(word_indices)*self.target_index),
                                     word_indices), "float32")
         gru_mask = K.repeat_elements(K.expand_dims(index_mask, -1), K.int_shape(gru_f)[-1], K.ndim(gru_f) - 1)
         masked_gru_f = switch(gru_mask, gru_f, K.zeros_like(gru_f))
         selected_gru_f = K.sum(masked_gru_f, axis=1)
-        masked_gru_b_reversed = switch(gru_mask, gru_b_reversed,
-                                       K.zeros_like(gru_b_reversed))
-        selected_gru_b_reversed = K.sum(masked_gru_b_reversed, axis=1)
-        selected_bigru = K.concatenate([selected_gru_f, selected_gru_b_reversed], axis=-1)
+        masked_gru_b = switch(gru_mask, gru_b,
+                                       K.zeros_like(gru_b))
+        selected_gru_b = K.sum(masked_gru_b, axis=1)
+        selected_bigru = K.concatenate([selected_gru_f, selected_gru_b], axis=-1)
         return selected_bigru
