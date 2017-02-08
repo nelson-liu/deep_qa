@@ -231,7 +231,7 @@ class GatedAttentionReader(TextTrainer):
     def _get_callbacks(self):
         callbacks = super(GatedAttentionReader, self)._get_callbacks()
         def _half_lr(epoch):
-            initial_lr = 0.005
+            initial_lr = 0.0005
             if epoch > 3:
                 return initial_lr / ((epoch-3)*.5)
             return initial_lr
