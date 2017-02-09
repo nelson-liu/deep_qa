@@ -140,17 +140,18 @@ object ScienceDatasets {
    * Fourth Grade Questions in RC Format (BUSC-fetched passage,
    * question, answer options)
    */
-  val readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground: JValue =
+
+  val omnibusRcGradeFourTrainQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeFourTrainSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeFourTrainBuscBackgroundFile)
 
-  val readingComprehensionOmnibusQaGradeFourDevQuestionsWithBuscBackground: JValue =
+  val omnibusRcGradeFourDevQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeFourDevSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeFourDevBuscBackgroundFile)
 
-  val readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground: JValue =
+  val omnibusRcGradeFourTestQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeFourTestSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeFourTestBuscBackgroundFile)
@@ -162,15 +163,15 @@ object ScienceDatasets {
 
   val omnibusFourTrainReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeFourTrainQuestionsWithBuscBackground))
 
   val omnibusFourDevReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourDevQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeFourDevQuestionsWithBuscBackground))
 
   val omnibusFourTestReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeFourTestQuestionsWithBuscBackground))
 
   /*
    * Eighth Grade BUSC Background Files
@@ -215,17 +216,17 @@ object ScienceDatasets {
    * question, answer options)
    */
 
-  val readingComprehensionOmnibusQaGradeEightTrainQuestionsWithBuscBackground: JValue =
+  val omnibusRcGradeEightTrainQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeEightTrainSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeEightTrainBuscBackgroundFile)
 
-  val readingComprehensionOmnibusQaGradeEightDevQuestionsWithBuscBackground: JValue =
+  val omnibusRcGradeEightDevQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeEightDevSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeEightDevBuscBackgroundFile)
 
-  val readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground: JValue =
+  val omnibusRcGradeEightTestQuestionsWithBuscBackground: JValue =
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeEightTestSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeEightTestBuscBackgroundFile)
@@ -237,15 +238,15 @@ object ScienceDatasets {
 
   val omnibusEightTrainReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightTrainQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeEightTrainQuestionsWithBuscBackground))
 
   val omnibusEightDevReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightDevQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeEightDevQuestionsWithBuscBackground))
 
   val omnibusEightTestReadingComprehensionDataset: JValue =
     ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground))
+      ("data files" -> Seq(omnibusRcGradeEightTestQuestionsWithBuscBackground))
 
   /////////////////////////////////////////////////////////////////////
   // Diagram QA
