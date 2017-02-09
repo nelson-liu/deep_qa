@@ -65,105 +65,19 @@ object SciQDatasetExperiments {
   }
 
   val attentionSumReader: JValue = {
-    Models.attentionSumReader merge
-    (("patience" -> 1) ~
-      ("preferred_backend" -> "theano") ~
-      ("encoder" ->
-        ("default" ->
-          ("type" -> "bi_gru")~
-          ("output_dim" -> 384)
-        )
-      ) ~
-      ("seq2seq_encoder" ->
-        ("default" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 384)
-          ) ~
-          ("wrapper_params" -> JObject())
-        )
-      ) ~
-      ("optimizer" ->
-        ("type" -> "adam") ~
-        ("clipnorm" -> 10.0) ~
-        ("lr" -> 0.0005)
-      ) ~
-      ("embedding_dropout" -> 0.0) ~
-      ("patience" -> 0) ~
-      ("embedding_size" -> 256) ~
-      ("num_epochs" -> 5)
-    )
+    Models.attentionSumReader
   }
 
   val gatedAttentionReader: JValue = {
-    Models.gatedAttentionReader merge
-    (("embedding_size" -> 100) ~
-      ("pretrained_embeddings_file" -> "/efs/data/dlfa/glove/glove.6B.100d.txt.gz") ~
-      ("fine_tune_embeddings" -> false) ~
-      ("project_embeddings" -> false) ~
-      ("num_gated_attention_layers" -> 3) ~
-      ("patience" -> 0) ~
-      ("preferred_backend" -> "theano") ~
-      ("encoder" ->
-        ("question_final" ->
-          ("type" -> "bi_gru")~
-          ("output_dim" -> 128)
-        )
-      ) ~
-      ("seq2seq_encoder" ->
-        ("question_0" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 128)
-          ) ~
-          ("wrapper_params" -> JObject())
-        ) ~
-        ("document_0" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 128)
-          ) ~
-          ("wrapper_params" -> JObject())
-        ) ~
-        ("question_1" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 128)
-          ) ~
-          ("wrapper_params" -> JObject())
-        ) ~
-        ("document_1" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 128)
-          ) ~
-          ("wrapper_params" -> JObject())
-        ) ~
-        ("document_final" ->
-          ("type" -> "bi_gru") ~
-          ("encoder_params" ->
-            ("output_dim" -> 128)
-          ) ~
-          ("wrapper_params" -> JObject())
-        )
-      ) ~
-      ("optimizer" ->
-        ("type" -> "adam") ~
-        ("clipnorm" -> 10.0) ~
-        ("lr" -> 0.0005)
-      ) ~
-      ("embedding_dropout" -> 0.0) ~
-      ("patience" -> 0) ~
-      ("num_epochs" -> 5)
-    )
+    Models.gatedAttentionReader
   }
 
 
   def main(args: Array[String]) {
-    runASReaderOmnibusEightExperiment
-    runASReaderOmnibusFourExperiment
-    runGAReaderOmnibusEightExperiment
-    runGAReaderOmnibusFourExperiment
+    runASReaderOmnibusEightExperiment()
+    runASReaderOmnibusFourExperiment()
+    runGAReaderOmnibusEightExperiment()
+    runGAReaderOmnibusFourExperiment()
   }
 
   def runASReaderOmnibusFourExperiment() {
