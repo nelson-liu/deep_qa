@@ -11,7 +11,9 @@ class MaskedBatchDot(Layer):
     ``abs(K.ndim(tensor_a) - K.ndim(tensor_b)) < 1``, due to limitations in ``K.batch_dot()``.
 
     We always assume the dimension to perform the dot is the last one, and that the
-    masks have one fewer dimension that the tensors.
+    masks have one fewer dimension that the tensors. Note that this layer returns
+    zeros in places that were masked. If this then gets fed into a softmax,
+    for instance, your computation will be incorrect.
 
     Inputs:
         - tensor_a: tensor with ``ndim >= 2``.
