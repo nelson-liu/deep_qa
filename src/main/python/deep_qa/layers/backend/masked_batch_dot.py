@@ -38,7 +38,10 @@ class MaskedBatchDot(Layer):
         # will have to change if that assumption changes in masked_batch_dot.
         a_out_shape = tuple([input_shape[0][i] for i in range(0, len(input_shape[0]) - 1)])
         b_out_shape = tuple([input_shape[1][i] for i in range(1, len(input_shape[1]) - 1)])
-        return a_out_shape + b_out_shape
+        final_out_shape = a_out_shape + b_out_shape
+        if len(final_out_shape) == 1:
+            final_out_shape += (1,)
+        return final_out_shape
 
     @overrides
     def call(self, x, mask=None):

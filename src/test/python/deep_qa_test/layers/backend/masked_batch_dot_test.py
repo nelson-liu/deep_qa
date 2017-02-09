@@ -49,6 +49,7 @@ class TestMaskedBatchDotLayer:
     def test_get_output_shape_for(self):
         # TODO(nelson): verify the correctness of this, esp. in rank 1 edge case.
         mbd = MaskedBatchDot()
+        assert mbd.get_output_shape_for([(5, 10), (5, 10)]) == (5, 1)
         assert mbd.get_output_shape_for([(1, 1, 1), (1, 1, 1)]) == (1, 1, 1)
         assert mbd.get_output_shape_for([(1, 5, 3), (1, 2, 3)]) == (1, 5, 2)
         assert mbd.get_output_shape_for([(1, 5, 4, 3), (1, 2, 3)]) == (1, 5, 4, 2)
