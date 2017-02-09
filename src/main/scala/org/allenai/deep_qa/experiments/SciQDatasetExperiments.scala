@@ -24,77 +24,43 @@ object SciQDatasetExperiments {
   }
 
   /*
-   * Turn Omnibus-8 reading comprehension train, test, and dev files
-   * with BUSC background to datasets.
-   */
-
-  val omnibusEightTrainReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeEightTrainQuestionsWithBuscBackground))
-
-  val omnibusEightDevReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeEightDevQuestionsWithBuscBackground))
-
-  val omnibusEightTestReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground))
-
-  /*
-   * Turn Omnibus-4 reading comprehension train, test, and dev files
-   * with BUSC background to datasets.
-   */
-
-  val omnibusFourTrainReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground))
-
-  val omnibusFourDevReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeFourDevQuestionsWithBuscBackground))
-
-  val omnibusFourTestReadingComprehensionDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(ScienceDatasets.readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground))
-
-  /*
    * Create combined datasets with Omnibus4Train + SciQ Train and
    * Omnibus8Train + SciQ Train.
    */
 
   val combinedSciQTrainOmnibusEightTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, omnibusEightTrainReadingComprehensionDataset))~
+      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, ScienceDatasets.omnibusEightTrainReadingComprehensionDataset))~
       ("output directory" -> s"/efs/data/dlfa/processed/omnibus_8_train_and_sciq_train_combined/")
 
   val combinedSciQTrainOmnibusFourTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, omnibusFourTrainReadingComprehensionDataset))~
+      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, ScienceDatasets.omnibusFourTrainReadingComprehensionDataset))~
       ("output directory" -> s"/efs/data/dlfa/processed/omnibus_4_train_and_sciq_train_combined/")
 
   def omnibusGradeFourExperiment(
     name: String,
     modelParams: JValue,
-    trainingDataset: JValue=omnibusFourTrainReadingComprehensionDataset
+    trainingDataset: JValue=ScienceDatasets.omnibusFourTrainReadingComprehensionDataset
   ): JValue = {
     experiment(
       name,
       modelParams,
       trainingDataset,
-      omnibusFourDevReadingComprehensionDataset
+      ScienceDatasets.omnibusFourDevReadingComprehensionDataset
     )
   }
 
   def omnibusGradeEightExperiment(
     name: String,
     modelParams: JValue,
-    trainingDataset: JValue=omnibusEightTrainReadingComprehensionDataset
+    trainingDataset: JValue=ScienceDatasets.omnibusEightTrainReadingComprehensionDataset
   ): JValue = {
     experiment(
       name,
       modelParams,
       trainingDataset,
-      omnibusEightDevReadingComprehensionDataset
+      ScienceDatasets.omnibusEightDevReadingComprehensionDataset
     )
   }
 
@@ -107,7 +73,7 @@ object SciQDatasetExperiments {
       name,
       modelParams,
       trainingDataset,
-      omnibusFourDevReadingComprehensionDataset
+      ScienceDatasets.omnibusFourDevReadingComprehensionDataset
     )
   }
 
@@ -120,7 +86,7 @@ object SciQDatasetExperiments {
       name,
       modelParams,
       trainingDataset,
-      omnibusEightDevReadingComprehensionDataset
+      ScienceDatasets.omnibusEightDevReadingComprehensionDataset
     )
   }
 
@@ -230,7 +196,7 @@ object SciQDatasetExperiments {
     val asReaderOmnibusFourDefault = omnibusGradeFourExperiment(
       "ASReader omnibus four",
       attentionSumReader,
-      omnibusFourTrainReadingComprehensionDataset
+      ScienceDatasets.omnibusFourTrainReadingComprehensionDataset
     )
 
     val asReaderOmnibusFourWithSciQDataset = omnibusGradeFourExperiment(
@@ -247,7 +213,7 @@ object SciQDatasetExperiments {
     val asReaderOmnibusEightDefault = omnibusGradeEightExperiment(
       "ASReader omnibus eight",
       attentionSumReader,
-      omnibusEightTrainReadingComprehensionDataset
+      ScienceDatasets.omnibusEightTrainReadingComprehensionDataset
     )
 
     val asReaderOmnibusEightWithSciQDataset = omnibusGradeEightExperiment(
@@ -264,7 +230,7 @@ object SciQDatasetExperiments {
     val gaReaderOmnibusFourDefault = omnibusGradeFourExperiment(
       "GAReader omnibus four",
       gatedAttentionReader,
-      omnibusFourTrainReadingComprehensionDataset
+      ScienceDatasets.omnibusFourTrainReadingComprehensionDataset
     )
 
     val gaReaderOmnibusFourWithSciQDataset = omnibusGradeFourExperiment(
@@ -281,7 +247,7 @@ object SciQDatasetExperiments {
     val gaReaderOmnibusEightDefault = omnibusGradeEightExperiment(
       "GAReader omnibus eight",
       gatedAttentionReader,
-      omnibusEightTrainReadingComprehensionDataset
+      ScienceDatasets.omnibusEightTrainReadingComprehensionDataset
     )
 
     val gaReaderOmnibusEightWithSciQDataset = omnibusGradeEightExperiment(

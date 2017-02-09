@@ -156,6 +156,23 @@ object ScienceDatasets {
       ("background" -> omnibusQaGradeFourTestBuscBackgroundFile)
 
   /*
+   * Turn Omnibus-4 reading comprehension train, test, and dev files
+   * with BUSC background to datasets.
+   */
+
+  val omnibusFourTrainReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourTrainQuestionsWithBuscBackground))
+
+  val omnibusFourDevReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourDevQuestionsWithBuscBackground))
+
+  val omnibusFourTestReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeFourTestQuestionsWithBuscBackground))
+
+  /*
    * Eighth Grade BUSC Background Files
    */
 
@@ -212,6 +229,23 @@ object ScienceDatasets {
     ("sentence producer type" -> "qa and background to mc") ~
       ("sentences" -> ScienceFiles.omnibusGradeEightTestSentences_questionAndAnswer) ~
       ("background" -> omnibusQaGradeEightTestBuscBackgroundFile)
+
+  /*
+   * Turn Omnibus-8 reading comprehension train, test, and dev files
+   * with BUSC background to datasets.
+   */
+
+  val omnibusEightTrainReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightTrainQuestionsWithBuscBackground))
+
+  val omnibusEightDevReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightDevQuestionsWithBuscBackground))
+
+  val omnibusEightTestReadingComprehensionDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(readingComprehensionOmnibusQaGradeEightTestQuestionsWithBuscBackground))
 
   /////////////////////////////////////////////////////////////////////
   // Diagram QA
