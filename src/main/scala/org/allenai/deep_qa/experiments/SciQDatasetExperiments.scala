@@ -64,32 +64,6 @@ object SciQDatasetExperiments {
     )
   }
 
-  def combinedSciQOmnibusGradeFourExperiment(
-    name: String,
-    modelParams: JValue,
-    trainingDataset: JValue=combinedSciQTrainOmnibusFourTrainDataset
-  ): JValue = {
-    experiment(
-      name,
-      modelParams,
-      trainingDataset,
-      ScienceDatasets.omnibusFourDevReadingComprehensionDataset
-    )
-  }
-
-  def combinedSciQOmnibusGradeEightExperiment(
-    name: String,
-    modelParams: JValue,
-    trainingDataset: JValue=combinedSciQTrainOmnibusEightTrainDataset
-  ): JValue = {
-    experiment(
-      name,
-      modelParams,
-      trainingDataset,
-      ScienceDatasets.omnibusEightDevReadingComprehensionDataset
-    )
-  }
-
   val attentionSumReader: JValue = {
     Models.attentionSumReader merge
     (("patience" -> 1) ~
