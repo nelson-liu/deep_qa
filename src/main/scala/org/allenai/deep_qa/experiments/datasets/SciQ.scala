@@ -25,6 +25,9 @@ object SciQDatasets {
     ("data files" -> List(file))
   }
 
+  // TODO(matt/nelson): It'd probably be a good idea to
+  // have a DatasetUtil object, or something similar, that groups all
+  // of the makeFile and makeDataset methods.
   def makeMcFile(sentence_params: JValue): JValue = {
     ("sentences" -> sentence_params) ~
       ("sentence producer type" -> "drop first column")
