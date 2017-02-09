@@ -5,7 +5,8 @@ from ..tensors.backend import switch
 class Overlap(Layer):
     """
     This Layer takes 2 inputs: a ``tensor_a`` (e.g. a document) and a ``tensor_b``
-    (e.g. a question). It returns a one-hot vector with the same shape as ``tensor_a``,
+    (e.g. a question). It returns a one-hot vector suitable for feature
+    representation with the same shape as ``tensor_a``,
     indicating at each index whether the element in ``tensor_a`` appears in
     ``tensor_b``. Note that the output is not the same shape as ``tensor_a``.
 
@@ -16,6 +17,12 @@ class Overlap(Layer):
     Output:
         - Collection of one-hot vectors indicating
           overlap: shape ``(batch_size, length_a, 2)``
+
+    Notes
+    -----
+    This layer is used to implement the "Question Evidence Common Word Feature"
+    discussed in section 3.2.4 of `Dhingra et. al, 2016
+    <https://arxiv.org/pdf/1606.01549.pdf>`_.
     """
     def __init__(self, **kwargs):
         self.supports_masking = True
