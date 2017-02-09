@@ -23,11 +23,6 @@ object SciQDatasetExperiments {
       ("validation dataset" -> validationDataset)
   }
 
-  // Turn SciQ reading comprehension train file with BUSC background to a dataset.
-  val sciQTrainDataset: JValue =
-    ("dataset type" -> "from sentence producers") ~
-      ("data files" -> Seq(SciQDatasets.readingComprehensionTrainWithBuscBackgroundFile))
-
   /*
    * Turn Omnibus-8 reading comprehension train, test, and dev files
    * with BUSC background to datasets.
@@ -69,12 +64,12 @@ object SciQDatasetExperiments {
 
   val combinedSciQTrainOmnibusEightTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(sciQTrainDataset, omnibusEightTrainReadingComprehensionDataset))~
+      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, omnibusEightTrainReadingComprehensionDataset))~
       ("output directory" -> s"/efs/data/dlfa/processed/omnibus_8_train_and_sciq_train_combined/")
 
   val combinedSciQTrainOmnibusFourTrainDataset: JValue =
     ("dataset type" -> "combined") ~
-      ("datasets" -> Seq(sciQTrainDataset, omnibusFourTrainReadingComprehensionDataset))~
+      ("datasets" -> Seq(SciQDatasets.sciQTrainDataset, omnibusFourTrainReadingComprehensionDataset))~
       ("output directory" -> s"/efs/data/dlfa/processed/omnibus_4_train_and_sciq_train_combined/")
 
   def omnibusGradeFourExperiment(

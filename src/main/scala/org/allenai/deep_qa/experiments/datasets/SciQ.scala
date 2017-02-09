@@ -131,4 +131,10 @@ object SciQDatasets {
     "question and answer",
     ScienceCorpora.buscElasticSearchIndex(3)
   )
+
+  // Turn SciQ reading comprehension train file with BUSC background to a dataset.
+  val sciQTrainDataset: JValue =
+    ("dataset type" -> "from sentence producers") ~
+      ("data files" -> Seq(SciQDatasets.readingComprehensionTrainWithBuscBackgroundFile))
+
 }
