@@ -53,8 +53,7 @@ class BiGRUIndexSelector(Layer):
         gru_mask = K.repeat_elements(K.expand_dims(index_mask, -1), K.int_shape(gru_f)[-1], K.ndim(gru_f) - 1)
         masked_gru_f = switch(gru_mask, gru_f, K.zeros_like(gru_f))
         selected_gru_f = K.sum(masked_gru_f, axis=1)
-        masked_gru_b = switch(gru_mask, gru_b,
-                                       K.zeros_like(gru_b))
+        masked_gru_b = switch(gru_mask, gru_b, K.zeros_like(gru_b))
         selected_gru_b = K.sum(masked_gru_b, axis=1)
         selected_bigru = K.concatenate([selected_gru_f, selected_gru_b], axis=-1)
         return selected_bigru
