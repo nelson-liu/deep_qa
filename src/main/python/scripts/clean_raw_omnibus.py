@@ -8,7 +8,7 @@ import os
 import csv
 
 from argparse import ArgumentParser
-import pandas as pd
+import pandas
 
 logger = logging.getLogger(__name__) # pylint: disable=invalid-name
 
@@ -31,7 +31,7 @@ def main():
     for omnibus_file in arguments.input_csv:
         all_clean_file_rows.extend(clean_omnibus_csv(omnibus_file))
     # turn the list of rows into a dataframe, and write to TSV
-    dataframe = pd.DataFrame(all_clean_file_rows)
+    dataframe = pandas.DataFrame(all_clean_file_rows)
     folder, filename = os.path.split(omnibus_file)
     outdirectory = folder + "/cleaned/"
     os.makedirs(outdirectory, exist_ok=True)
@@ -45,7 +45,7 @@ def main():
 def clean_omnibus_csv(omnibus_file_path):
     logger.info("cleaning up %s", omnibus_file_path)
     # open the file as a csv
-    dataframe = pd.read_csv(omnibus_file_path, sep="\t",
+    dataframe = pandas.read_csv(omnibus_file_path, sep="\t",
                             encoding='utf-8', header=None,
                             quoting=csv.QUOTE_NONE)
     dataframe_trimmed = dataframe[[3, 9]]
