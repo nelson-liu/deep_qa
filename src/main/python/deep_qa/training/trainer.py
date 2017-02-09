@@ -53,6 +53,8 @@ class Trainer:
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
         self.max_training_instances = params.pop('max_training_instances', None)
+        self.max_tuning_instances = params.pop('max_tuning_instances', None)
+
         # Amount of training data to use for Keras' validation (not our QA validation, set by
         # the validation_file param, which is separate).  This value is passed as
         # 'validation_split' to Keras' model.fit().
@@ -70,6 +72,10 @@ class Trainer:
         # The files containing the data that should be used for training.  See
         # _load_dataset_from_files().
         self.train_files = params.pop('train_files', None)
+
+        # The files containing the data that should be used for tuning.  See
+        # _load_dataset_from_files().
+        self.tune_files = params.pop('tune_files', None)
 
         # The files containing the data that should be used for validation, if you do not want to
         # use a split of the training data for validation.  The default of None means to just use
@@ -245,6 +251,13 @@ class Trainer:
             self.validation_dataset = self._load_dataset_from_files(self.validation_files)
             self.validation_input, self.validation_labels = self._prepare_data(self.validation_dataset,
                                                                                for_train=False)
+        if self.tune_files:
+            logger.info("Getting tuning data.")
+            self.tuning_dataset = self._load_dataset_from_files(self.tune_files)
+            if self.max_tuning_instances is not None:
+                logger.info("Truncating the tuning dataset to %d instances", self.max_tuning_instances)
+                self.tuning_dataset = self.tuning_dataset.truncate(self.max_tuning_instances)
+            self.tune_input, self.tune_labels = self._prepare_data(self.tuning_dataset, for_train=True)
 
         # We need to actually do pretraining _after_ we've loaded the training data, though, as we
         # need to build the models to be consistent between training and pretraining.  The training
@@ -291,6 +304,12 @@ class Trainer:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
         history = self.model.fit(self.train_input, self.train_labels, **kwargs)
+
+        # If there is tuning data, run the tuning data on the model.
+        if self.tune_files:
+            logger.info("Fitting dataset on tuning inputs.")
+            tune_history = self.model.fit(self.tune_input, self.tune_labels, **kwargs)
+
         # After finishing training, we save the best weights and
         # any auxillary files, such as the model config.
 
