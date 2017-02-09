@@ -1,19 +1,21 @@
 from keras import backend as K
 from keras.layers import Layer
-
+from ..tensors.backend import switch
 
 class Overlap(Layer):
     """
-    This Layer takes 2 inputs: a tensor_a (e.g. a document) and a tensor_b
-    (e.g. a question). It returns a one-hot vector with the same shape as tensor_a,
-    indicating at each index whether the element in tensor_a appears in tensor_b.
+    This Layer takes 2 inputs: a ``tensor_a`` (e.g. a document) and a ``tensor_b``
+    (e.g. a question). It returns a one-hot vector with the same shape as ``tensor_a``,
+    indicating at each index whether the element in ``tensor_a`` appears in
+    ``tensor_b``. Note that the output is not the same shape as ``tensor_a``.
 
     Inputs:
         - tensor_a: shape ``(batch_size, length_a)``
         - tensor_b shape ``(batch_size, length_b)``
 
     Output:
-        - One-hot indicating overlap: shape ``(batch_size, length_a, 2)``
+        - Collection of one-hot vectors indicating
+          overlap: shape ``(batch_size, length_a, 2)``
     """
     def __init__(self, **kwargs):
         self.supports_masking = True
@@ -36,11 +38,16 @@ class Overlap(Layer):
             return None
 
     def call(self, inputs, mask=None):
-        # tensor_a is of shape (batch size, length_a)
-        # tensor_b is of shape (batch size, length_b)
+        # tensor_a, mask_a are of shape (batch size, length_a)
+        # tensor_b mask_b are of shape (batch size, length_b)
         tensor_a, tensor_b = inputs
+        mask_a, mask_b = mask
         length_a = K.int_shape(tensor_a)[1]
         length_b = K.int_shape(tensor_b)[1]
+        # change the indices that are masked in b to -1, since no indices
+        # in the document will ever be -1.
+        tensor_b = K.cast(switch(mask_b, tensor_b, -1*K.ones_like(tensor_b)), "int32")
+
         # reshape tensor_a to shape (batch_size, length_a, length_b)
         tensor_a_tiled = K.repeat_elements(K.expand_dims(tensor_a, 2),
                                            length_b,
