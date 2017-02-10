@@ -84,7 +84,7 @@ class GatedAttention(Layer):
         document_matrix, question_matrix, normalized_qd_attention = inputs
         document_mask = mask[0]
         if document_mask is None:
-            document_mask = K.ones_like(document_matrix)[:,:,0]
+            document_mask = K.ones_like(document_matrix)[:, :, 0]
 
         # question_update is of shape (batch, document length, bigru hidden).
         question_update = K.batch_dot(normalized_qd_attention, question_matrix, axes=[2, 1])
