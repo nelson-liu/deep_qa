@@ -71,8 +71,8 @@ class GatedAttention(Layer):
 
     def compute_mask(self, inputs, mask=None):
         # pylint: disable=unused-argument
-        # We do not need a mask beyond this layer.
-        return None
+        return mask[0]
+
 
     def get_output_shape_for(self, input_shapes):
         return (input_shapes[0][0], input_shapes[0][1], input_shapes[0][2])
