@@ -13,6 +13,15 @@ MaskedBatchDot
     :undoc-members:
     :show-inheritance:
 
+BatchDot
+--------
+
+.. automodule:: deep_qa.layers.backend.batch_dot
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
 Max
 ---
 

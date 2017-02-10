@@ -12,6 +12,14 @@ deep_qa.layers.backend.masked_batch_dot
 deep_qa.layers.backend.max
 --------------------------
 
+.. automodule:: deep_qa.layers.backend.batch_dot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.backend.max
+--------------------------
+
 .. automodule:: deep_qa.layers.backend.max
     :members:
     :undoc-members:
