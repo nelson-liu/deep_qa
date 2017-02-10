@@ -5,7 +5,7 @@ from keras.callbacks import LearningRateScheduler
 
 from ...data.instances.mc_question_answer_instance import McQuestionAnswerInstance
 from ...common.checks import ConfigurationError
-from ...layers.backend.masked_batch_dot import MaskedBatchDot
+from ...layers.backend.batch_dot import BatchDot
 from ...layers.attention.attention import Attention
 from ...layers.attention.masked_softmax import MaskedSoftmax
 from ...layers.option_attention_sum import OptionAttentionSum
@@ -117,7 +117,7 @@ class GatedAttentionReader(TextTrainer):
             encoded_document = document_encoder(document_embedding)
 
             # (batch size, document length, question length)
-            qd_attention = MaskedBatchDot()([encoded_document, encoded_question])
+            qd_attention = BatchDot()([encoded_document, encoded_question])
             # (batch size, document length, question length)
             normalized_qd_attention = MaskedSoftmax()([qd_attention])
 
