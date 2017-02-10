@@ -91,26 +91,7 @@ class GatedAttention(Layer):
 
         # We use the gating function to calculate the new document representation
         # which is of shape (batch, document length, biGRU hidden length).
-        if self.gating_function == "*":
-            unmasked_representation = question_update * document_matrix
-            # Apply the mask from the document to zero out things that should be masked.
-            # The mask is of shape (batch, document length), so we tile it to
-            # shape (batch, document length, biGRU hidden length)
-            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
-                                           K.int_shape(document_matrix)[2], 2)
-            masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
-            return masked_representation
-
-        if self.gating_function == "+":
-            # shape (batch, document length, biGRU hidden length)
-            unmasked_representation = question_update + document_matrix
-            # Apply the mask from the document to zero out things that should be masked.
-            # The mask is of shape (batch, document length), so we tile it to
-            # shape (batch, document length, biGRU hidden length)
-            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
-                                           K.int_shape(document_matrix)[2], 2)
-            masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
-            return masked_representation
+        masked_representation = None
         if self.gating_function == "||":
             # shape (batch, document length, biGRU hidden length*2)
             unmasked_representation = K.concatenate([question_update, document_matrix])
@@ -123,6 +104,23 @@ class GatedAttention(Layer):
                                            K.zeros_like(unmasked_representation))
             return masked_representation
 
-        raise ConfigurationError("Invalid gating function "
-                                 "{}, expected one of {}".format(self.gating_function,
-                                                                 GATING_FUNCTIONS))
+        if self.gating_function == "*":
+            unmasked_representation = question_update * document_matrix
+
+        if self.gating_function == "+":
+            # shape (batch, document length, biGRU hidden length)
+            unmasked_representation = question_update + document_matrix
+
+        # Apply the mask from the document to zero out things that should be masked.
+        # The mask is of shape (batch, document length), so we tile it to
+        # shape (batch, document length, biGRU hidden length)
+        tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+                                       K.int_shape(document_matrix)[2], 2)
+        masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
+
+        if masked_representation is not None:
+            return masked_representation
+        else:
+            raise ConfigurationError("Invalid gating function "
+                                     "{}, expected one of {}".format(self.gating_function,
+                                                                     GATING_FUNCTIONS))
