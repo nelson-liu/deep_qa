@@ -1,6 +1,7 @@
 from keras import backend as K
 from keras.layers import Layer
 from ...common.checks import ConfigurationError
+from ...tensors.backend import switch
 
 GATING_FUNCTIONS = ["*", "+", "||"]
 
@@ -8,7 +9,8 @@ GATING_FUNCTIONS = ["*", "+", "||"]
 class GatedAttention(Layer):
     r"""
     This layer implements the majority of the Gated Attention module described in
-    "Gated-Attention Readers for Text Comprehension" by Dhingra et. al 2016.
+    `"Gated-Attention Readers for Text Comprehension" by Dhingra et. al 2016
+    <https://arxiv.org/pdf/1606.01549.pdf>`_.
 
     The module is described in section 3.2.2. For each token :math:`d_i` in :math:`D`,
     the GA module forms a "token-specific representation" of the query :math:`q_i` using
@@ -76,24 +78,51 @@ class GatedAttention(Layer):
         return (input_shapes[0][0], input_shapes[0][1], input_shapes[0][2])
 
     def call(self, inputs, mask=None):
-        # document matrix is of shape (batch, document length, biGRU hidden length)
-        # question matrix is of shape (batch, question length, biGRU hidden length)
-        # normalized_qd_attention is of shape (batch, document length, question length)
+        # document_matrix is of shape (batch, document length, biGRU hidden length).
+        # question_matrix is of shape (batch, question length, biGRU hidden length).
+        # normalized_qd_attention is of shape (batch, document length, question length).
         document_matrix, question_matrix, normalized_qd_attention = inputs
+        document_mask = mask[0]
+        if document_mask is None:
+            document_mask = K.ones_like(document_matrix)[:,:,0]
 
-        # question update is of shape (batch, document length, bigru hidden)
+        # question_update is of shape (batch, document length, bigru hidden).
         question_update = K.batch_dot(normalized_qd_attention, question_matrix, axes=[2, 1])
 
-        # use the gating function to calculate the new document representation
-        # which is of shape (batch, document length, biGRU hidden length)
+        # We use the gating function to calculate the new document representation
+        # which is of shape (batch, document length, biGRU hidden length).
         if self.gating_function == "*":
-            return question_update * document_matrix
+            unmasked_representation = question_update * document_matrix
+            # Apply the mask from the document to zero out things that should be masked.
+            # The mask is of shape (batch, document length), so we tile it to
+            # shape (batch, document length, biGRU hidden length)
+            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+                                           K.int_shape(document_matrix)[2], 2)
+            masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
+            return masked_representation
+
         if self.gating_function == "+":
             # shape (batch, document length, biGRU hidden length)
-            return question_update + document_matrix
+            unmasked_representation = question_update + document_matrix
+            # Apply the mask from the document to zero out things that should be masked.
+            # The mask is of shape (batch, document length), so we tile it to
+            # shape (batch, document length, biGRU hidden length)
+            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+                                           K.int_shape(document_matrix)[2], 2)
+            masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
+            return masked_representation
         if self.gating_function == "||":
             # shape (batch, document length, biGRU hidden length*2)
-            return K.concatenate([question_update, document_matrix])
+            unmasked_representation = K.concatenate([question_update, document_matrix])
+            # Apply the mask from the document to zero out things that should be masked.
+            # The mask is of shape (batch, document length), so we tile it to
+            # shape (batch, document length, biGRU hidden length*2)
+            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+                                           (2*K.int_shape(document_matrix)[2]), 2)
+            masked_representation = switch(tiled_mask, unmasked_representation,
+                                           K.zeros_like(unmasked_representation))
+            return masked_representation
+
         raise ConfigurationError("Invalid gating function "
                                  "{}, expected one of {}".format(self.gating_function,
                                                                  GATING_FUNCTIONS))
