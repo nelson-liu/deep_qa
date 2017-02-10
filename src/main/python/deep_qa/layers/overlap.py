@@ -48,7 +48,9 @@ class Overlap(Layer):
         # tensor_a, mask_a are of shape (batch size, length_a)
         # tensor_b mask_b are of shape (batch size, length_b)
         tensor_a, tensor_b = inputs
-        mask_a, mask_b = mask
+        mask_b = mask[1]
+        if mask_b is None:
+            mask_b = K.ones_like(tensor_b)
         length_a = K.int_shape(tensor_a)[1]
         length_b = K.int_shape(tensor_b)[1]
         # change the indices that are masked in b to -1, since no indices
