@@ -131,6 +131,9 @@ class Trainer:
         self.validation_dataset = None
         self.validation_input = None
         self.validation_labels = None
+        self.tuning_dataset = None
+        self.tune_input = None
+        self.tune_labels = None
         self.debug_dataset = None
         self.debug_input = None
 
@@ -313,7 +316,10 @@ class Trainer:
         # After finishing training, we save the best weights and
         # any auxillary files, such as the model config.
 
-        self.best_epoch = int(numpy.argmax(history.history[self.validation_metric]))
+        if self.tune_files:
+            self.best_epoch = int(numpy.argmax(tune_history.history[self.validation_metric]))
+        else:
+            self.best_epoch = int(numpy.argmax(history.history[self.validation_metric]))
         if self.save_models:
             self._save_best_model()
             self._save_auxiliary_files()
