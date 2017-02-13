@@ -80,7 +80,7 @@ class TestBatchDotLayer(TestCase):
                                                            [1.0, 1.0, 0.0, 1.0],
                                                            [0.0, 0.0, 0.0, 0.0]]]))
 
-    def test_compute_mask_a_smaller_than_b(self):
+    def test_a_smaller_than_b(self):
         batch_size = 3
         tensor_a = numpy.random.randint(7, size=(batch_size, 5))
         tensor_b = numpy.random.randint(7, size=(batch_size, 2, 5))
@@ -112,7 +112,7 @@ class TestBatchDotLayer(TestCase):
         assert mask_tensor[0][0] == 0
         assert mask_tensor[0][1] == 0
 
-    def test_compute_mask_a_larger_than_b(self):
+    def test_a_larger_than_b(self):
         batch_size = 3
         tensor_a = numpy.random.randint(7, size=(batch_size, 2, 5))
         tensor_b = numpy.random.randint(7, size=(batch_size, 5))
@@ -144,7 +144,7 @@ class TestBatchDotLayer(TestCase):
         assert mask_tensor[0][0] == 0
         assert mask_tensor[0][1] == 0
 
-    def test_compute_mask_a_smaller_than_b_higher_dimension(self):
+    def test_a_smaller_than_b_higher_dimension(self):
         batch_size = 3
         tensor_a = numpy.random.randint(7, size=(batch_size, 4, 5))
         tensor_b = numpy.random.randint(7, size=(batch_size, 4, 2, 5))
@@ -186,7 +186,7 @@ class TestBatchDotLayer(TestCase):
         assert mask_tensor[1][3][0] == 0
         assert mask_tensor[1][3][1] == 0
 
-    def test_compute_mask_a_larger_than_b_higher_dimension(self):
+    def test_a_larger_than_b_higher_dimension(self):
         batch_size = 3
         tensor_a = numpy.random.randint(7, size=(batch_size, 4, 2, 5))
         tensor_b = numpy.random.randint(7, size=(batch_size, 4, 5))
@@ -228,15 +228,15 @@ class TestBatchDotLayer(TestCase):
         assert mask_tensor[1][3][1] == 0
 
     def test_output_shapes(self):
-        mbd = BatchDot()
+        bd = BatchDot()
         a_shapes = [(5, 10), (1, 1, 1), (1, 5, 3), (1, 5, 4, 3), (1, 5, 3)]
         b_shapes = [(5, 10), (1, 1, 1), (1, 2, 3), (1, 5, 3), (1, 5, 4, 3)]
         expected_shapes = [(5, 1), (1, 1, 1), (1, 5, 2), (1, 5, 4), (1, 5, 4)]
         for a_shape, b_shape, expected_shape in zip(a_shapes, b_shapes, expected_shapes):
             if (len(a_shape) > 3 or len(b_shape) > 3) and K.backend() == "theano":
                 # this breaks in theano, so check that an error is raised
-                self.assertRaises(RuntimeError, mbd.call,
+                self.assertRaises(RuntimeError, bd.call,
                                   [K.ones(shape=a_shape), K.ones(shape=b_shape)])
             else:
-                assert K.eval(mbd([K.ones(shape=a_shape), K.ones(shape=b_shape)])).shape == expected_shape
-            assert mbd.get_output_shape_for([a_shape, b_shape]) == expected_shape
+                assert K.eval(bd([K.ones(shape=a_shape), K.ones(shape=b_shape)])).shape == expected_shape
+            assert bd.get_output_shape_for([a_shape, b_shape]) == expected_shape
