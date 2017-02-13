@@ -8,7 +8,7 @@ class BatchDot(Layer):
     This ``Layer`` calls ``K.batch_dot()`` on two inputs ``tensor_a`` and ``tensor_b``.
     This function will work for tensors of arbitrary size as long as
     ``abs(K.ndim(tensor_a) - K.ndim(tensor_b)) < 1``, due to limitations in ``K.batch_dot()``.
-    The when the input tensors have more than three dimensions, they must have the same shape, except
+    When the input tensors have more than three dimensions, they must have the same shape, except
     for the last two dimensions. See the examples for more explanation of what this means.
 
     We always assume the dimension to perform the dot is the last one, and that
@@ -29,15 +29,17 @@ class BatchDot(Layer):
     Examples
     --------
     The following examples will try to give some insight on how this layer works in relation
-    to ``K.batch_dot()``
+    to ``K.batch_dot()``. Note that the Keras documentation (as of 2/13/17) on ``K.batch_dot``
+    is incorrect, and that this layer behaves differently from the documented behavior.
 
-    As a first example, let's suppose that ``tensor_a`` and ``tensor_b`` have the same number
-    of dimensions. Let the shape of ``tensor_a`` be ``(2, 3, 2)``, and let the shape of ``tensor_b`` be ``(2, 4, 2)``. The mask accompanying these inputs always has one less dimension, so the
-    ``tensor_a_mask`` has shape ``(2, 3)`` and ``tensor_b_mask`` has shape ``(2, 4)``. The shape
-    of the ``batch_dot`` output would thus be ``(2, 3, 4)``. This is because we are taking the
-    batch dot of the last dimension, so the output shape is ``(2, 3)`` (from tensor_a) with ``(4)``
-    (from tensor_b) appended on (to get ``(2, 3, 4)`` in total). The output mask has the same
-    shape as the output, and is thus ``(2, 3, 4)`` as well.
+    As a first example, let's suppose that ``tensor_a`` and ``tensor_b`` have the same
+    number of dimensions. Let the shape of ``tensor_a`` be ``(2, 3, 2)``, and let the shape
+    of ``tensor_b`` be ``(2, 4, 2)``. The mask accompanying these inputs always has one less
+    dimension, so the ``tensor_a_mask`` has shape ``(2, 3)`` and ``tensor_b_mask`` has
+    shape ``(2, 4)``. The shape of the ``batch_dot`` output would thus be ``(2, 3, 4)``. This is
+    because we are taking the batch dot of the last dimension, so the output shape is ``(2, 3)``
+    (from tensor_a) with ``(4)`` (from tensor_b) appended on (to get ``(2, 3, 4)`` in total). The
+    output mask has the same shape as the output, and is thus ``(2, 3, 4)`` as well.
 
     >>> import keras.backend as K
     >>> tensor_a = K.ones(shape=(2, 3, 2))
@@ -53,7 +55,7 @@ class BatchDot(Layer):
     expand the last dimension of the smaller tensor to make them even. Thus in this case, we expand
     ``tensor_a`` to get a new shape of ``(2, 4, 2, 1)``. Now we are taking the ``batch_dot`` of a
     tensor with shape ``(2, 4, 2, 1)`` and ``(2, 4, 3, 2)``. Note that the first two dimensions of
-    this tensor are the same ``(2, 4)`` -- this is an requirement imposed by ``K.batch_dot``.
+    this tensor are the same ``(2, 4)`` -- this is a requirement imposed by ``K.batch_dot``.
     Following the methodology of calculating the output shape above, we get that the output is
     ``(2, 4, 1, 3)`` since we get ``(2, 4, 1)`` from ``tensor_a`` and ``(3)`` from ``tensor_b``. We
     then squeeze the tensor to remove the 1-dimension to get a final shape of ``(2, 4, 3)``. Note
