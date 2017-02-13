@@ -573,7 +573,7 @@ class Trainer:
         epoch_weight_file = "%s_weights_epoch=%d.h5" % (self.model_prefix, self.best_epoch)
         final_weight_file = "%s_weights.h5" % self.model_prefix
         copyfile(epoch_weight_file, final_weight_file)
-        logger.info("Saved the best model to %s", final_weight_file)
+        print("Saved the best model to {}".format(final_weight_file))
 
     def _save_auxiliary_files(self):
         """
