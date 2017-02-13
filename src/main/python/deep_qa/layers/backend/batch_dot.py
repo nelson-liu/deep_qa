@@ -58,20 +58,20 @@ class BatchDot(Layer):
             # tensor_a has less dimensions than tensor_b.
             # We tile tensor_a to have the same shape as tensor_b
             float_mask_a = K.expand_dims(float_mask_a, dim=-1)
-            # We take the shape of mask_b as a hacky way of getting
+            # We take the shape of tensor_b as a hacky way of getting
             # around K.int_shape() and the Theano backend.
             tiled_float_mask_a = K.repeat_elements(float_mask_a,
-                                                   K.int_shape(mask_b)[-1],
+                                                   K.int_shape(tensor_b)[-2],
                                                    mask_b_dot_axis)
             final_mask = tiled_float_mask_a * float_mask_b
         else:
             # tensor_a has more dimensions than tensor_b.
             # We tile tensor_b to have the same shape as tensor_a
             float_mask_b = K.expand_dims(float_mask_b, dim=-1)
-            # We take the shape of mask_a as a hacky way of getting
+            # We take the shape of tensor_a as a hacky way of getting
             # around K.int_shape() and the Theano backend.
             tiled_float_mask_b = K.repeat_elements(float_mask_b,
-                                                   K.int_shape(mask_a)[-1],
+                                                   K.int_shape(tensor_a)[-2],
                                                    mask_a_dot_axis)
             final_mask = float_mask_a * tiled_float_mask_b
         return final_mask
