@@ -2,6 +2,7 @@
 from unittest import TestCase
 import os
 import shutil
+from numpy.testing import assert_allclose
 
 from deep_qa.models.reading_comprehension.attention_sum_reader import AttentionSumReader
 from ...common.constants import TEST_DIR
@@ -16,8 +17,9 @@ class TestAttentionSumReader(TestCase):
     def tearDown(self):
         shutil.rmtree(TEST_DIR)
 
-    def test_train_does_not_crash(self):
+    def test_train_does_not_crash_and_load_works(self):
         args = {
+                'save_models': True,
                 "encoder": {
                         "default": {
                                 "type": "bi_gru",
@@ -35,5 +37,13 @@ class TestAttentionSumReader(TestCase):
                 },
                 "embedding_size": 5,
         }
-        solver = get_model(AttentionSumReader, args)
-        solver.train()
+        model = get_model(AttentionSumReader, args)
+        model.train()
+
+        # load the model that we serialized
+        loaded_model = get_model(AttentionSumReader, args)
+        loaded_model.load_model()
+
+        # verify that original model and the loaded model predict the same outputs
+        assert_allclose(model.model.predict(model.__dict__["validation_input"]),
+                        loaded_model.model.predict(model.__dict__["validation_input"]))

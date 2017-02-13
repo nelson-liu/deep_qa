@@ -142,6 +142,10 @@ def write_question_answer_memory_network_files():
 def write_who_did_what_files():
     with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as train_file:
         train_file.write('1\tpassage1\tquestion1\tanswer1###answer2\t0\n')
+        train_file.write('1\tpassage2\tquestion2 question2word2\tanswer1###answer2\t0\n')
+        train_file.write('1\tpassage3\tquestion3\tanswer1###answer1 word2###answer2\t0\n')
+        train_file.write('1\tpassage4\tquestion4\tanswer1###answer1\t0\n')
+        train_file.write('1\tpassage5\tquestion5\tanswer1###answer1\t0\n')
     with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
         # document, question, answers
         train_file.write('1\te q e q ka q o\ta b XXX e i d\tanswer1 word2###answer2\t0\n')
