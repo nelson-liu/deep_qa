@@ -12,9 +12,64 @@ from ..common.checks import ConfigurationError
 from ..common.params import get_choice
 from ..data.dataset import Dataset
 from ..data.instances.instance import Instance
-from ..layers.wrappers import OutputMask
 from .models import DeepQaModel
 from .optimizers import optimizer_from_params
+
+# custom layers for use in _get_custom_objects
+from ..layers.adaptive_recurrence import AdaptiveRecurrence
+from ..layers.additive import Additive
+from ..layers.bigru_index_selector import BiGRUIndexSelector
+from ..layers.complex_concat import ComplexConcat
+from ..layers.highway import Highway
+from ..layers.knowledge_combiners import AttentiveGRUKnowledgeCombiner
+from ..layers.knowledge_combiners import WeightedAverageKnowledgeCombiner
+from ..layers.knowledge_encoders import BiGRUKnowledgeEncoder
+from ..layers.knowledge_encoders import IndependentKnowledgeEncoder
+from ..layers.knowledge_encoders import TemporalKnowledgeEncoder
+from ..layers.knowledge_selectors import DotProductKnowledgeSelector
+from ..layers.knowledge_selectors import ParameterizedKnowledgeSelector
+from ..layers.knowledge_selectors import ParameterizedHeuristicMatchingKnowledgeSelector
+from ..layers.l1_normalize import L1Normalize
+from ..layers.memory_updaters import DenseConcatMemoryUpdater
+from ..layers.memory_updaters import DenseConcatNoQuestionMemoryUpdater
+from ..layers.memory_updaters import SumMemoryUpdater
+from ..layers.option_attention_sum import OptionAttentionSum
+from ..layers.overlap import Overlap
+from ..layers.recurrence_modes import FixedRecurrence
+from ..layers.time_distributed_embedding import TimeDistributedEmbedding
+from ..layers.top_knowledge_selector import TopKnowledgeSelector
+from ..layers.vector_matrix_merge import VectorMatrixMerge
+from ..layers.vector_matrix_split import VectorMatrixSplit
+from ..layers.wrappers import EncoderWrapper
+from ..layers.wrappers import FixedTimeDistributed
+from ..layers.wrappers import OutputMask
+from ..layers.wrappers import TimeDistributedWithMask
+from ..layers.wrappers import TimeDistributedWithPassThroughMask
+
+from ..layers.backend.max import Max
+from ..layers.backend.permute import Permute
+from ..layers.backend.repeat import Repeat
+
+from ..layers.attention.attention import Attention
+from ..layers.attention.masked_softmax import MaskedSoftmax
+from ..layers.attention.matrix_attention import MatrixAttention
+from ..layers.attention.max_similarity_softmax import MaxSimilaritySoftmax
+from ..layers.attention.weighted_sum import WeightedSum
+
+
+from ..layers.encoders.bag_of_words import BOWEncoder
+from ..layers.encoders.positional_encoder import PositionalEncoder
+from ..layers.encoders.knowledge_backed_lstm import KnowledgeBackedLSTM
+from ..layers.encoders.tree_composition_lstm import TreeCompositionLSTM
+
+from ..layers.entailment_models.decomposable_attention import DecomposableAttentionEntailment
+from ..layers.entailment_models.encoded_sentence import HeuristicMatchingCombiner
+from ..layers.entailment_models.encoded_sentence import MemoryOnlyCombiner
+from ..layers.entailment_models.encoded_sentence import MultipleChoiceEntailmentModel
+from ..layers.entailment_models.encoded_sentence import QuestionAnswerEntailmentModel
+from ..layers.entailment_models.encoded_sentence import TrueFalseEntailmentModel
+from ..layers.entailment_models.multiple_choice_tuple_entailment import MultipleChoiceTupleEntailment
+from ..layers.entailment_models.word_alignment import WordAlignmentEntailment
 
 logger = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
@@ -518,6 +573,7 @@ class Trainer:
         epoch_weight_file = "%s_weights_epoch=%d.h5" % (self.model_prefix, self.best_epoch)
         final_weight_file = "%s_weights.h5" % self.model_prefix
         copyfile(epoch_weight_file, final_weight_file)
+        print("saved the model at {}".format(final_weight_file))
 
     def _save_auxiliary_files(self):
         """
@@ -554,4 +610,55 @@ class Trainer:
         If you've used any Layers that Keras doesn't know about, you need to specify them in this
         dictionary, so we can load them correctly.
         """
-        return {}
+        return {
+                "DeepQaModel": DeepQaModel,
+                "AdaptiveRecurrence": AdaptiveRecurrence,
+                "Additive": Additive,
+                "BiGRUIndexSelector": BiGRUIndexSelector,
+                "ComplexConcat": ComplexConcat,
+                "Highway": Highway,
+                "AttentiveGRUKnowledgeCombiner": AttentiveGRUKnowledgeCombiner,
+                "WeightedAverageKnowledgeCombiner": WeightedAverageKnowledgeCombiner,
+                "BiGRUKnowledgeEncoder": BiGRUKnowledgeEncoder,
+                "IndependentKnowledgeEncoder": IndependentKnowledgeEncoder,
+                "TemporalKnowledgeEncoder": TemporalKnowledgeEncoder,
+                "DotProductKnowledgeSelector": DotProductKnowledgeSelector,
+                "ParameterizedKnowledgeSelector": ParameterizedKnowledgeSelector,
+                "ParameterizedHeuristicMatchingKnowledgeSelector": ParameterizedHeuristicMatchingKnowledgeSelector,
+                "L1Normalize": L1Normalize,
+                "DenseConcatMemoryUpdater": DenseConcatMemoryUpdater,
+                "DenseConcatNoQuestionMemoryUpdater": DenseConcatNoQuestionMemoryUpdater,
+                "SumMemoryUpdater": SumMemoryUpdater,
+                "OptionAttentionSum": OptionAttentionSum,
+                "Overlap": Overlap,
+                "FixedRecurrence": FixedRecurrence,
+                "TimeDistributedEmbedding": TimeDistributedEmbedding,
+                "TopKnowledgeSelector": TopKnowledgeSelector,
+                "VectorMatrixMerge": VectorMatrixMerge,
+                "VectorMatrixSplit": VectorMatrixSplit,
+                "EncoderWrapper": EncoderWrapper,
+                "FixedTimeDistributed": FixedTimeDistributed,
+                "OutputMask": OutputMask,
+                "TimeDistributedWithMask": TimeDistributedWithMask,
+                "TimeDistributedWithPassThroughMask": TimeDistributedWithPassThroughMask,
+                "Max": Max,
+                "Permute": Permute,
+                "Repeat": Repeat,
+                "Attention": Attention,
+                "MaskedSoftmax": MaskedSoftmax,
+                "MatrixAttention": MatrixAttention,
+                "MaxSimilaritySoftmax": MaxSimilaritySoftmax,
+                "WeightedSum": WeightedSum,
+                "BOWEncoder": BOWEncoder,
+                "PositionalEncoder": PositionalEncoder,
+                "KnowledgeBackedLSTM": KnowledgeBackedLSTM,
+                "TreeCompositionLSTM": TreeCompositionLSTM,
+                "DecomposableAttentionEntailment": DecomposableAttentionEntailment,
+                "HeuristicMatchingCombiner": HeuristicMatchingCombiner,
+                "MemoryOnlyCombiner": MemoryOnlyCombiner,
+                "MultipleChoiceEntailmentModel": MultipleChoiceEntailmentModel,
+                "QuestionAnswerEntailmentModel": QuestionAnswerEntailmentModel,
+                "TrueFalseEntailmentModel": TrueFalseEntailmentModel,
+                "MultipleChoiceTupleEntailment": MultipleChoiceTupleEntailment,
+                "WordAlignmentEntailment": WordAlignmentEntailment
+        }
