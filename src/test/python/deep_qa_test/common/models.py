@@ -51,25 +51,25 @@ def write_snli_file():
 
 def write_true_false_model_files():
     with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as validation_file:
-        validation_file.write('1\tq1a1\t0\n')
-        validation_file.write('2\tq1a2\t1\n')
-        validation_file.write('3\tq1a3\t0\n')
-        validation_file.write('4\tq1a4\t0\n')
-        validation_file.write('5\tq2a1\t0\n')
-        validation_file.write('6\tq2a2\t0\n')
-        validation_file.write('7\tq2a3\t1\n')
-        validation_file.write('8\tq2a4\t0\n')
-        validation_file.write('9\tq3a1\t0\n')
-        validation_file.write('10\tq3a2\t0\n')
-        validation_file.write('11\tq3a3\t0\n')
-        validation_file.write('12\tq3a4\t1\n')
+        validation_file.write('1\tcats can fly\t0\n')
+        validation_file.write('2\tthe sun is bright\t1\n')
+        validation_file.write('3\tmice can bark\t0\n')
+        validation_file.write('4\yet another false statement\t0\n')
+        validation_file.write('5\tmany birds run quickly\t0\n')
+        validation_file.write('6\tthe sun is blue\t0\n')
+        validation_file.write('7\tthe waves are from wind\t1\n')
+        validation_file.write('8\tbirds can talk\t0\n')
+        validation_file.write('9\tthe sky is green\t0\n')
+        validation_file.write('10\tmaybe another false statement\t0\n')
+        validation_file.write('11\tcats like dogs\t0\n')
+        validation_file.write('12\tdogs enjoy the sun\t1\n')
     with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
-        train_file.write('1\tsentence1\t0\n')
-        train_file.write('2\tsentence2 word2 word3\t1\n')
-        train_file.write('3\tsentence3 word2\t0\n')
-        train_file.write('4\tsentence4\t1\n')
-        train_file.write('5\tsentence5\t0\n')
-        train_file.write('6\tsentence6\t0\n')
+        train_file.write('1\tthe sun does not shine\t0\n')
+        train_file.write('2\tthe sky is blue\t1\n')
+        train_file.write('3\tbirds do not fly\t0\n')
+        train_file.write('4\tthe ocean is deep\t1\n')
+        train_file.write('5\tmice can talk\t0\n')
+        train_file.write('6\tcats can bark\t0\n')
 
 
 def write_memory_network_files():
