@@ -141,7 +141,8 @@ def write_question_answer_memory_network_files():
 def write_who_did_what_files():
     with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as train_file:
         train_file.write('1\tHe went to the store to buy goods.\tHe bought XXX\tgoods###store\t0\n')
-        train_file.write('1\tShe hiking on the weekend with her friend.\tShe went XXX\thiking###friend###weekend\t0\n')
+        train_file.write('1\tShe hiking on the weekend with her friend.'
+                         '\tShe went XXX\thiking###friend###weekend\t0\n')
     with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
         # document, question, answers
         train_file.write('1\tFred hit the ball with the bat.\tHe hit the ball with the XXX\tbat###ball\t0\n')
