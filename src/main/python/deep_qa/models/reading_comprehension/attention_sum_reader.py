@@ -150,6 +150,4 @@ class AttentionSumReader(TextTrainer):
         custom_objects["Attention"] = Attention
         custom_objects["L1Normalize"] = L1Normalize
         custom_objects["OptionAttentionSum"] = OptionAttentionSum
-        from ...layers.time_distributed_embedding import TimeDistributedEmbedding
-        custom_objects["TimeDistributedEmbedding"] = TimeDistributedEmbedding
         return custom_objects
