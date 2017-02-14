@@ -242,7 +242,7 @@ class Trainer:
             # We want to tune on other datasets.
             self.training_datasets = []
             for train_file in self.train_files:
-                logger.info("Reading dataset from %s", self.train_files)
+                logger.info("Reading dataset from %s", train_file)
                 self.training_datasets.append(self._load_dataset_from_files(train_file))
         else:
             # Only train on one dataset.
