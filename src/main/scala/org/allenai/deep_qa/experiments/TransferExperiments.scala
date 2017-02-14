@@ -22,7 +22,7 @@ object TransferExperiments {
         ("datasets" -> Seq(
           truncatedQuestions,
           SciQDatasets.sciQTrainDataset)) ~
-        ("output directory" -> s"/efs/data/dlfa/sciq/sciq_and_who_did_what_combined/train/")
-        combinedDataset
+      ("output directory" -> s"/efs/data/dlfa/sciq/sciq_and_who_did_what_combined/train/")
+    combinedDataset
   }
 }
