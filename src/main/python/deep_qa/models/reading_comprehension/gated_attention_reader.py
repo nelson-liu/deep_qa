@@ -142,7 +142,7 @@ class GatedAttentionReader(TextTrainer):
             encoded_question = question_encoder(question_embedding)
 
             # We encode the document embeddings with a seq2seq encoder.
-            # Note that this is not the same encoder as used for the question
+            # Note that this is not the same encoder as used for the question.
             document_encoder = self._get_seq2seq_encoder(name="document_{}".format(i))
             # shape: (batch size, document_length, 2*seq2seq hidden size)
             encoded_document = document_encoder(document_embedding)
@@ -167,7 +167,7 @@ class GatedAttentionReader(TextTrainer):
             # shape (batch size, document_indices, 2)
             qd_common_feature = Overlap()([document_indices,
                                            question_indices])
-            # concatenate qd_common_feature with document embeddings
+            # We concatenate qd_common_feature with the document embeddings.
             # shape: (batch size, document_length, (2*seq2seq hidden size) + 2)
             document_embedding = merge([document_embedding, qd_common_feature],
                                        mode='concat')
@@ -183,7 +183,7 @@ class GatedAttentionReader(TextTrainer):
             # shape: (batch size, 2*seq2seq hidden size)
             final_encoded_question = final_question_encoder(question_embedding)
         else:
-            # get a final encoding of the question by concatenating the forward
+            # We get a final encoding of the question by concatenating the forward
             # and backward GRU at the index of the cloze token.
             final_question_encoder = self._get_seq2seq_encoder(name="question_final")
             # each are shape (batch size, question_length, seq2seq hidden size)
@@ -210,8 +210,7 @@ class GatedAttentionReader(TextTrainer):
                                                    document_probabilities,
                                                    options_indices])
 
-        # We normalize the option_probabilities by dividing each
-        # element by L1 norm (sum) of the whole tensor.
+        # We normalize the option_probabilities by dividing it by its L1 norm.
         l1_norm_layer = L1Normalize()
 
         # shape: (batch size, num_options)
