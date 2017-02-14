@@ -55,7 +55,6 @@ class Trainer:
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
         self.max_training_instances = params.pop('max_training_instances', None)
-        self.max_tuning_instances = params.pop('max_tuning_instances', None)
 
         # Amount of training data to use for Keras' validation (not our QA validation, set by
         # the validation_file param, which is separate).  This value is passed as
@@ -129,7 +128,6 @@ class Trainer:
         self.validation_dataset = None
         self.validation_input = None
         self.validation_labels = None
-        self.tuning_dataset = None
         self.debug_dataset = None
         self.debug_input = None
 
