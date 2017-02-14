@@ -584,6 +584,6 @@ class TextTrainer(Trainer):
         # These are used in the words_and_characters tokenizer.
         from ..layers.wrappers import FixedTimeDistributed
         custom_objects["FixedTimeDistributed"] = FixedTimeDistributed
-        from ...layers.vector_matrix_split import VectorMatrixSplit
+        from ..layers.vector_matrix_split import VectorMatrixSplit
         custom_objects["VectorMatrixSplit"] = VectorMatrixSplit
         return custom_objects
