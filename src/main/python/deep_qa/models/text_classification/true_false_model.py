@@ -63,10 +63,4 @@ class TrueFalseModel(TextTrainer):
     @classmethod
     def _get_custom_objects(cls):
         custom_objects = super(TrueFalseModel, cls)._get_custom_objects()
-        from ...layers.vector_matrix_split import VectorMatrixSplit
-        custom_objects["VectorMatrixSplit"] = VectorMatrixSplit
-        from ...layers.time_distributed_embedding import TimeDistributedEmbedding
-        custom_objects["TimeDistributedEmbedding"] = TimeDistributedEmbedding
-        from ...layers.wrappers import FixedTimeDistributed
-        custom_objects["FixedTimeDistributed"] = FixedTimeDistributed
         return custom_objects
