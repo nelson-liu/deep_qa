@@ -238,7 +238,7 @@ class Trainer:
 
         # First we need to prepare the data that we'll use for training.
         logger.info("Getting training data")
-        if type(self.train_files[0]) is list:
+        if isinstance(self.train_files[0], list):
             # We want to tune on other datasets.
             self.training_datasets = []
             for train_file in self.train_files:

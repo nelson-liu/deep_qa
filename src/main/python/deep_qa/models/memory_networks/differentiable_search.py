@@ -115,8 +115,13 @@ class DifferentiableSearchMemoryNetwork(MemoryNetwork):
             # Then we update both self.training_dataset and self.validation_dataset with new
             # background information, taken from a nearest neighbor search over the corpus.
             logger.info("Updating the training data background")
-            self.training_dataset = self._update_background_dataset(self.training_dataset)
-            self.train_input, self.train_labels = self._prepare_data(self.training_dataset, for_train=False)
+            self.training_datasets = []
+            self.train_input = self.train_labels = []
+            for training_dataset in self.training_datasets:
+                self._update_background_dataset(training_dataset)
+                train_input, train_labels = self._prepare_data(training_dataset, for_train=False)
+                self.train_input.append(train_input)
+                self.train_labels.append(train_labels)
             if self.validation_dataset:
                 logger.info("Updating the validation data background")
                 self.validation_dataset = self._update_background_dataset(self.validation_dataset)
