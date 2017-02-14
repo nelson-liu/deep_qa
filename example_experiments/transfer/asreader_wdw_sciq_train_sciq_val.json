@@ -1,7 +1,7 @@
 // train a model on WhoDidWhat, then on SciQ, and see how well it does on SciQ
 {
     "model_class": "AttentionSumReader",
-    "model_serialization_prefix": "models/multiple_choice_qa/asreader_wdw_train_sciq_tune_sciq_test",
+    "model_serialization_prefix": "models/multiple_choice_qa/asreader_wdw_train_sciq_tune_sciq_val",
     "preferred_backend": "theano",
     "encoder": {
         "default": {
