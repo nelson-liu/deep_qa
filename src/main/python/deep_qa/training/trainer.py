@@ -316,8 +316,7 @@ class Trainer:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
         # We train the model on every dataset that was given.
-        for train_inputs, train_labels, train_file in self.train_input, self.train_labels, self.train_files:
-            logger.info("Training on %s", train_file)
+        for train_inputs, train_labels in self.train_input, self.train_labels:
             history = self.model.fit(train_inputs, train_labels, **kwargs)
 
         # After finishing training, we save the best weights and
