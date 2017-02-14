@@ -281,7 +281,5 @@ class GatedAttentionReader(TextTrainer):
         custom_objects["OptionAttentionSum"] = OptionAttentionSum
         custom_objects["Overlap"] = Overlap
         custom_objects["VectorMatrixSplit"] = VectorMatrixSplit
-        # from ...layers.wrappers import FixedTimeDistributed
-        # custom_objects["FixedTimeDistributed"] = FixedTimeDistributed
 
         return custom_objects
