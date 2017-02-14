@@ -252,15 +252,16 @@ class Trainer:
         if self.max_training_instances is not None:
             logger.info("Truncating the training dataset to %d instances",
                         self.max_training_instances)
-            for training_dataset in self.training_datasets:
-                training_dataset.truncate(self.max_training_instances)
-        self.train_input = self.train_labels = []
+            self.training_datasets[:] = [training_dataset.truncate(self.max_training_instances) for
+                                         training_dataset in self.training_datasets]
+
+        self.train_input = []
+        self.train_labels = []
         for train_dataset in self.training_datasets:
             train_input, train_labels = self._prepare_data(train_dataset,
                                                            for_train=True)
             self.train_input.append(train_input)
             self.train_labels.append(train_labels)
-
         if self.validation_files:
             logger.info("Getting validation data")
             self.validation_dataset = self._load_dataset_from_files(self.validation_files)
@@ -316,7 +317,7 @@ class Trainer:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
         # We train the model on every dataset that was given.
-        for train_inputs, train_labels in self.train_input, self.train_labels:
+        for train_inputs, train_labels in zip(self.train_input, self.train_labels):
             history = self.model.fit(train_inputs, train_labels, **kwargs)
 
         # After finishing training, we save the best weights and
