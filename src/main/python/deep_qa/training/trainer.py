@@ -355,6 +355,7 @@ class Trainer:
                                             self._debug(self.debug_params["layer_names"],
                                                         self.debug_params.get("masks", []), epoch))
             callbacks.append(debug_callback)
+            return CallbackList(callbacks)
 
         # Some witchcraft is happening here - we don't specify the epoch replacement variable
         # checkpointing string, because Keras does that within the callback if we specify it here.
@@ -545,6 +546,7 @@ class Trainer:
         epoch_weight_file = "%s_weights_epoch=%d.h5" % (self.model_prefix, self.best_epoch)
         final_weight_file = "%s_weights.h5" % self.model_prefix
         copyfile(epoch_weight_file, final_weight_file)
+        logger.info("Saved the best model to %s", final_weight_file)
 
     def _save_auxiliary_files(self):
         """
@@ -581,4 +583,6 @@ class Trainer:
         If you've used any Layers that Keras doesn't know about, you need to specify them in this
         dictionary, so we can load them correctly.
         """
-        return {}
+        return {
+                "DeepQaModel": DeepQaModel
+        }
