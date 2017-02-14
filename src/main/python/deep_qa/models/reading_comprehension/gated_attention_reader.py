@@ -21,7 +21,38 @@ from ...training.models import DeepQaModel
 class GatedAttentionReader(TextTrainer):
     """
     This TextTrainer implements the Gated Attention Reader model described in
-    "Gated-Attention Readers for Text Comprehension" by Dhingra et. al 2016.
+    "Gated-Attention Readers for Text Comprehension" by Dhingra et. al 2016. It encodes
+    the document with a variable number of gated attention layers, and then encodes
+    the query. It takes the dot product of these two final encodings to generate an
+    attention over the words in the document, and it then selects the option with the
+    highest summed or mean weight as the answer.
+
+    Parameters
+    ----------
+    multiword_option_mode: str, optional (default="mean")
+        Describes how to calculate the probability of options
+        that contain multiple words. If "mean", the probability of
+        the option is taken to be the mean of the probabilities of
+        its constituent words. If "sum", the probability of the option
+        is taken to be the sum of the probabilities of its constituent
+        words.
+
+    num_gated_attention_layers: int, optional (default=3)
+        The number of gated attention layers to pass the document
+        embedding through. Must be at least 1.
+
+    cloze_token: str, optional (default=None)
+        If not None, the string that represents the cloze token in a cloze question.
+        Used to calculate the attention over the document, as the model does it
+        differently for cloze vs non-cloze datasets.
+
+    gated_attention_dropout: float, optional (default=0.3)
+        The proportion of units to drop out after each gated attention layer.
+
+    qd_common_feature: boolean, optional (default=True)
+        Whether to use the question-document common word feature. This feature simply
+        indicates, for each word in the document, whether it appears in the query
+        and has been shown to improve reading comprehension performance.
     """
     def __init__(self, params: Dict[str, Any]):
         self.max_question_length = params.pop('max_question_length', None)
@@ -31,7 +62,7 @@ class GatedAttentionReader(TextTrainer):
         # either "mean" or "sum"
         self.multiword_option_mode = params.pop('multiword_option_mode', "mean")
         # number of gated attention layers to use
-        self.num_gated_attention_layers = params.pop('num_gated_attention_layers', 4)
+        self.num_gated_attention_layers = params.pop('num_gated_attention_layers', 3)
         # dropout proportion after each gated attention layer.
         self.gated_attention_dropout = params.pop('gated_attention_dropout', 0.3)
         # If you are using the model on a cloze (fill in the blank) dataset,
