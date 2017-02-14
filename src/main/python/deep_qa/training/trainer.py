@@ -50,6 +50,7 @@ class Trainer:
                                                          K.backend())
             logger.warning(warning_message)
 
+        self.batch_size = params.pop('batch_size', 32)
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
         self.max_training_instances = params.pop('max_training_instances', None)
@@ -63,6 +64,9 @@ class Trainer:
         self.patience = params.pop('patience', 1)
         # Log directory for tensorboard.
         self.tensorboard_log = params.pop('tensorboard_log', None)
+        # Tensorboard histogram frequency: note that activating the tensorboard histgram (frequency > 0) can
+        # drastically increase model training time.  Please set frequency with consideration to desired runtime.
+        self.tensorboard_histogram_freq = params.pop('tensorboard_histogram_freq', 0)
 
         # The files containing the data that should be used for training.  See
         # _load_dataset_from_files().
@@ -278,7 +282,7 @@ class Trainer:
 
         # Now we actually train the model using various Keras callbacks to control training.
         callbacks = self._get_callbacks()
-        kwargs = {'nb_epoch': self.num_epochs, 'callbacks': [callbacks]}
+        kwargs = {'nb_epoch': self.num_epochs, 'callbacks': [callbacks], 'batch_size': self.batch_size}
         # We'll check for explicit validation data first; if you provided this, you definitely
         # wanted to use it for validation.  self.keras_validation_split is non-zero by default,
         # so you may have left it above zero on accident.
@@ -315,7 +319,8 @@ class Trainer:
             if K.backend() == 'theano':
                 raise ConfigurationError("Tensorboard logging is only compatibile with Tensorflow. "
                                          "Change the backend using the KERAS_BACKEND environment variable.")
-            tensorboard_visualisation = TensorBoard(log_dir=self.tensorboard_log)
+            tensorboard_visualisation = TensorBoard(log_dir=self.tensorboard_log,
+                                                    histogram_freq=self.tensorboard_histogram_freq)
             callbacks.append(tensorboard_visualisation)
 
         if self.debug_params:
