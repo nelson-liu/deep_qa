@@ -240,10 +240,13 @@ class Trainer:
         logger.info("Getting training data")
         if type(self.train_files[0]) is list:
             # We want to tune on other datasets.
-            self.training_datasets = [self._load_dataset_from_files(train_file)
-                                     for train_file in self.train_files]
+            self.training_datasets = []
+            for train_file in self.train_files:
+                logger.info("Reading dataset from %s", self.train_files)
+                self.training_datasets.append(self._load_dataset_from_files(train_file))
         else:
             # Only train on one dataset.
+            logger.info("Reading dataset from %s", self.train_files)
             self.training_datasets = [self._load_dataset_from_files(self.train_files)]
 
         if self.max_training_instances is not None:
@@ -313,7 +316,8 @@ class Trainer:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
         # We train the model on every dataset that was given.
-        for train_inputs, train_labels in self.train_input, self.train_labels:
+        for train_inputs, train_labels, train_file in self.train_input, self.train_labels, self.train_files:
+            logger.info("Training on %s", train_file)
             history = self.model.fit(train_inputs, train_labels, **kwargs)
 
         # After finishing training, we save the best weights and
