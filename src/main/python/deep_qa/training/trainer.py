@@ -1,6 +1,7 @@
 import logging
 import os
 from typing import Any, Dict, List
+import re
 
 import numpy
 import keras.backend as K
@@ -74,10 +75,6 @@ class Trainer:
         # _load_dataset_from_files().
         self.train_files = params.pop('train_files', None)
 
-        # The files containing the data that should be used for tuning.  See
-        # _load_dataset_from_files().
-        self.tune_files = params.pop('tune_files', None)
-
         # The files containing the data that should be used for validation, if you do not want to
         # use a split of the training data for validation.  The default of None means to just use
         # the `keras_validation_split` parameter to split the training data for validation.
@@ -126,15 +123,13 @@ class Trainer:
 
         # We store the datasets used for training and validation, both before processing and after
         # processing, in case a subclass wants to modify it between epochs for whatever reason.
-        self.training_dataset = None
+        self.training_datasets = None
         self.train_input = None
         self.train_labels = None
         self.validation_dataset = None
         self.validation_input = None
         self.validation_labels = None
         self.tuning_dataset = None
-        self.tune_input = None
-        self.tune_labels = None
         self.debug_dataset = None
         self.debug_input = None
 
@@ -245,24 +240,31 @@ class Trainer:
 
         # First we need to prepare the data that we'll use for training.
         logger.info("Getting training data")
-        self.training_dataset = self._load_dataset_from_files(self.train_files)
+        if type(self.train_files[0]) is list:
+            # We want to tune on other datasets.
+            self.training_datasets = [self._load_dataset_from_files(train_file)
+                                     for train_file in self.train_files]
+        else:
+            # Only train on one dataset.
+            self.training_datasets = [self._load_dataset_from_files(self.train_files)]
+
         if self.max_training_instances is not None:
-            logger.info("Truncating the training dataset to %d instances", self.max_training_instances)
-            self.training_dataset = self.training_dataset.truncate(self.max_training_instances)
-        self.train_input, self.train_labels = self._prepare_data(self.training_dataset, for_train=True)
+            logger.info("Truncating the training dataset to %d instances",
+                        self.max_training_instances)
+            for training_dataset in self.training_datasets:
+                training_dataset.truncate(self.max_training_instances)
+        self.train_input = self.train_labels = []
+        for train_dataset in self.training_datasets:
+            train_input, train_labels = self._prepare_data(train_dataset,
+                                                           for_train=True)
+            self.train_input.append(train_input)
+            self.train_labels.append(train_labels)
+
         if self.validation_files:
             logger.info("Getting validation data")
             self.validation_dataset = self._load_dataset_from_files(self.validation_files)
             self.validation_input, self.validation_labels = self._prepare_data(self.validation_dataset,
                                                                                for_train=False)
-        if self.tune_files:
-            logger.info("Getting tuning data.")
-            self.tuning_dataset = self._load_dataset_from_files(self.tune_files)
-            if self.max_tuning_instances is not None:
-                logger.info("Truncating the tuning dataset to %d instances", self.max_tuning_instances)
-                self.tuning_dataset = self.tuning_dataset.truncate(self.max_tuning_instances)
-            self.tune_input, self.tune_labels = self._prepare_data(self.tuning_dataset, for_train=True)
-
         # We need to actually do pretraining _after_ we've loaded the training data, though, as we
         # need to build the models to be consistent between training and pretraining.  The training
         # data tells us a max sentence length, which we need for the pretrainer.
@@ -282,8 +284,13 @@ class Trainer:
             debug_masks = self.debug_params.get('masks', [])
             debug_data = self.debug_params['data']
             if debug_data == "training":
-                self.debug_dataset = self.training_dataset
-                self.debug_input = self.train_input
+                # default to the first dataset / first train input
+                self.debug_dataset = self.training_datasets[0]
+                self.debug_input = self.train_input[0]
+            elif re.match("training_[0-9]", debug_data):
+                # specify a certain training dataset by doing training_<dataset#>
+                self.debug_dataset = self.training_datasets[int(debug_data[-1])]
+                self.debug_input = self.train_input[int(debug_data[-1])]
             elif debug_data == "validation":
                 # NOTE: This currently only works if you've specified specific validation data, not
                 # if you are just splitting the training data for validation.
@@ -307,20 +314,14 @@ class Trainer:
         elif self.keras_validation_split > 0.0:
             kwargs['validation_split'] = self.keras_validation_split
         # We now pass all the arguments to the model's fit function, which does all of the training.
-        history = self.model.fit(self.train_input, self.train_labels, **kwargs)
-
-        # If there is tuning data, run the tuning data on the model.
-        if self.tune_files:
-            logger.info("Fitting dataset on tuning inputs.")
-            tune_history = self.model.fit(self.tune_input, self.tune_labels, **kwargs)
+        # We train the model on every dataset that was given.
+        for train_inputs, train_labels in self.train_input, self.train_labels:
+            history = self.model.fit(train_inputs, train_labels, **kwargs)
 
         # After finishing training, we save the best weights and
         # any auxillary files, such as the model config.
 
-        if self.tune_files:
-            self.best_epoch = int(numpy.argmax(tune_history.history[self.validation_metric]))
-        else:
-            self.best_epoch = int(numpy.argmax(history.history[self.validation_metric]))
+        self.best_epoch = int(numpy.argmax(history.history[self.validation_metric]))
         if self.save_models:
             self._save_best_model()
             self._save_auxiliary_files()
