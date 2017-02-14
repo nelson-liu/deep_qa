@@ -55,7 +55,6 @@ class Trainer:
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
         self.max_training_instances = params.pop('max_training_instances', None)
-
         # Amount of training data to use for Keras' validation (not our QA validation, set by
         # the validation_file param, which is separate).  This value is passed as
         # 'validation_split' to Keras' model.fit().
