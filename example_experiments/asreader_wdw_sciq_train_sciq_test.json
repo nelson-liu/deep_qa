@@ -1,7 +1,7 @@
-// train a model on WhoDidWhat, tune on SciQ, and see how well it does on Omnibus.
+// train a model on WhoDidWhat, then on SciQ, and see how well it does on SciQ
 {
     "model_class": "AttentionSumReader",
-    "model_serialization_prefix": "models/multiple_choice_qa/asreader_wdw_train_sciq_tune_omnibus_test",
+    "model_serialization_prefix": "models/multiple_choice_qa/asreader_wdw_train_sciq_tune_sciq_test",
     "preferred_backend": "theano",
     "encoder": {
         "default": {
@@ -22,10 +22,9 @@
                   "clipnorm": 10.0
                  },
     "embedding_dropout": 0.0,
-    "patience": 1,
+    "patience": 0,
     "embedding_size": 256,
     "num_epochs": 5,
-    "train_files": ["/efs/data/dlfa/who_did_what/processed/strict/train.tsv"],
-    "validation_files": ["/efs/data/dlfa/processed/omnibus_4_dev/question_and_answer/questions_with_background_as_passages.tsv"],
-    "tune_files": ["/efs/data/dlfa/sciq/processed/train_no_passage_with_background_as_passages.tsv"],
+    "train_files": [["/efs/data/dlfa/who_did_what/processed/strict/train.tsv"], ["/efs/data/dlfa/sciq/processed/train_no_passage_with_background_as_passages.tsv"]],
+    "validation_files": ["/efs/data/dlfa/sciq/processed/test_no_passage_with_background_as_passages.tsv"],
 }
