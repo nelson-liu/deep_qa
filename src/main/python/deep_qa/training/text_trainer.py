@@ -582,6 +582,8 @@ class TextTrainer(Trainer):
         custom_objects["TimeDistributedEmbedding"] = TimeDistributedEmbedding
 
         # These are used in the words_and_characters tokenizer.
+        # TODO(nelson/matt): We might consider making the Tokenizer API
+        # return custom objects.
         from ..layers.wrappers import FixedTimeDistributed
         custom_objects["FixedTimeDistributed"] = FixedTimeDistributed
         from ..layers.vector_matrix_split import VectorMatrixSplit
