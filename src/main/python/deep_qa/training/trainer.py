@@ -1,7 +1,6 @@
 import logging
 import os
 from typing import Any, Dict, List
-import re
 
 import numpy
 import keras.backend as K
@@ -314,25 +313,6 @@ class Trainer:
             # solver definition and build a debug model.
             debug_layer_names = self.debug_params['layer_names']
             debug_masks = self.debug_params.get('masks', [])
-            debug_data = self.debug_params['data']
-            if debug_data == "training":
-                # default to the first dataset / first train input
-                self.debug_dataset = self.training_datasets[0]
-                self.debug_input = self.train_input[0]
-            elif re.match("training_[0-9]", debug_data):
-                # specify a certain training dataset by doing training_<dataset#>
-                self.debug_dataset = self.training_datasets[int(debug_data[-1])]
-                self.debug_input = self.train_input[int(debug_data[-1])]
-            elif debug_data == "validation":
-                # NOTE: This currently only works if you've specified specific validation data, not
-                # if you are just splitting the training data for validation.
-                self.debug_dataset = self.validation_dataset
-                self.debug_input = self.validation_input
-            else:
-                # If the `data` param is not "training" or "validation", we assume it's a list of
-                # file names.
-                self.debug_dataset = self._load_dataset_from_files(debug_data)
-                self.debug_input, _ = self._prepare_data(self.debug_dataset, for_train=False)
             self.debug_model = self._build_debug_model(debug_layer_names, debug_masks)
 
         # Now we actually train the model using various Keras callbacks to control training.
@@ -350,6 +330,21 @@ class Trainer:
             elif self.keras_validation_split > 0.0:
                 kwargs['validation_split'] = self.keras_validation_split
             train_inputs, train_labels = train_inputs_labels
+            if self.debug_params:
+                debug_data = self.debug_params['data']
+                if debug_data == "training":
+                    self.debug_dataset = self.training_datasets[idx]
+                    self.debug_input = train_input
+                elif debug_data == "validation":
+                    # NOTE: This currently only works if you've specified specific validation data, not
+                    # if you are just splitting the training data for validation.
+                    self.debug_dataset = self.validation_dataset[idx]
+                    self.debug_input = validation_input
+                else:
+                    # If the `data` param is not "training" or "validation", we assume it's a list of
+                    # file names.
+                    self.debug_dataset = self._load_dataset_from_files(debug_data)
+                    self.debug_input, _ = self._prepare_data(self.debug_dataset, for_train=False)
 
             history = self.model.fit(train_inputs, train_labels, **kwargs)
 
