@@ -57,18 +57,13 @@ class TestTextTrainer(TestCase):
             assert word_embeddings[0].shape == (5, 4)
             word_masks = output_dict['masks']['combined_word_embedding_for_sentence_input']
             # Zeros are added to sentences _from the left_.
-            assert word_masks[0][0] == 0
-            assert word_masks[0][1] == 0
-            assert word_masks[0][2] == 1
-            assert word_masks[1][0] == 1
-            assert word_masks[1][1] == 1
-            assert word_masks[1][2] == 1
-            assert word_masks[2][0] == 0
-            assert word_masks[2][1] == 1
-            assert word_masks[2][2] == 1
-            assert word_masks[3][0] == 0
-            assert word_masks[3][1] == 0
-            assert word_masks[3][2] == 1
+            print(word_masks)
+            assert_allclose(word_masks, numpy.array([[1.0, 1.0, 1.0, 1.0, 1.0],
+                                                     [0.0, 1.0, 1.0, 1.0, 1.0],
+                                                     [0.0, 1.0, 1.0, 1.0, 1.0],
+                                                     [0.0, 1.0, 1.0, 1.0, 1.0],
+                                                     [0.0, 0.0, 1.0, 1.0, 1.0],
+                                                     [0.0, 0.0, 1.0, 1.0, 1.0]]))
         _output_debug_info.side_effect = new_debug
         model.train()
 
