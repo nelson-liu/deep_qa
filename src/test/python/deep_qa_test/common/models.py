@@ -54,7 +54,7 @@ def write_true_false_model_files():
         validation_file.write('1\tcats can fly\t0\n')
         validation_file.write('2\tthe sun is bright\t1\n')
         validation_file.write('3\tmice can bark\t0\n')
-        validation_file.write('4\yet another false statement\t0\n')
+        validation_file.write('4\tyet another false statement\t0\n')
         validation_file.write('5\tmany birds run quickly\t0\n')
         validation_file.write('6\tthe sun is blue\t0\n')
         validation_file.write('7\tthe waves are from wind\t1\n')

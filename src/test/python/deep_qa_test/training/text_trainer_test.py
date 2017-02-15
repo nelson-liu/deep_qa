@@ -54,7 +54,7 @@ class TestTextTrainer(TestCase):
             # consistently happening, though.
             word_embeddings = output_dict['combined_word_embedding_for_sentence_input'][0]
             assert len(word_embeddings) == 6
-            assert word_embeddings[0].shape == (3, 4)
+            assert word_embeddings[0].shape == (5, 4)
             word_masks = output_dict['masks']['combined_word_embedding_for_sentence_input']
             # Zeros are added to sentences _from the left_.
             assert word_masks[0][0] == 0
