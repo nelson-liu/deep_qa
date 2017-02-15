@@ -115,21 +115,25 @@ class DifferentiableSearchMemoryNetwork(MemoryNetwork):
             # Then we update both self.training_dataset and self.validation_dataset with new
             # background information, taken from a nearest neighbor search over the corpus.
             logger.info("Updating the training data background")
-            self.training_datasets = []
             self.train_input = []
             self.train_labels = []
-            for training_dataset in self.training_datasets:
-                self._update_background_dataset(training_dataset)
+            for idx, training_dataset in enumerate(self.training_datasets):
+                self.training_datasets[idx] = self._update_background_dataset(training_dataset)
                 train_input, train_labels = self._prepare_data(training_dataset,
                                                                for_train=False)
                 self.train_input.append(train_input)
                 self.train_labels.append(train_labels)
-            if self.validation_dataset:
-                logger.info("Updating the validation data background")
-                self.validation_dataset = self._update_background_dataset(self.validation_dataset)
-                self.validation_input, self.validation_labels = self._prepare_data(
-                        self.validation_dataset, for_train=False)
 
+            if self.validation_datasets:
+                logger.info("Updating the validation data background")
+                self.validation_input = []
+                self.validation_labels = []
+                for idx, validation_dataset in enumerate(self.validation_datasets):
+                    self.validation_datasets[idx] = self._update_background_dataset(validation_dataset)
+                    validation_input, validation_labels = self._prepare_data(validation_dataset,
+                                                                             for_train=False)
+                    self.validation_input.append(validation_input)
+                    self.validation_labels.append(validation_labels)
     @overrides
     def _save_auxiliary_files(self):
         """

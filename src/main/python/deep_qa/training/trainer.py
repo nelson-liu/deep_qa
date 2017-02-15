@@ -237,7 +237,7 @@ class Trainer:
         # input, verify they also did the same with the same length for the validation input
         if isinstance(self.train_files[0], list) and self.validation_files is not None:
             if (not isinstance(self.validation_files[0], list) or
-                len(self.train_files) != len(self.validation_files)):
+                        len(self.train_files) != len(self.validation_files)):
                 raise ConfigurationError("Train files input is a list of lists, "
                                          "so validation files input must also be a "
                                          "list of lists that is the same length.")
@@ -281,8 +281,8 @@ class Trainer:
                 # We want to tune on other datasets.
                 self.validation_datasets = []
                 for validation_file in self.validation_files:
-                    logger.info("Reading validation dataset from %s", train_file)
-                    self.validation_datasets.append(self._load_dataset_from_files(train_file))
+                    logger.info("Reading validation dataset from %s", validation_file)
+                    self.validation_datasets.append(self._load_dataset_from_files(validation_file))
             else:
                 # Only training on one dataset, so only validate on one dataset.
                 logger.info("Reading validation dataset from %s", self.validation_files)
@@ -338,7 +338,7 @@ class Trainer:
                 elif debug_data == "validation":
                     # NOTE: This currently only works if you've specified specific validation data, not
                     # if you are just splitting the training data for validation.
-                    self.debug_dataset = self.validation_dataset[idx]
+                    self.debug_dataset = self.validation_datasets[idx]
                     self.debug_input = validation_input
                 else:
                     # If the `data` param is not "training" or "validation", we assume it's a list of
