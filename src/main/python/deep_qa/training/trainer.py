@@ -124,7 +124,7 @@ class Trainer:
         self.training_datasets = None
         self.train_input = None
         self.train_labels = None
-        self.validation_dataset = None
+        self.validation_datasets = None
         self.validation_input = None
         self.validation_labels = None
         self.debug_dataset = None
@@ -234,6 +234,19 @@ class Trainer:
         # pre-training, if any, so we provide a hook that you can override to do whatever you want.
         if self.pretrainers:
             self._process_pretraining_data()
+        # Perform some input validation --- if the user passed in a list of lists for the train
+        # input, verify they also did the same with the same length for the validation input
+        if isinstance(self.train_files[0], list) and self.validation_files is not None:
+            if (not isinstance(self.validation_files[0], list) or
+                len(self.train_files) != len(self.validation_files)):
+                raise ConfigurationError("Train files input is a list of lists, "
+                                         "so validation files input must also be a "
+                                         "list of lists that is the same length.")
+        elif not isinstance(self.train_files[0], list) and self.validation_files is not None:
+            if isinstance(self.validation_files[0], list):
+                raise ConfigurationError("Train files input was not a list of "
+                                         "lists, so the validation input must "
+                                         "also be just a list.")
 
         # First we need to prepare the data that we'll use for training.
         logger.info("Getting training data")
@@ -241,11 +254,11 @@ class Trainer:
             # We want to tune on other datasets.
             self.training_datasets = []
             for train_file in self.train_files:
-                logger.info("Reading dataset from %s", train_file)
+                logger.info("Reading training dataset from %s", train_file)
                 self.training_datasets.append(self._load_dataset_from_files(train_file))
         else:
             # Only train on one dataset.
-            logger.info("Reading dataset from %s", self.train_files)
+            logger.info("Reading training dataset from %s", self.train_files)
             self.training_datasets = [self._load_dataset_from_files(self.train_files)]
 
         if self.max_training_instances is not None:
@@ -261,11 +274,27 @@ class Trainer:
                                                            for_train=True)
             self.train_input.append(train_input)
             self.train_labels.append(train_labels)
+
         if self.validation_files:
-            logger.info("Getting validation data")
-            self.validation_dataset = self._load_dataset_from_files(self.validation_files)
-            self.validation_input, self.validation_labels = self._prepare_data(self.validation_dataset,
-                                                                               for_train=False)
+            if isinstance(self.validation_files[0], list):
+                # We want to tune on other datasets.
+                self.validation_datasets = []
+                for validation_file in self.validation_files:
+                    logger.info("Reading validation dataset from %s", train_file)
+                    self.validation_datasets.append(self._load_dataset_from_files(train_file))
+            else:
+                # Only training on one dataset, so only validate on one dataset.
+                logger.info("Reading validation dataset from %s", self.validation_files)
+                self.validation_datasets = [self._load_dataset_from_files(self.validation_files)]
+
+            self.validation_input = []
+            self.validation_labels = []
+            for validation_dataset in self.validation_datasets:
+                validation_input, validation_labels = self._prepare_data(validation_dataset,
+                                                                         for_train=False)
+                self.validation_input.append(validation_input)
+                self.validation_labels.append(validation_labels)
+
         # We need to actually do pretraining _after_ we've loaded the training data, though, as we
         # need to build the models to be consistent between training and pretraining.  The training
         # data tells us a max sentence length, which we need for the pretrainer.
@@ -307,16 +336,19 @@ class Trainer:
         # Now we actually train the model using various Keras callbacks to control training.
         callbacks = self._get_callbacks()
         kwargs = {'nb_epoch': self.num_epochs, 'callbacks': [callbacks], 'batch_size': self.batch_size}
-        # We'll check for explicit validation data first; if you provided this, you definitely
-        # wanted to use it for validation.  self.keras_validation_split is non-zero by default,
-        # so you may have left it above zero on accident.
-        if self.validation_input is not None:
-            kwargs['validation_data'] = (self.validation_input, self.validation_labels)
-        elif self.keras_validation_split > 0.0:
-            kwargs['validation_split'] = self.keras_validation_split
+
         # We now pass all the arguments to the model's fit function, which does all of the training.
         # We train the model on every dataset that was given.
-        for train_inputs, train_labels in zip(self.train_input, self.train_labels):
+        for idx, train_inputs_labels in enumerate(zip(self.train_input, self.train_labels)):
+            # We'll check for explicit validation data first; if you provided this, you definitely
+            # wanted to use it for validation.  self.keras_validation_split is non-zero by default,
+            # so you may have left it above zero on accident.
+            if self.validation_input is not None:
+                kwargs['validation_data'] = (self.validation_input[idx], self.validation_labels[idx])
+            elif self.keras_validation_split > 0.0:
+                kwargs['validation_split'] = self.keras_validation_split
+            train_inputs, train_labels = train_inputs_labels
+
             history = self.model.fit(train_inputs, train_labels, **kwargs)
 
         # After finishing training, we save the best weights and

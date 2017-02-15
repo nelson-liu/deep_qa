@@ -60,8 +60,8 @@ class TestGatedAttention(TestCase):
         loaded_model.load_model()
 
         # verify that original model and the loaded model predict the same outputs
-        assert_allclose(model.model.predict(model.__dict__["validation_input"]),
-                        loaded_model.model.predict(model.__dict__["validation_input"]))
+        assert_allclose(model.model.predict(model.__dict__["validation_input"][0]),
+                        loaded_model.model.predict(model.__dict__["validation_input"][0]))
 
     def test_non_cloze_train_does_not_crash(self):
         args = {
@@ -100,5 +100,5 @@ class TestGatedAttention(TestCase):
         loaded_model.load_model()
 
         # verify that original model and the loaded model predict the same outputs
-        assert_allclose(model.model.predict(model.__dict__["validation_input"]),
-                        loaded_model.model.predict(model.__dict__["validation_input"]))
+        assert_allclose(model.model.predict(model.__dict__["validation_input"][0]),
+                        loaded_model.model.predict(model.__dict__["validation_input"][0]))
