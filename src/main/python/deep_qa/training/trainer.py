@@ -249,6 +249,8 @@ class Trainer:
                                          "also be just a list.")
 
         # First we need to prepare the data that we'll use for training.
+        # TODO(nelson/matt): storing multiple datasets at once is
+        # quite memory-wasteful, consider refactoring.
         logger.info("Getting training data")
         if isinstance(self.train_files[0], list):
             # We want to tune on other datasets.
