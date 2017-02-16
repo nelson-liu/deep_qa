@@ -40,7 +40,7 @@ class TestAttentionSumReader(TestCase):
                                 "wrapper_params": {}
                         }
                 },
-                "embedding_size": 3,
+                "embedding_size": 5,
         }
         model = get_model(AttentionSumReader, args)
         model.train()
