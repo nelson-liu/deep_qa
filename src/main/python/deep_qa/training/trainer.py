@@ -42,6 +42,15 @@ class Trainer:
             parent_directory = os.path.dirname(self.model_prefix)
             os.makedirs(parent_directory, exist_ok=True)
 
+        # Preferred backend to use for training. If a different backend is detected, we still
+        # train but we also warn the user.
+        self.preferred_backend = params.pop('preferred_backend', None)
+        if self.preferred_backend and self.preferred_backend.lower() != K.backend():
+            warning_message = self._make_backend_warning(self.preferred_backend.lower(),
+                                                         K.backend())
+            logger.warning(warning_message)
+
+        self.batch_size = params.pop('batch_size', 32)
         # Upper limit on the number of training instances.  If this is set, and we get more than
         # this, we will truncate the data.
         self.max_training_instances = params.pop('max_training_instances', None)
@@ -55,6 +64,9 @@ class Trainer:
         self.patience = params.pop('patience', 1)
         # Log directory for tensorboard.
         self.tensorboard_log = params.pop('tensorboard_log', None)
+        # Tensorboard histogram frequency: note that activating the tensorboard histgram (frequency > 0) can
+        # drastically increase model training time.  Please set frequency with consideration to desired runtime.
+        self.tensorboard_histogram_freq = params.pop('tensorboard_histogram_freq', 0)
 
         # The files containing the data that should be used for training.  See
         # _load_dataset_from_files().
@@ -270,7 +282,7 @@ class Trainer:
 
         # Now we actually train the model using various Keras callbacks to control training.
         callbacks = self._get_callbacks()
-        kwargs = {'nb_epoch': self.num_epochs, 'callbacks': [callbacks]}
+        kwargs = {'nb_epoch': self.num_epochs, 'callbacks': [callbacks], 'batch_size': self.batch_size}
         # We'll check for explicit validation data first; if you provided this, you definitely
         # wanted to use it for validation.  self.keras_validation_split is non-zero by default,
         # so you may have left it above zero on accident.
@@ -307,7 +319,8 @@ class Trainer:
             if K.backend() == 'theano':
                 raise ConfigurationError("Tensorboard logging is only compatibile with Tensorflow. "
                                          "Change the backend using the KERAS_BACKEND environment variable.")
-            tensorboard_visualisation = TensorBoard(log_dir=self.tensorboard_log)
+            tensorboard_visualisation = TensorBoard(log_dir=self.tensorboard_log,
+                                                    histogram_freq=self.tensorboard_histogram_freq)
             callbacks.append(tensorboard_visualisation)
 
         if self.debug_params:
@@ -315,6 +328,7 @@ class Trainer:
                                             self._debug(self.debug_params["layer_names"],
                                                         self.debug_params.get("masks", []), epoch))
             callbacks.append(debug_callback)
+            return CallbackList(callbacks)
 
         # Some witchcraft is happening here - we don't specify the epoch replacement variable
         # checkpointing string, because Keras does that within the callback if we specify it here.
@@ -505,6 +519,7 @@ class Trainer:
         epoch_weight_file = "%s_weights_epoch=%d.h5" % (self.model_prefix, self.best_epoch)
         final_weight_file = "%s_weights.h5" % self.model_prefix
         copyfile(epoch_weight_file, final_weight_file)
+        logger.info("Saved the best model to %s", final_weight_file)
 
     def _save_auxiliary_files(self):
         """
@@ -516,10 +531,31 @@ class Trainer:
         print(model_config, file=model_config_file)
         model_config_file.close()
 
+    @staticmethod
+    def _make_backend_warning(preferred_backend, actual_backend):
+        warning_info = ("@ Preferred backend is %s, but "
+                        "current backend is %s. @" % (preferred_backend,
+                                                      actual_backend))
+        end_row = "@" * len(warning_info)
+        warning_row_spaces = len(warning_info) - len("@ WARNING: @")
+        left_warning_row_spaces = right_warning_row_spaces = warning_row_spaces // 2
+        if warning_row_spaces % 2 == 1:
+            # left and right have uneven spacing
+            right_warning_row_spaces += 1
+        left_warning_row = "\n@" + " " * left_warning_row_spaces
+        right_warning_row = " " * right_warning_row_spaces + "@\n"
+        warning_message = ("\n" + end_row +
+                           left_warning_row + " WARNING: " + right_warning_row +
+                           warning_info +
+                           "\n" + end_row)
+        return warning_message
+
     @classmethod
     def _get_custom_objects(cls):
         """
         If you've used any Layers that Keras doesn't know about, you need to specify them in this
         dictionary, so we can load them correctly.
         """
-        return {}
+        return {
+                "DeepQaModel": DeepQaModel
+        }

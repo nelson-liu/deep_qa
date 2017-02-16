@@ -4,23 +4,24 @@ from unittest import TestCase
 import numpy as np
 
 from deep_qa.data.data_indexer import DataIndexer
-from deep_qa.data.instances.whodidwhat_instance import WhoDidWhatInstance, IndexedWhoDidWhatInstance
+from deep_qa.data.instances.mc_question_answer_instance import McQuestionAnswerInstance
+from deep_qa.data.instances.mc_question_answer_instance import IndexedMcQuestionAnswerInstance
 
 
-class TestWhoDidWhatInstance:
+class TestMcQuestionAnswerInstance:
     @staticmethod
-    def instance_to_line(question: str, left_context: str, right_context: str,
+    def instance_to_line(passage: str, question: str,
                          options: str, label: int, index=None):
         line = ''
         if index is not None:
             line += str(index) + '\t'
-        line += question + '\t' + left_context + '\t' + right_context + '\t' + options + '\t'+ str(label)
+        line += passage + '\t' + question + '\t' + options + '\t'+ str(label)
         return line
 
     def test_words_has_question_passage_options(self):
-        instance = WhoDidWhatInstance("Cats from Nevada are eaten by dogs in XXX .",
-                                      "Dogs eat cats from Nevada in Washington .",
-                                      ["Nevada", "Washington"], 1)
+        instance = McQuestionAnswerInstance("Cats from Nevada are eaten by dogs in XXX .",
+                                            "Dogs eat cats from Nevada in Washington .",
+                                            ["Nevada", "Washington"], 1)
         assert instance.words() == {'words': ['cats', 'from', 'nevada', 'are', 'eaten', 'by',
                                               'dogs', 'in', 'xxx', '.', 'dogs', 'eat', 'cats',
                                               'from', 'nevada', 'in', 'washington', '.', 'nevada',
@@ -28,14 +29,12 @@ class TestWhoDidWhatInstance:
 
     def test_read_from_line_handles_five_column(self):
         passage = "Dogs eat cats from Nevada in Washington ."
-        left_context = "Cats from Nevada are eaten by dogs in"
-        right_context = "."
+        question = "Cats from Nevada are eaten by dogs in XXX ."
         options_str = "Nevada###Washington"
         label = 1
-        line = self.instance_to_line(passage, left_context, right_context, options_str, label)
-        instance = WhoDidWhatInstance.read_from_line(line)
+        line = self.instance_to_line(passage, question, options_str, label)
+        instance = McQuestionAnswerInstance.read_from_line(line)
 
-        question = "Cats from Nevada are eaten by dogs in XXX ."
         assert instance.question_text == question
         assert instance.passage_text == passage
         options = ["Nevada", "Washington"]
@@ -45,15 +44,13 @@ class TestWhoDidWhatInstance:
 
     def test_read_from_line_handles_six_column(self):
         passage = "Dogs eat cats from Nevada in Washington ."
-        left_context = "Cats from Nevada are eaten by dogs in"
-        right_context = "."
+        question = "Cats from Nevada are eaten by dogs in XXX ."
         options_str = "Nevada###Washington"
         label = 1
         index = 42
-        line = self.instance_to_line(passage, left_context, right_context, options_str, label, index)
-        instance = WhoDidWhatInstance.read_from_line(line)
+        line = self.instance_to_line(passage, question, options_str, label, index)
+        instance = McQuestionAnswerInstance.read_from_line(line)
 
-        question = "Cats from Nevada are eaten by dogs in XXX ."
         assert instance.question_text == question
         assert instance.passage_text == passage
         options = ["Nevada", "Washington"]
@@ -62,9 +59,9 @@ class TestWhoDidWhatInstance:
         assert instance.index == index
 
     def test_to_indexed_instance_converts_correctly(self):
-        instance = WhoDidWhatInstance("Cats from Nevada are eaten by dogs in XXX .",
-                                      "Dogs eat cats from Nevada in Washington .",
-                                      ["Nevada", "Washington"], 1)
+        instance = McQuestionAnswerInstance("Cats from Nevada are eaten by dogs in XXX .",
+                                            "Dogs eat cats from Nevada in Washington .",
+                                            ["Nevada", "Washington"], 1)
         data_indexer = DataIndexer()
         cats_index = data_indexer.add_word_to_index("cats")
         are_index = data_indexer.add_word_to_index("are")
@@ -94,12 +91,12 @@ class TestWhoDidWhatInstance:
         assert indexed_instance.label == 1
 
 
-class TestIndexedQuestionAnswerInstance(TestCase):
+class TestIndexedMcQuestionAnswerInstance(TestCase):
     def setUp(self):
-        self.instance = IndexedWhoDidWhatInstance([1, 2, 3, 5, 6],
-                                                  [2, 3, 4, 5, 6, 7],
-                                                  [[2], [3, 5], [6]],
-                                                  1)
+        self.instance = IndexedMcQuestionAnswerInstance([1, 2, 3, 5, 6],
+                                                        [2, 3, 4, 5, 6, 7],
+                                                        [[2], [3, 5], [6]],
+                                                        1)
 
     def test_get_lengths_returns_three_correct_lengths(self):
         assert self.instance.get_lengths() == {
@@ -113,7 +110,7 @@ class TestIndexedQuestionAnswerInstance(TestCase):
         self.instance.pad({'num_question_words': 7, 'num_passage_words': 9,
                            'num_option_words': 2, 'num_options': 3})
         assert self.instance.question_indices == [0, 0, 1, 2, 3, 5, 6]
-        assert self.instance.passage_indices == [0, 0, 0, 2, 3, 4, 5, 6, 7]
+        assert self.instance.passage_indices == [2, 3, 4, 5, 6, 7, 0, 0, 0]
         assert self.instance.option_indices[0] == [0, 2]
         assert self.instance.option_indices[1] == [3, 5]
         assert self.instance.option_indices[2] == [0, 6]
@@ -122,7 +119,7 @@ class TestIndexedQuestionAnswerInstance(TestCase):
         self.instance.pad({'num_question_words': 3, 'num_passage_words': 4,
                            'num_option_words': 1, 'num_options': 4})
         assert self.instance.question_indices == [3, 5, 6]
-        assert self.instance.passage_indices == [4, 5, 6, 7]
+        assert self.instance.passage_indices == [2, 3, 4, 5]
         assert self.instance.option_indices[0] == [2]
         assert self.instance.option_indices[1] == [5]
         assert self.instance.option_indices[2] == [6]
@@ -133,7 +130,7 @@ class TestIndexedQuestionAnswerInstance(TestCase):
         self.instance.pad({'num_question_words': 3, 'num_passage_words': 4,
                            'num_option_words': 1, 'num_options': 1})
         assert self.instance.question_indices == [3, 5, 6]
-        assert self.instance.passage_indices == [4, 5, 6, 7]
+        assert self.instance.passage_indices == [2, 3, 4, 5]
         assert self.instance.option_indices[0] == [2]
         assert len(self.instance.option_indices) == 1
 
@@ -143,5 +140,5 @@ class TestIndexedQuestionAnswerInstance(TestCase):
         inputs, label = self.instance.as_training_data()
         assert np.all(label == np.asarray([0, 1, 0, 0]))
         assert np.all(inputs[0] == np.asarray([0, 0, 1, 2, 3, 5, 6]))
-        assert np.all(inputs[1] == np.asarray([4, 5, 6, 7]))
+        assert np.all(inputs[1] == np.asarray([2, 3, 4, 5]))
         assert np.all(inputs[2] == np.asarray([[0, 2], [3, 5], [0, 6], [0, 0]]))

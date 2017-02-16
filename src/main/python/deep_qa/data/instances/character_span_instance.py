@@ -1,8 +1,10 @@
 from typing import Tuple, List
 
+import numpy
 from overrides import overrides
 
-from .question_passage_instance import QuestionPassageInstance
+from .question_passage_instance import QuestionPassageInstance, IndexedQuestionPassageInstance
+from ..data_indexer import DataIndexer
 
 
 class CharacterSpanInstance(QuestionPassageInstance):
@@ -61,8 +63,27 @@ class CharacterSpanInstance(QuestionPassageInstance):
             question, passage, label = fields
             index = None
         else:
-            raise RuntimeError("Unrecognized line format: " + line)
+            raise RuntimeError("Unrecognized line format (" + str(len(fields)) + " columns): " + line)
         label_fields = label.split(",")
         span_begin = int(label_fields[0])
         span_end = int(label_fields[1])
         return cls(question, passage, (span_begin, span_end), index)
+
+    @overrides
+    def to_indexed_instance(self, data_indexer: DataIndexer):
+        instance = super(CharacterSpanInstance, self).to_indexed_instance(data_indexer)
+        return IndexedCharacterSpanInstance(instance.question_indices, instance.passage_indices,
+                                            instance.label, instance.index)
+
+
+class IndexedCharacterSpanInstance(IndexedQuestionPassageInstance):
+    @overrides
+    def as_training_data(self):
+        input_arrays, _ = super(IndexedCharacterSpanInstance, self).as_training_data()
+        span_begin_label = span_end_label = None
+        if self.label is not None:
+            span_begin_label = numpy.zeros((len(self.passage_indices)))
+            span_end_label = numpy.zeros((len(self.passage_indices)))
+            span_begin_label[self.label[0]] = 1
+            span_end_label[self.label[1]] = 1
+        return input_arrays, (span_begin_label, span_end_label)

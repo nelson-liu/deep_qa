@@ -116,7 +116,10 @@ class TextDataset(Dataset):
         labels.sort(key=lambda x: str(x[0]))
         label_counts = [(label, len([x for x in group]))
                         for label, group in itertools.groupby(labels, lambda x: x[0])]
-        logger.info("Finished reading dataset; label counts: %s", str(label_counts))
+        label_count_str = str(label_counts)
+        if len(label_count_str) > 100:
+            label_count_str = label_count_str[:100] + '...'
+        logger.info("Finished reading dataset; label counts: %s", label_count_str)
         return TextDataset(instances)
 
     @staticmethod
@@ -194,7 +197,7 @@ class IndexedDataset(Dataset):
         if not lengths:
             return max_lengths
         for key in lengths[0]:
-            max_lengths[key] = max(x[key] for x in lengths)
+            max_lengths[key] = max(x[key] if key in x else 0 for x in lengths)
         return max_lengths
 
     def pad_instances(self, max_lengths: Dict[str, int]=None):

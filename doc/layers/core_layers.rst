@@ -1,8 +1,8 @@
 Core Layers
 ===========
 
-adaptive_recurrence
--------------------
+AdaptiveRecurrence
+------------------
 
 .. automodule:: deep_qa.layers.adaptive_recurrence
     :members:
@@ -10,7 +10,7 @@ adaptive_recurrence
     :undoc-members:
     :show-inheritance:
 
-additive
+Additive
 --------
 
 .. automodule:: deep_qa.layers.additive
@@ -19,8 +19,35 @@ additive
     :undoc-members:
     :show-inheritance:
 
-knowledge_combiners
--------------------
+BiGRUIndexSelector
+------------------
+
+.. automodule:: deep_qa.layers.bigru_index_selector
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+ComplexConcat
+-------------
+
+.. automodule:: deep_qa.layers.complex_concat
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+Highway
+-------
+
+.. automodule:: deep_qa.layers.highway
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+KnowledgeCombiners
+------------------
 
 .. automodule:: deep_qa.layers.knowledge_combiners
     :members:
@@ -28,8 +55,8 @@ knowledge_combiners
     :undoc-members:
     :show-inheritance:
 
-knowledge_encoders
-------------------
+KnowledgeEncoders
+-----------------
 
 .. automodule:: deep_qa.layers.knowledge_encoders
     :members:
@@ -37,8 +64,8 @@ knowledge_encoders
     :undoc-members:
     :show-inheritance:
 
-knowledge_selectors
--------------------
+KnowledgeSelectors
+------------------
 
 .. automodule:: deep_qa.layers.knowledge_selectors
     :members:
@@ -46,8 +73,8 @@ knowledge_selectors
     :undoc-members:
     :show-inheritance:
 
-l1_normalize
-------------
+L1Normalize
+-----------
 
 .. automodule:: deep_qa.layers.l1_normalize
     :members:
@@ -55,8 +82,8 @@ l1_normalize
     :undoc-members:
     :show-inheritance:
 
-memory_updaters
----------------
+MemoryUpdaters
+--------------
 
 .. automodule:: deep_qa.layers.memory_updaters
     :members:
@@ -64,8 +91,17 @@ memory_updaters
     :undoc-members:
     :show-inheritance:
 
-option_attention_sum
---------------------
+NoisyOr
+------------------
+
+.. automodule:: deep_qa.layers.noisy_or
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+OptionAttentionSum
+------------------
 
 .. automodule:: deep_qa.layers.option_attention_sum
     :members:
@@ -73,8 +109,17 @@ option_attention_sum
     :undoc-members:
     :show-inheritance:
 
-recurrence_modes
-----------------
+Overlap
+-------
+
+.. automodule:: deep_qa.layers.overlap
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+RecurrenceModes
+---------------
 
 .. automodule:: deep_qa.layers.recurrence_modes
     :members:
@@ -82,8 +127,8 @@ recurrence_modes
     :undoc-members:
     :show-inheritance:
 
-time_distributed_embedding
---------------------------
+TimeDistributedEmbedding
+------------------------
 
 .. automodule:: deep_qa.layers.time_distributed_embedding
     :members:
@@ -91,8 +136,8 @@ time_distributed_embedding
     :undoc-members:
     :show-inheritance:
 
-top_knowledge_selector
-----------------------
+TopKnowledgeSelector
+--------------------
 
 .. automodule:: deep_qa.layers.top_knowledge_selector
     :members:
@@ -100,8 +145,8 @@ top_knowledge_selector
     :undoc-members:
     :show-inheritance:
 
-vector_matrix_merge
--------------------
+VectorMatrixMerge
+-----------------
 
 .. automodule:: deep_qa.layers.vector_matrix_merge
     :members:
@@ -109,8 +154,8 @@ vector_matrix_merge
     :undoc-members:
     :show-inheritance:
 
-vector_matrix_split
--------------------
+VectorMatrixSplit
+-----------------
 
 .. automodule:: deep_qa.layers.vector_matrix_split
     :members:
@@ -118,7 +163,7 @@ vector_matrix_split
     :undoc-members:
     :show-inheritance:
 
-wrappers
+Wrappers
 --------
 
 .. automodule:: deep_qa.layers.wrappers

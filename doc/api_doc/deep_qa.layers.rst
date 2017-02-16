@@ -4,6 +4,7 @@ deep_qa.layers
 .. toctree::
 
     deep_qa.layers.encoders
+    deep_qa.layers.backend
     deep_qa.layers.entailment_models
     deep_qa.layers.attention
 
@@ -19,6 +20,30 @@ deep_qa.layers.additive
 -----------------------
 
 .. automodule:: deep_qa.layers.additive
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.bigru_index_selector
+------------------------------------
+
+.. automodule:: deep_qa.layers.bigru_index_selector
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.complex_concat
+-----------------------------
+
+.. automodule:: deep_qa.layers.complex_concat
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.highway
+----------------------
+
+.. automodule:: deep_qa.layers.highway
     :members:
     :undoc-members:
     :show-inheritance:
@@ -63,10 +88,26 @@ deep_qa.layers.memory_updaters
     :undoc-members:
     :show-inheritance:
 
+deep_qa.layers.noisy_or
+-----------------------------------
+
+.. automodule:: deep_qa.layers.noisy_or
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 deep_qa.layers.option_attention_sum
 -----------------------------------
 
 .. automodule:: deep_qa.layers.option_attention_sum
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.overlap
+----------------------
+
+.. automodule:: deep_qa.layers.overlap
     :members:
     :undoc-members:
     :show-inheritance:

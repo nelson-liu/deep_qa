@@ -1,5 +1,7 @@
 # pylint: disable=invalid-name
 import codecs
+import gzip
+import shutil
 
 from deep_qa.models.memory_networks.memory_network import MemoryNetwork
 from deep_qa.models.multiple_choice_qa.multiple_true_false_similarity import MultipleTrueFalseSimilarity
@@ -10,6 +12,8 @@ from .constants import TRAIN_BACKGROUND
 from .constants import VALIDATION_FILE
 from .constants import VALIDATION_BACKGROUND
 from .constants import SNLI_FILE
+from .constants import PRETRAINED_VECTORS_FILE
+from .constants import PRETRAINED_VECTORS_GZIP
 
 
 def get_model(cls, additional_arguments=None):
@@ -18,8 +22,8 @@ def get_model(cls, additional_arguments=None):
     params['model_serialization_prefix'] = TEST_DIR
     params['train_files'] = [TRAIN_FILE]
     params['validation_files'] = [VALIDATION_FILE]
-    params['embedding_size'] = 5
-    params['encoder'] = {'type': 'bow'}
+    params['embedding_size'] = 6
+    params['encoder'] = {"default": {'type': 'bow'}}
     params['num_epochs'] = 1
     params['keras_validation_split'] = 0.0
     if is_model_with_background(cls):
@@ -134,22 +138,41 @@ def write_question_answer_memory_network_files():
         train_background.write('3\tsb4\n')
         train_background.write('4\tsb5\tsb6\n')
 
+def write_who_did_what_files():
+    with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as train_file:
+        train_file.write('1\tHe went to the store to buy goods.\tHe bought xxxxx\tgoods###store\t0\n')
+        train_file.write('1\tShe hiking on the weekend with her friend.'
+                         '\tShe went xxxxx\thiking###friend###weekend\t0\n')
+    with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
+        # document, question, answers
+        train_file.write('1\tFred hit the ball with the bat.\tHe hit the ball with the xxxxx\tbat###ball\t0\n')
+        train_file.write('1\tShe walked the dog today.\tThe xxxxx was walked today.\tShe###dog###today\t1\n')
+        train_file.write('1\tHe kept typing at his desk.\tHe typed at  his xxxxx\tdesk###kept\t0\n')
+        train_file.write('1\tThe pup at the bone but not the biscuit.\tThe pup ate the xxxxx\tbone###biscuit\t0\n')
+
+def write_span_prediction_files():
+    with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as train_file:
+        train_file.write('1\tquestion 1\tpassage with answer\t13,18\n')
+    with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
+        train_file.write('1\tquestion 1\tpassage1 with answer1\t14,20\n')
+        train_file.write('2\tquestion 2\tpassage2 with answer2\t0,8\n')
+        train_file.write('3\tquestion 3\tpassage3 with answer3\t9,13\n')
+        train_file.write('4\tquestion 4\tpassage4 with answer4\t14,20\n')
+
+
+def write_pretrained_vector_files():
+    # write the file
+    with codecs.open(PRETRAINED_VECTORS_FILE, 'w', 'utf-8') as vector_file:
+        vector_file.write('word2 0.21 0.57 0.51 0.31\n')
+        vector_file.write('sentence1 0.81 0.48 0.19 0.47\n')
+    # compress the file
+    with open(PRETRAINED_VECTORS_FILE, 'rb') as f_in, gzip.open(PRETRAINED_VECTORS_GZIP, 'wb') as f_out:
+        shutil.copyfileobj(f_in, f_out)
 
 def is_memory_network(cls):
     if issubclass(cls, MemoryNetwork):
         return True
     return False
-
-
-def write_who_did_what_files():
-    with codecs.open(VALIDATION_FILE, 'w', 'utf-8') as train_file:
-        train_file.write('1\tpassage1\tleftcontext1\trightcontext1\tanswer1###answer2\t0\n')
-    with codecs.open(TRAIN_FILE, 'w', 'utf-8') as train_file:
-        # document, leftcontext, rightcontext, answers
-        train_file.write('1\te q e q ka q o\ta b\te i d\tanswer1 word2###answer2\t0\n')
-        train_file.write('2\tm a os e z p\ta b\tc d\tanswer3###answer4\t1\n')
-        train_file.write('3\tx e q m\te d w f d\ts a\tanswer5###answer6###answer9\t2\n')
-        train_file.write('4\tj aq ei q l\te fj\tk w q\tanswer7###answer8\t0\n')
 
 
 def is_model_with_background(cls):

@@ -2,7 +2,7 @@ from typing import Any, Dict
 from overrides import overrides
 from keras.layers import Input
 
-from ...data.instances.whodidwhat_instance import WhoDidWhatInstance
+from ...data.instances.mc_question_answer_instance import McQuestionAnswerInstance
 from ...layers.attention.attention import Attention
 from ...layers.option_attention_sum import OptionAttentionSum
 from ...layers.l1_normalize import L1Normalize
@@ -62,7 +62,7 @@ class AttentionSumReader(TextTrainer):
         document_input = Input(shape=self._get_sentence_shape(self.max_passage_length),
                                dtype='int32',
                                name="document_input")
-        # shape: (batch size, max number of options, num_options)
+        # shape: (batch size, num_options, options_length)
         options_input = Input(shape=(self.num_options,) + self._get_sentence_shape(self.max_option_length),
                               dtype='int32', name="options_input")
         # shape: (batch size, question_length, embedding size)
@@ -72,22 +72,22 @@ class AttentionSumReader(TextTrainer):
         document_embedding = self._embed_input(document_input)
 
         # We encode the question embeddings with some encoder.
-        question_encoder = self._get_sentence_encoder()
+        question_encoder = self._get_encoder()
         # shape: (batch size, 2*embedding size)
         encoded_question = question_encoder(question_embedding)
 
-        # We encode the document with a seq2seq encoder. Note that
-        # this is not the same encoder as used for the question
-        # TODO(nelson): Enable using the same encoder for both
-        # document and question.
-        seq2seq_input_shape = self._get_sentence_shape(self.max_passage_length) + (self.embedding_size,)
-        document_encoder = self._get_seq2seq_encoder(input_shape=seq2seq_input_shape)
+        # We encode the document with a seq2seq encoder. Note that this is not the same encoder as
+        # used for the question.
+        # TODO(nelson): Enable using the same encoder for both document and question.  (This would
+        # be hard in our current code; you would need a method to transform an encoder into a
+        # seq2seq encoder.)
+        document_encoder = self._get_seq2seq_encoder()
         # shape: (batch size, document_length, 2*embedding size)
         encoded_document = document_encoder(document_embedding)
 
         # Here we take the dot product of `encoded_question` and each word
         # vector in `encoded_document`.
-        # shape: (batch size, max docuent length in words)
+        # shape: (batch size, max document length in words)
         document_probabilities = Attention(name='question_document_softmax')([encoded_question,
                                                                               encoded_document])
         # We sum together the weights of words that match each option.
@@ -110,7 +110,7 @@ class AttentionSumReader(TextTrainer):
         """
         Return the instance type that the model trains on.
         """
-        return WhoDidWhatInstance
+        return McQuestionAnswerInstance
 
     @overrides
     def _get_max_lengths(self) -> Dict[str, int]:
@@ -143,3 +143,11 @@ class AttentionSumReader(TextTrainer):
     def _set_max_lengths_from_model(self):
         self.max_sentence_length = self.model.get_input_shape_at(0)[1]
         # TODO(matt): implement this correctly
+
+    @classmethod
+    def _get_custom_objects(cls):
+        custom_objects = super(AttentionSumReader, cls)._get_custom_objects()
+        custom_objects["Attention"] = Attention
+        custom_objects["L1Normalize"] = L1Normalize
+        custom_objects["OptionAttentionSum"] = OptionAttentionSum
+        return custom_objects
