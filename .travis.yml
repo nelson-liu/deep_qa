@@ -13,7 +13,7 @@ cache:
 env:
   matrix:
     # test tensorflow keras backend
-    - KERAS_BACKEND="tensorflow"
+    - KERAS_BACKEND="tensorflow" COVERAGE="true"
     # test theano keras backend
     - KERAS_BACKEND="theano"
     # pylint checks skip the tests
@@ -24,3 +24,4 @@ notifications:
 
 install: source build_tools/travis/install.sh
 script: bash build_tools/travis/test_script.sh
+after_success: source build_tools/travis/after_success.sh
