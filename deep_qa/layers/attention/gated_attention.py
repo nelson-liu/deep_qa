@@ -73,7 +73,6 @@ class GatedAttention(Layer):
         # pylint: disable=unused-argument
         return mask[0]
 
-
     def get_output_shape_for(self, input_shapes):
         return (input_shapes[0][0], input_shapes[0][1], input_shapes[0][2])
 
@@ -124,3 +123,8 @@ class GatedAttention(Layer):
             raise ConfigurationError("Invalid gating function "
                                      "{}, expected one of {}".format(self.gating_function,
                                                                      GATING_FUNCTIONS))
+
+    def get_config(self):
+        config = {'gating_function': self.gating_function}
+        base_config = super(GatedAttention, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
