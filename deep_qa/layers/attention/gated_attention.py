@@ -127,4 +127,5 @@ class GatedAttention(Layer):
     def get_config(self):
         config = {'gating_function': self.gating_function}
         base_config = super(GatedAttention, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        config.update(base_config)
+        return config
