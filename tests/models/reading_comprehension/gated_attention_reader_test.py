@@ -71,14 +71,14 @@ class TestGatedAttention(TestCase):
         model.train()
         # verify that the gated attention function was set properly
         assert model.gating_function == "+"
-        assert model.gating_function == model.model.get_layer("gatedattention_1").gating_function
+        assert model.gating_function == model.model.get_layer("gated_attention_0").gating_function
 
         # load the model that we serialized
         loaded_model = get_model(GatedAttentionReader, args)
         loaded_model.load_model()
         # verify that the gated attention function was set properly
         assert loaded_model.gating_function == "+"
-        assert loaded_model.gating_function == loaded_model.model.get_layer("gatedattention_1").gating_function
+        assert loaded_model.gating_function == loaded_model.model.get_layer("gated_attention_0").gating_function
 
         # verify that original model and the loaded model predict the same outputs
         assert_allclose(model.model.predict(model.__dict__["validation_input"]),
@@ -133,14 +133,14 @@ class TestGatedAttention(TestCase):
         model.train()
         # verify that the gated attention function was set properly
         assert model.gating_function == "+"
-        assert model.gating_function == model.model.get_layer("gatedattention_2").gating_function
+        assert model.gating_function == model.model.get_layer("gated_attention_0").gating_function
 
         # load the model that we serialized
         loaded_model = get_model(GatedAttentionReader, args)
         loaded_model.load_model()
         # verify that the gated attention function was set properly
         assert loaded_model.gating_function == "+"
-        assert loaded_model.gating_function == loaded_model.model.get_layer("gatedattention_2").gating_function
+        assert loaded_model.gating_function == loaded_model.model.get_layer("gated_attention_0").gating_function
 
         # verify that original model and the loaded model predict the same outputs
         assert_allclose(model.model.predict(model.__dict__["validation_input"]),

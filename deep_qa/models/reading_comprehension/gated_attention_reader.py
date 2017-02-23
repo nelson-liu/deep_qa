@@ -159,7 +159,8 @@ class GatedAttentionReader(TextTrainer):
             # (batch size, document length, question length)
             normalized_qd_attention = MaskedSoftmax()([qd_attention])
 
-            gated_attention_layer = GatedAttention(self.gating_function)
+            gated_attention_layer = GatedAttention(self.gating_function,
+                                                   name="gated_attention_{}".format(i))
             # shape: (batch size, document_length, 2*seq2seq hidden size)
             document_embedding = gated_attention_layer([encoded_document,
                                                         encoded_question,
