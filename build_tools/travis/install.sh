@@ -28,7 +28,7 @@ if [[ ! -d /home/travis/miniconda3 ]]
     # If we are running pylint, use Python 3.5.2 due to
     # bug in pylint. https://github.com/PyCQA/pylint/issues/1295
     if [[ "$RUN_PYLINT" == "true" ]]; then
-        conda create -n testenv --yes python=3.5.2
+        conda create -n testenv352 --yes python=3.5.2
     else
         conda create -n testenv --yes python=3.5
     fi
@@ -37,7 +37,11 @@ cd ..
 popd
 
 # Activate the python environment we created.
-source activate testenv
+if [[ "$RUN_PYLINT" == "true" ]]; then
+    source activate testenv352
+else
+    source activate testenv
+fi
 
 # Install requirements via pip in our conda environment
 pip install -r requirements.txt
