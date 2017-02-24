@@ -57,7 +57,6 @@ class MatrixAttention(Layer):
 
     @overrides
     def build(self, input_shape):
-        print("MatrixAttention build called")
         similarity_function_shape = self.get_output_shape_for(input_shape) + (input_shape[0][-1],)
         self.trainable_weights = self.similarity_function.initialize_weights(similarity_function_shape)
         super(MatrixAttention, self).build(input_shape)
