@@ -30,7 +30,7 @@ class MatrixAttention(Layer):
     Output:
         - ``(batch_size, num_rows_1, num_rows_2)``, with mask of same shape
     '''
-    def __init__(self, **kwargs):
+    def __init__(self, weights=None, **kwargs):
         self.supports_masking = True
         # We need to wait until below to actually handle this, because self.name gets set in
         # super.__init__.
@@ -41,10 +41,14 @@ class MatrixAttention(Layer):
                                                       list(similarity_functions.keys()))
         similarity_function_params['name'] = self.name + '_similarity_function'
         self.similarity_function = similarity_functions[sim_function_choice](**similarity_function_params)
+        self.initial_weights = weights
 
     def build(self, input_shape):
         similarity_function_shape = self.get_output_shape_for(input_shape) + (input_shape[0][-1],)
         self.trainable_weights = self.similarity_function.initialize_weights(similarity_function_shape)
+        if self.initial_weights is not None:
+            self.set_weights(self.initial_weights)
+            del self.initial_weights
         super(MatrixAttention, self).build(input_shape)
 
     def compute_mask(self, inputs, mask=None):
