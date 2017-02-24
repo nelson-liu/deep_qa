@@ -1,5 +1,9 @@
+from copy import deepcopy
+from typing import Any, Dict
+
 from keras import backend as K
 from keras.layers import Layer
+from overrides import overrides
 
 from ...common.params import get_choice_with_default
 from ...tensors.similarity_functions import similarity_functions
@@ -29,28 +33,36 @@ class MatrixAttention(Layer):
 
     Output:
         - ``(batch_size, num_rows_1, num_rows_2)``, with mask of same shape
+
+    Parameters
+    ----------
+    similarity_function_params: Dict[str, Any], default={}
+        These parameters get passed to a similarity function (see the module for more info on
+        what's acceptable here: :mod:`deep_qa.tensors.similarity_functions`).  The default
+        similarity function with no parameters is a simple dot product.
     '''
-    def __init__(self, weights=None, **kwargs):
+    def __init__(self, similarity_function: Dict[str, Any]=None, **kwargs):
         self.supports_masking = True
         # We need to wait until below to actually handle this, because self.name gets set in
         # super.__init__.
-        similarity_function_params = kwargs.pop('similarity_function', {})
         super(MatrixAttention, self).__init__(**kwargs)
-        sim_function_choice = get_choice_with_default(similarity_function_params,
+        self.similarity_function_params = deepcopy(similarity_function)
+        sim_function_choice = get_choice_with_default(similarity_function,
                                                       'type',
                                                       list(similarity_functions.keys()))
-        similarity_function_params['name'] = self.name + '_similarity_function'
-        self.similarity_function = similarity_functions[sim_function_choice](**similarity_function_params)
-        self.initial_weights = weights
+        if similarity_function is None:
+            similarity_function = {}
+        similarity_function['name'] = self.name + '_similarity_function'
+        self.similarity_function = similarity_functions[sim_function_choice](**similarity_function)
 
+    @overrides
     def build(self, input_shape):
+        print("MatrixAttention build called")
         similarity_function_shape = self.get_output_shape_for(input_shape) + (input_shape[0][-1],)
         self.trainable_weights = self.similarity_function.initialize_weights(similarity_function_shape)
-        if self.initial_weights is not None:
-            self.set_weights(self.initial_weights)
-            del self.initial_weights
         super(MatrixAttention, self).build(input_shape)
 
+    @overrides
     def compute_mask(self, inputs, mask=None):
         # pylint: disable=unused-argument
         mask_1, mask_2 = mask
@@ -65,9 +77,11 @@ class MatrixAttention(Layer):
         mask_2 = K.cast(K.expand_dims(mask_2, dim=1), 'float32')
         return K.cast(K.batch_dot(mask_1, mask_2), 'uint8')
 
+    @overrides
     def get_output_shape_for(self, input_shape):
         return (input_shape[0][0], input_shape[0][1], input_shape[1][1])
 
+    @overrides
     def call(self, inputs, mask=None):
         """
         NOTE: This does not work if ``num_rows_1`` or ``num_rows_2`` is ``None``!  I tried to get
@@ -79,3 +93,10 @@ class MatrixAttention(Layer):
         tiled_matrix_1 = K.repeat_elements(K.expand_dims(matrix_1, dim=2), num_rows_2, axis=2)
         tiled_matrix_2 = K.repeat_elements(K.expand_dims(matrix_2, dim=1), num_rows_1, axis=1)
         return self.similarity_function.compute_similarity(tiled_matrix_1, tiled_matrix_2)
+
+    @overrides
+    def get_config(self):
+        base_config = super(MatrixAttention, self).get_config()
+        config = {'similarity_function': self.similarity_function_params}
+        config.update(base_config)
+        return config

@@ -20,11 +20,11 @@ class TestBidirectionalAttentionFlow(TestCase):
         os.makedirs(TEST_DIR, exist_ok=True)
         write_span_prediction_files()
 
-    # def tearDown(self):
-    #     shutil.rmtree(TEST_DIR)
+    def tearDown(self):
+        shutil.rmtree(TEST_DIR)
 
     @requires_tensorflow
-    def test_train_does_not_crash(self):
+    def test_trains_and_loads_correctly(self):
         args = {
                 'save_models': True,
                 'show_summary_with_masking_info': True,
