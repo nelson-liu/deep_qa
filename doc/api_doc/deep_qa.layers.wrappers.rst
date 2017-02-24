@@ -9,26 +9,18 @@ deep_qa.layers.wrappers.encoder_wrapper
     :undoc-members:
     :show-inheritance:
 
-deep_qa.layers.wrappers.fixed_time_distributed
-----------------------------------------------
-
-.. automodule:: deep_qa.layers.wrappers.fixed_time_distributed
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-deep_qa.layers.wrappers.multi_input_time_distributed
-----------------------------------------------------
-
-.. automodule:: deep_qa.layers.wrappers.multi_input_time_distributed
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-deep_qa.layers.wrappers.debug_output_mask
+deep_qa.layers.wrappers.output_mask
 -----------------------------------------
 
-.. automodule:: deep_qa.layers.wrappers.debug_output_mask
+.. automodule:: deep_qa.layers.wrappers.output_mask
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+deep_qa.layers.wrappers.time_distributed
+----------------------------------------------
+
+.. automodule:: deep_qa.layers.wrappers.time_distributed
     :members:
     :undoc-members:
     :show-inheritance:
