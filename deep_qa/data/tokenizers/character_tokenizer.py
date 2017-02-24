@@ -29,8 +29,8 @@ class CharacterTokenizer(Tokenizer):
 
     @overrides
     def embed_input(self,
-                    input_layer: 'keras.layers.Layer',
-                    text_trainer: 'TextTrainer',
+                    input_layer,
+                    text_trainer,
                     embedding_name: str="embedding"):
         # pylint: disable=protected-access
         return text_trainer._get_embedded_input(input_layer,
