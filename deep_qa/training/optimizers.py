@@ -1,4 +1,4 @@
-"""
+r"""
 It turns out that Keras' design is somewhat crazy\*, and there is no list of
 optimizers that you can just import from Keras. So, this module specifies a
 list, and a helper function or two for dealing with optimizer parameters.
