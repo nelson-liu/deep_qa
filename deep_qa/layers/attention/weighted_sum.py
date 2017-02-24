@@ -10,12 +10,14 @@ class WeightedSum(MaskedLayer):
     computing an attention over the sentence, for example.
 
     Inputs:
-        - matrix: ``(batch_size, num_rows, embedding_dim)``, with mask ``(batch_size, num_rows)``
-        - vector: ``(batch_size, num_rows)``, mask is ignored
 
-    Output:
-        - A weighted sum of the rows in the matrix, with shape ``(batch_size, embedding_dim)``,
-          with mask=``None``.
+    - matrix: ``(batch_size, num_rows, embedding_dim)``, with mask ``(batch_size, num_rows)``
+    - vector: ``(batch_size, num_rows)``, mask is ignored
+
+    Outputs:
+
+    - A weighted sum of the rows in the matrix, with shape ``(batch_size, embedding_dim)``, with
+      mask=``None``.
 
     Parameters
     ----------
