@@ -47,11 +47,11 @@ class MatrixAttention(Layer):
         # super.__init__.
         super(MatrixAttention, self).__init__(**kwargs)
         self.similarity_function_params = deepcopy(similarity_function)
+        if similarity_function is None:
+            similarity_function = {}
         sim_function_choice = get_choice_with_default(similarity_function,
                                                       'type',
                                                       list(similarity_functions.keys()))
-        if similarity_function is None:
-            similarity_function = {}
         similarity_function['name'] = self.name + '_similarity_function'
         self.similarity_function = similarity_functions[sim_function_choice](**similarity_function)
 
