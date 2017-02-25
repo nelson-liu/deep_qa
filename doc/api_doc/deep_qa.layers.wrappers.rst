@@ -10,7 +10,7 @@ deep_qa.layers.wrappers.encoder_wrapper
     :show-inheritance:
 
 deep_qa.layers.wrappers.output_mask
------------------------------------------
+-----------------------------------
 
 .. automodule:: deep_qa.layers.wrappers.output_mask
     :members:
@@ -18,7 +18,7 @@ deep_qa.layers.wrappers.output_mask
     :show-inheritance:
 
 deep_qa.layers.wrappers.time_distributed
-----------------------------------------------
+----------------------------------------
 
 .. automodule:: deep_qa.layers.wrappers.time_distributed
     :members:
