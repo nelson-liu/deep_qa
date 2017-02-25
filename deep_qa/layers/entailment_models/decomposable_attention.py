@@ -9,7 +9,7 @@ from ...tensors.backend import switch, apply_feed_forward
 
 
 class DecomposableAttentionEntailment(WordAlignmentEntailment):
-    '''
+    """
     This layer is a reimplementation of the entailment algorithm described in
     "A Decomposable Attention Model for Natural Language Inference", Parikh et
     al., 2016. The algorithm has three main steps:
@@ -34,15 +34,15 @@ class DecomposableAttentionEntailment(WordAlignmentEntailment):
     This layer can take either a tuple (premise, hypothesis) or a concatenation
     of them as input.
 
-    Expected shapes:
+    Input:
 
-    - tuple input: ``(batch_size, sentence_length, embed_dim)``, ``(batch_size, sentence_length, embed_dim)``
-    - single input: (batch_size, sentence_length*2, embed_dim)
+    - tuple input: shape ``(batch_size, sentence_length, embed_dim)``, ``(batch_size, sentence_length, embed_dim)``
+    - single input: shape ``(batch_size, sentence_length*2, embed_dim)``
 
     Notes
     -----
     premise_length = hypothesis_length = sentence_length below.
-    '''
+    """
     def __init__(self, params: Dict[str, Any]):
         self.num_hidden_layers = params.pop('num_hidden_layers', 1)
         self.hidden_layer_width = params.pop('hidden_layer_width', 50)

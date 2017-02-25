@@ -66,15 +66,16 @@ class Tokenizer:
 
         Parameters
         ----------
-        input_layer: Keras Input() layers
+        input_layer: Keras ``Input()`` layer
             The layer to embed.
 
         text_trainer: TextTrainer
             A TextTrainer instance so we can access methods on it like
-            `text_trainer._get_embedded_input`, which actually applies an embedding layer, projection
-            layers, and dropout to the input layer.  Simple TextEncoders will basically just call
-            this function and be done.  More complicated TextEncoders might need additional logic on
-            top of just calling `text_trainer._get_embedded_input`.
+            ``text_trainer._get_embedded_input``, which actually applies an
+            embedding layer, projection layers, and dropout to the input layer.
+            Simple TextEncoders will basically just call this function and be done.
+            More complicated TextEncoders might need additional logic on
+            top of just calling ``text_trainer._get_embedded_input``.
 
         embedding_name: str, optional (default="embedding")
             The name to assign the embedding layer, which allows for

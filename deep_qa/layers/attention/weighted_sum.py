@@ -4,7 +4,7 @@ from overrides import overrides
 from ..masked_layer import MaskedLayer
 
 class WeightedSum(MaskedLayer):
-    '''
+    """
     This ``Layer`` takes a matrix of vectors and a vector of row weights, and returns a weighted
     sum of the vectors.  You might use this to get some aggregate sentence representation after
     computing an attention over the sentence, for example.
@@ -51,7 +51,7 @@ class WeightedSum(MaskedLayer):
     But you _can't_ have an attention "vector" that does not include all of the queries, so shape
     (batch_size, num_words) is not allowed - you haven't specified how to handle that dimension in
     the "matrix", so we can't do anything with this input.
-    '''
+    """
     def __init__(self, use_masking: bool=True, **kwargs):
         self.use_masking = use_masking
         super(WeightedSum, self).__init__(**kwargs)

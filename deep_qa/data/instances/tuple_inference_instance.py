@@ -369,7 +369,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         Pads (or truncates) each indexed tuple in answers_indexed and
         background_indexed to specified lengths, using the superclass methods
         ``pad_sequence_to_length`` (for padding number of options, number of
-        tuples, and number of slots per tuple) and ''pad_word_sequence`` (for
+        tuples, and number of slots per tuple) and ``pad_word_sequence`` (for
         padding the words in each slot).
 
         When padding the number of answer options, if there are more answers
@@ -439,7 +439,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         -------
         tuple_in: List[List[int]]
             In the returned (modified) list, the length matches the desired_num_slots and each of
-            the slots has a length equal to the value set by 'num_sentence_words' in max_lengths.
+            the slots has a length equal to the value set by ``num_sentence_words`` in max_lengths.
         """
         desired_num_slots = max_lengths['num_slots']
         tuple_in = self.pad_sequence_to_length(tuple_in, desired_num_slots,

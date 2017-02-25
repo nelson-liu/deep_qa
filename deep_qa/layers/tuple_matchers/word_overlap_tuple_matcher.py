@@ -36,7 +36,8 @@ class WordOverlapTupleMatcher(MaskedLayer):
       match tuple 1.
 
     Output:
-        - entailment score, shape ``(batch, 1)``
+
+    - entailment score, shape ``(batch, 1)``
 
     Parameters
     ----------
