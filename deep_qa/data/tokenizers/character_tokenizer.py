@@ -1,5 +1,5 @@
 from typing import Any, Dict, List, Tuple
-
+from keras.layers import Layer
 from overrides import overrides
 
 from .tokenizer import Tokenizer
@@ -29,7 +29,7 @@ class CharacterTokenizer(Tokenizer):
 
     @overrides
     def embed_input(self,
-                    input_layer,
+                    input_layer: Layer,
                     text_trainer,
                     embedding_name: str="embedding"):
         # pylint: disable=protected-access

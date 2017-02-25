@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Tuple
 
 from overrides import overrides
+from keras.layers import Layer
 
 from .tokenizer import Tokenizer
 from .word_processor import WordProcessor
@@ -43,7 +44,7 @@ class WordTokenizer(Tokenizer):
 
     @overrides
     def embed_input(self,
-                    input_layer,
+                    input_layer: Layer,
                     text_trainer,
                     embedding_name: str="embedding"):
         # pylint: disable=protected-access
