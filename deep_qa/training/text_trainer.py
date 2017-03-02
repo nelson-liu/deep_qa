@@ -121,13 +121,14 @@ class TextTrainer(Trainer):
         self._sentence_encoder_model = None
 
     @overrides
-    def _prepare_data(self, dataset: TextDataset, for_train: bool):
+    def _prepare_data(self, dataset: TextDataset, for_train: bool,
+                      update_data_indexer=True):
         """
         Takes dataset, which could be a complex tuple for some classes, and produces as output a
         tuple of (inputs, labels), which can be used directly with Keras to either train or
         evaluate self.model.
         """
-        if for_train:
+        if for_train and update_data_indexer:
             self.data_indexer.fit_word_dictionary(dataset)
         logger.info("Indexing dataset")
         indexed_dataset = dataset.to_indexed_dataset(self.data_indexer)
