@@ -229,6 +229,15 @@ class DeepQaTestCase(TestCase):
             train_file.write('3\tquestion 3\tpassage3 with answer3\t9,13\n')
             train_file.write('4\tquestion 4\tpassage4 with answer4\t14,20\n')
 
+    def write_additional_span_prediction_files(self):
+        with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as train_file:
+            train_file.write('1\tquestion 2\tpassage with perhaps the answer\t13,18\n')
+        with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
+            train_file.write('1\tquestion 5\tpassage5 with answer5 answer3\t14,20\n')
+            train_file.write('2\tquestion 6\tpassage6 with answer6\t0,8\n')
+            train_file.write('3\tquestion 7\tpassage7 with answer7\t9,13\n')
+            train_file.write('4\tquestion 8\tpassage8 with answer8\t14,20\n')
+
     def write_pretrained_vector_files(self):
         # write the file
         with codecs.open(self.PRETRAINED_VECTORS_FILE, 'w', 'utf-8') as vector_file:
