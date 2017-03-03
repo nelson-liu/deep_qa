@@ -223,8 +223,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         # the passage input or the question input is arbitrary, as the
         # two word lengths are guaranteed to be the same and BiDAF ignores
         # self.max_sentence_length.
-        super(BidirectionalAttentionFlow, self)._set_max_lengths_from_model_input(
-                self.model.get_input_shape_at(0)[1][2:])
+        self.set_max_lengths_from_model_input(self.model.get_input_shape_at(0)[1][2:])
 
     @classmethod
     def _get_custom_objects(cls):
