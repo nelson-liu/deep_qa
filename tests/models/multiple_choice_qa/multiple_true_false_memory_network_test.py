@@ -32,7 +32,7 @@ class TestMultipleTrueFalseMemoryNetwork(DeepQaTestCase):
                                                          loaded_model.validation_files,
                                                          update_data_indexer=False)
         _, train_input, train_labels = train_data
-        _, validation_input, _ = val_data
+        # _, validation_input, _ = val_data
         model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
         loaded_model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
 

@@ -3,7 +3,6 @@ from unittest import mock
 
 import numpy
 from numpy.testing import assert_allclose
-import random
 
 from deep_qa.common.params import get_choice_with_default
 from deep_qa.layers.encoders import encoders
@@ -165,7 +164,7 @@ class TestTextTrainer(DeepQaTestCase):
                                                          loaded_model.validation_files,
                                                          update_data_indexer=False)
         _, train_input, train_labels = train_data
-        _, validation_input, _ = val_data
+        # _, validation_input, _ = val_data
         model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
         loaded_model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
 
