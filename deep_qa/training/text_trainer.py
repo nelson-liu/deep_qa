@@ -277,7 +277,7 @@ class TextTrainer(Trainer):
         """
         raise NotImplementedError
 
-    def set_max_lengths_from_model_input(self, input_slice):
+    def set_text_lengths_from_model_input(self, input_slice):
         """
         Given an input slice (a tuple) from a model representing the max
         length of the sentences and the max length of each words, set the
