@@ -1,6 +1,7 @@
 # pylint: disable=invalid-name
 from unittest import TestCase
 import codecs
+from copy import deepcopy
 import gzip
 import logging
 import os
@@ -49,7 +50,7 @@ class DeepQaTestCase(TestCase):
             params['entailment_input_combiner'] = {'type': 'memory_only'}
         if additional_arguments:
             for key, value in additional_arguments.items():
-                params[key] = value
+                params[key] = deepcopy(value)
         return cls(params)
 
     def write_snli_file(self):

@@ -3,6 +3,7 @@ from unittest import mock
 
 import numpy
 from numpy.testing import assert_allclose
+import random
 
 from deep_qa.common.params import get_choice_with_default
 from deep_qa.layers.encoders import encoders
@@ -165,7 +166,11 @@ class TestTextTrainer(DeepQaTestCase):
                                                          update_data_indexer=False)
         _, train_input, train_labels = train_data
         _, validation_input, _ = val_data
+        random.seed(13370)
+        numpy.random.seed(1337)  # pylint: disable=no-member
         model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
+        random.seed(13370)
+        numpy.random.seed(1337)  # pylint: disable=no-member
         loaded_model.model.fit(train_input, train_labels, shuffle=False, nb_epoch=1)
 
         # verify that original model and the loaded model predict the same outputs
