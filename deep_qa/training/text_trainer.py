@@ -277,6 +277,29 @@ class TextTrainer(Trainer):
         """
         raise NotImplementedError
 
+    def _set_max_lengths_from_model_input(self, input_slice):
+        """
+        Given an input slice (a tuple) from a model representing the max
+        length of the sentences and the max length of each words, set the
+        padding max lengths.
+
+        Parameters
+        ----------
+        input_slice : tuple
+            A slice from a concrete model class that represents an input
+            word sequence. The tuple must be of length one or two, and the
+            first dimension should correspond to the length of the sentences
+            while the second dimension (if provided) should correspond to the
+            max length of the words in each sentence.
+        """
+        if len(input_slice) > 2:
+            raise ValueError("Length of input tuple must be "
+                             "2 or 1, got input tuple of "
+                             "length {}".format(len(input_slice)))
+        self.max_sentence_length = input_slice[0]
+        if len(input_slice) == 2:
+            self.max_word_length = input_slice[1]
+
     def _instance_type(self) -> Instance:
         """
         When reading datasets, what instance type should we create?

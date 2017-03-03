@@ -27,6 +27,7 @@ class TestMultipleTrueFalseMemoryNetwork(DeepQaTestCase):
 
         # now fit both models on some more data, and ensure that we get the same results.
         self.write_additional_multiple_true_false_memory_network_files()
+        # pylint: disable=unused-variable
         train_data, val_data = loaded_model.prepare_data(loaded_model.train_files,
                                                          loaded_model.max_training_instances,
                                                          loaded_model.validation_files,
