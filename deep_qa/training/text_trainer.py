@@ -250,7 +250,7 @@ class TextTrainer(Trainer):
         a saved model.
         """
         self.max_sentence_length = max_lengths['max_sentence_length']
-        self.max_word_length = max_lengths.get('word_character_length', None)
+        self.max_word_length = max_lengths.get('max_word_length', None)
 
     @overrides
     def _set_params_from_model(self):

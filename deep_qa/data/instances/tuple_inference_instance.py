@@ -287,7 +287,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
                    'max_sentence_length': max_slot_length,
                    'num_slots': max_num_slots}
         if max_word_length > 0:
-            lengths['word_character_length'] = max_word_length
+            lengths['max_word_length'] = max_word_length
         return lengths
 
     @staticmethod
@@ -321,8 +321,8 @@ class IndexedTupleInferenceInstance(IndexedInstance):
             for slot in indexed_tuple:
                 max_sentence_lengths = IndexedInstance._get_max_sentence_lengths(slot)
                 max_slot_words = max(max_slot_words, max_sentence_lengths['max_sentence_length'])
-                if 'word_character_length' in max_sentence_lengths:
-                    max_word_length = max(max_word_length, max_sentence_lengths['word_character_length'])
+                if 'max_word_length' in max_sentence_lengths:
+                    max_word_length = max(max_word_length, max_sentence_lengths['max_word_length'])
 
         return max_num_slots, max_slot_words, max_word_length
 
@@ -388,7 +388,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
                 - 'num_slots': the number of slots desired
                 - 'max_sentence_length': the number of words in a given slot
             May also include:
-                - 'word_character_length': the length of each word,
+                - 'max_word_length': the length of each word,
                 relevant when using a ``WordAndCharacterTokenizer``.
 
         Returns

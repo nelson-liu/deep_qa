@@ -238,13 +238,13 @@ class IndexedInstance(Instance):
         dictionary containing 'max_sentence_length', which is the number of
         words in word_indices. If the word representations also contain
         characters, the dictionary additionally contains a
-        'word_character_length' key, with a value corresponding to the longest
+        'max_word_length' key, with a value corresponding to the longest
         word in the sequence.
         """
         lengths = {'max_sentence_length': len(word_indices)}
         if len(word_indices) > 0 and not isinstance(word_indices[0], int):
             if isinstance(word_indices[0], list):
-                lengths['word_character_length'] = max([len(word) for word in word_indices])
+                lengths['max_word_length'] = max([len(word) for word in word_indices])
             # There might someday be other cases we're missing here, but we'll punt for now.
         return lengths
 
@@ -285,14 +285,14 @@ class IndexedInstance(Instance):
         direction, you can.
         """
         default_value = lambda: 0
-        if 'word_character_length' in lengths:
+        if 'max_word_length' in lengths:
             default_value = lambda: []
 
         padded_word_sequence = IndexedInstance.pad_sequence_to_length(
                 word_sequence, lengths['max_sentence_length'], default_value, truncate_from_right)
-        if 'word_character_length' in lengths:
+        if 'max_word_length' in lengths:
             padded_word_sequence = [IndexedInstance.pad_sequence_to_length(
-                    word, lengths['word_character_length'], truncate_from_right=False)
+                    word, lengths['max_word_length'], truncate_from_right=False)
                                     for word in padded_word_sequence]
         return padded_word_sequence
 

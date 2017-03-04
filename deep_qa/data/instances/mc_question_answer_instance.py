@@ -119,12 +119,12 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
         lengths['num_option_words'] = max([lengths['max_sentence_length'] for
                                            lengths in option_lengths])
         # the length of the longest word across the passage, question, and options
-        if 'word_character_length' in option_lengths[0]:
+        if 'max_word_length' in option_lengths[0]:
             # length of longest word (in characters) in options
-            max_option_word_length = max([lengths['word_character_length'] for
+            max_option_word_length = max([lengths['max_word_length'] for
                                           lengths in option_lengths])
 
-            lengths['word_character_length'] = max(lengths['word_character_length'],
+            lengths['max_word_length'] = max(lengths['max_word_length'],
                                                    max_option_word_length)
 
         return lengths
