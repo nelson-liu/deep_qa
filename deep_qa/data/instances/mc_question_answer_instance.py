@@ -125,7 +125,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
                                           lengths in option_lengths])
 
             lengths['max_word_length'] = max(lengths['max_word_length'],
-                                                   max_option_word_length)
+                                             max_option_word_length)
 
         return lengths
 
