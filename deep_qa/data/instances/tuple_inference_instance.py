@@ -284,7 +284,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         lengths = {'num_options': len(self.answers_indexed),
                    'num_question_tuples': max_question_tuples,
                    'num_background_tuples': len(self.background_indexed),
-                   'word_sequence_length': max_slot_length,
+                   'max_sentence_length': max_slot_length,
                    'num_slots': max_num_slots}
         if max_word_length > 0:
             lengths['word_character_length'] = max_word_length
@@ -319,10 +319,10 @@ class IndexedTupleInferenceInstance(IndexedInstance):
             num_slots = len(indexed_tuple)
             max_num_slots = max(max_num_slots, num_slots)
             for slot in indexed_tuple:
-                word_sequence_lengths = IndexedInstance._get_word_sequence_lengths(slot)
-                max_slot_words = max(max_slot_words, word_sequence_lengths['word_sequence_length'])
-                if 'word_character_length' in word_sequence_lengths:
-                    max_word_length = max(max_word_length, word_sequence_lengths['word_character_length'])
+                max_sentence_lengths = IndexedInstance._get_max_sentence_lengths(slot)
+                max_slot_words = max(max_slot_words, max_sentence_lengths['max_sentence_length'])
+                if 'word_character_length' in max_sentence_lengths:
+                    max_word_length = max(max_word_length, max_sentence_lengths['word_character_length'])
 
         return max_num_slots, max_slot_words, max_word_length
 
@@ -386,7 +386,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         max_lengths: Dict of {str: int}
             The lengths to pad to.  Must include the keys:
                 - 'num_slots': the number of slots desired
-                - 'word_sequence_length': the number of words in a given slot
+                - 'max_sentence_length': the number of words in a given slot
             May also include:
                 - 'word_character_length': the length of each word,
                 relevant when using a ``WordAndCharacterTokenizer``.
@@ -395,7 +395,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         -------
         tuple_in: List[List[int]]
             In the returned (modified) list, the length matches the desired_num_slots and each of the slots
-            has a length equal to the value set by 'word_sequence_length' in max_lengths.
+            has a length equal to the value set by 'max_sentence_length' in max_lengths.
         '''
         desired_num_slots = max_lengths['num_slots']
         tuple_in = self.pad_sequence_to_length(tuple_in, desired_num_slots,

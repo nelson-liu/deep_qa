@@ -225,7 +225,7 @@ class TextTrainer(Trainer):
             self._build_sentence_encoder_model()
         instance = TrueFalseInstance(sentence, True)
         indexed_instance = instance.to_indexed_instance(self.data_indexer)
-        indexed_instance.pad({'word_sequence_length': self.max_sentence_length})
+        indexed_instance.pad({'max_sentence_length': self.max_sentence_length})
         instance_input, _ = indexed_instance.as_training_data()
         encoded_instance = self._sentence_encoder_model.predict(numpy.asarray([instance_input]))
         return encoded_instance[0]
@@ -249,7 +249,7 @@ class TextTrainer(Trainer):
         variables given a dictionary of lengths, perhaps computed from training data or loaded from
         a saved model.
         """
-        self.max_sentence_length = max_lengths['word_sequence_length']
+        self.max_sentence_length = max_lengths['max_sentence_length']
         self.max_word_length = max_lengths.get('word_character_length', None)
 
     @overrides

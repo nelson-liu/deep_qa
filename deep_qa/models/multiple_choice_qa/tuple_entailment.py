@@ -54,7 +54,7 @@ class MultipleChoiceTupleEntailmentModel(TextTrainer):
     @overrides
     def _get_max_lengths(self) -> Dict[str, int]:
         return {
-                'word_sequence_length': self.max_sentence_length,
+                'max_sentence_length': self.max_sentence_length,
                 'answer_length': self.max_answer_length,
                 'background_sentences': self.max_knowledge_length,
                 'num_options': self.num_options,
@@ -63,7 +63,7 @@ class MultipleChoiceTupleEntailmentModel(TextTrainer):
 
     @overrides
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
-        self.max_sentence_length = max_lengths['word_sequence_length']
+        self.max_sentence_length = max_lengths['max_sentence_length']
         self.max_answer_length = max_lengths['answer_length']
         self.max_knowledge_length = max_lengths['background_sentences']
         self.num_options = max_lengths['num_options']

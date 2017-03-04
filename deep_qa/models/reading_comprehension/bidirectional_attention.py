@@ -207,9 +207,9 @@ class BidirectionalAttentionFlow(TextTrainer):
 
     @overrides
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
-        # Adding this because we're bypassing word_sequence_length in our model, but TextTrainer
+        # Adding this because we're bypassing max_sentence_length in our model, but TextTrainer
         # expects it.
-        max_lengths['word_sequence_length'] = None
+        max_lengths['max_sentence_length'] = None
         super(BidirectionalAttentionFlow, self)._set_max_lengths(max_lengths)
         self.num_passage_words = max_lengths['num_passage_words']
         self.num_question_words = max_lengths['num_question_words']

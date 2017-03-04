@@ -62,8 +62,8 @@ class IndexedSentencePairInstance(IndexedInstance):
 
     @overrides
     def get_lengths(self) -> Dict[str, int]:
-        first_sentence_lengths = self._get_word_sequence_lengths(self.first_sentence_indices)
-        second_sentence_lengths = self._get_word_sequence_lengths(self.second_sentence_indices)
+        first_sentence_lengths = self._get_max_sentence_lengths(self.first_sentence_indices)
+        second_sentence_lengths = self._get_max_sentence_lengths(self.second_sentence_indices)
         lengths = {}
         for key in first_sentence_lengths:
             lengths[key] = max(first_sentence_lengths[key], second_sentence_lengths[key])

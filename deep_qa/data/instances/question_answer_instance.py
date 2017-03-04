@@ -96,9 +96,9 @@ class IndexedQuestionAnswerInstance(IndexedInstance):
         number of answer options.  There could also be a fourth: the character length of the words
         in the question and the answers.
         """
-        question_lengths = self._get_word_sequence_lengths(self.question_indices)
-        answer_lengths = [self._get_word_sequence_lengths(option) for option in self.option_indices]
-        max_answer_length = max([lengths['word_sequence_length'] for lengths in answer_lengths])
+        question_lengths = self._get_max_sentence_lengths(self.question_indices)
+        answer_lengths = [self._get_max_sentence_lengths(option) for option in self.option_indices]
+        max_answer_length = max([lengths['max_sentence_length'] for lengths in answer_lengths])
         num_options = len(self.option_indices)
         lengths = {}
         lengths.update(question_lengths)
@@ -127,7 +127,7 @@ class IndexedQuestionAnswerInstance(IndexedInstance):
         for indices in self.option_indices:
             answer_lengths = {}
             answer_lengths.update(max_lengths)
-            answer_lengths['word_sequence_length'] = max_lengths['answer_length']
+            answer_lengths['max_sentence_length'] = max_lengths['answer_length']
             padded_options.append(self.pad_word_sequence(indices, answer_lengths))
         self.option_indices = padded_options
 

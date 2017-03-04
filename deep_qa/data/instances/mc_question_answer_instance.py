@@ -108,7 +108,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
         and the word length (in characters) among all the questions, passages,
         and answer options.
         """
-        option_lengths = [self._get_word_sequence_lengths(option) for option in self.option_indices]
+        option_lengths = [self._get_max_sentence_lengths(option) for option in self.option_indices]
 
         lengths = super(IndexedMcQuestionAnswerInstance, self).get_lengths()
 
@@ -116,7 +116,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
         lengths['num_options'] = len(self.option_indices)
 
         # the number of words in the longest option
-        lengths['num_option_words'] = max([lengths['word_sequence_length'] for
+        lengths['num_option_words'] = max([lengths['max_sentence_length'] for
                                            lengths in option_lengths])
         # the length of the longest word across the passage, question, and options
         if 'word_character_length' in option_lengths[0]:
@@ -148,7 +148,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
         # pad the number of words in the options, number of characters in each word in option
         padded_options = []
         for indices in self.option_indices:
-            max_lengths['word_sequence_length'] = max_lengths['num_option_words']
+            max_lengths['max_sentence_length'] = max_lengths['num_option_words']
             padded_options.append(self.pad_word_sequence(indices, max_lengths))
         self.option_indices = padded_options
 
