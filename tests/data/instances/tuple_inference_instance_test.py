@@ -163,7 +163,7 @@ class TestTupleInferenceInstance(DeepQaTestCase):
                        'num_slots': 2,
                        'num_sentence_words': 2,
                        'num_options': 1,
-                       'max_word_length': 3}
+                       'num_word_characters': 3}
         indexed.pad(max_lengths)
         expected_indexed_tuple = [[[0, 0, 0], [a_word_index, a_index, 0]],
                                   [[a_word_index, a_index, 0], [sentence_index, s_index, e_index]]]

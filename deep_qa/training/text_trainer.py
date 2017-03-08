@@ -53,7 +53,7 @@ class TextTrainer(Trainer):
         Upper limit on length of word sequences in the training data. Ignored during testing (we
         use the value set at training time, either from this parameter or from a loaded model).  If
         this is not set, we'll calculate a max length from the data.
-    max_word_length: int, optional (default=None)
+    num_word_characters: int, optional (default=None)
         Upper limit on length of words in the training data. Only applicable for "words and
         characters" text encoding.
     tokenizer: Dict[str, Any], optional (default={})
@@ -91,7 +91,7 @@ class TextTrainer(Trainer):
         self.embedding_size = params.pop('embedding_size', 50)
         self.embedding_dropout = params.pop('embedding_dropout', 0.5)
         self.num_sentence_words = params.pop('num_sentence_words', None)
-        self.max_word_length = params.pop('max_word_length', None)
+        self.num_word_characters = params.pop('num_word_characters', None)
 
         tokenizer_params = params.pop('tokenizer', {})
         tokenizer_choice = get_choice_with_default(tokenizer_params, 'type', list(tokenizers.keys()))
@@ -240,7 +240,7 @@ class TextTrainer(Trainer):
         have additional padding dimensions, call super()._get_max_lengths() and then update the
         dictionary.
         """
-        return self.tokenizer.get_max_lengths(self.num_sentence_words, self.max_word_length)
+        return self.tokenizer.get_max_lengths(self.num_sentence_words, self.num_word_characters)
 
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
         """
@@ -250,7 +250,7 @@ class TextTrainer(Trainer):
         a saved model.
         """
         self.num_sentence_words = max_lengths['num_sentence_words']
-        self.max_word_length = max_lengths.get('max_word_length', None)
+        self.num_word_characters = max_lengths.get('num_word_characters', None)
 
     @overrides
     def _set_params_from_model(self):
@@ -298,7 +298,7 @@ class TextTrainer(Trainer):
                              "length {}".format(len(input_slice)))
         self.num_sentence_words = input_slice[0]
         if len(input_slice) == 2:
-            self.max_word_length = input_slice[1]
+            self.num_word_characters = input_slice[1]
 
     def _instance_type(self) -> Instance:
         """
@@ -325,7 +325,7 @@ class TextTrainer(Trainer):
             # This can't be the default value for the function argument, because
             # self.num_sentence_words will not have been set at class creation time.
             sentence_length = self.num_sentence_words
-        return self.tokenizer.get_sentence_shape(sentence_length, self.max_word_length)
+        return self.tokenizer.get_sentence_shape(sentence_length, self.num_word_characters)
 
     def _embed_input(self, input_layer: Layer, embedding_name: str="embedding"):
         """

@@ -219,7 +219,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         self.num_question_words = self.model.get_input_shape_at(0)[0][1]
         self.num_passage_words = self.model.get_input_shape_at(0)[1][1]
         # We need to pass this slice of the passage input shape to the superclass
-        # mainly to set self.max_word_length. The decision of whether to pass
+        # mainly to set self.num_word_characters. The decision of whether to pass
         # the passage input or the question input is arbitrary, as the
         # two word lengths are guaranteed to be the same and BiDAF ignores
         # self.num_sentence_words.

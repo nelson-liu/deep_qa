@@ -102,10 +102,10 @@ class IndexedQuestionAnswerInstance(IndexedInstance):
         num_options = len(self.option_indices)
         lengths = {}
         lengths.update(question_lengths)
-        if 'max_word_length' in question_lengths:
-            max_answer_character_length = max([lengths['max_word_length'] for lengths in answer_lengths])
-            max_character_length = max([question_lengths['max_word_length'], max_answer_character_length])
-            lengths['max_word_length'] = max_character_length
+        if 'num_word_characters' in question_lengths:
+            max_answer_character_length = max([lengths['num_word_characters'] for lengths in answer_lengths])
+            max_character_length = max([question_lengths['num_word_characters'], max_answer_character_length])
+            lengths['num_word_characters'] = max_character_length
         lengths['answer_length'] = max_answer_length
         lengths['num_options'] = num_options
         return lengths
