@@ -108,7 +108,7 @@ class IndexedMcQuestionAnswerInstance(IndexedQuestionPassageInstance):
         and the word length (in characters) among all the questions, passages,
         and answer options.
         """
-        option_lengths = [self._get_word_sequence_lengthss(option) for option in self.option_indices]
+        option_lengths = [self._get_word_sequence_lengths(option) for option in self.option_indices]
 
         lengths = super(IndexedMcQuestionAnswerInstance, self).get_lengths()
 

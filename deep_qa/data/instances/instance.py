@@ -230,7 +230,7 @@ class IndexedInstance(Instance):
         raise NotImplementedError
 
     @staticmethod
-    def _get_word_sequence_lengthss(word_indices: List) -> Dict[str, int]:
+    def _get_word_sequence_lengths(word_indices: List) -> Dict[str, int]:
         """
         Because ``TextEncoders`` can return complex data structures, we might
         actually have several things to pad for a single word sequence. We
