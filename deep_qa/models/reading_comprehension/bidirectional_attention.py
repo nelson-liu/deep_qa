@@ -207,9 +207,9 @@ class BidirectionalAttentionFlow(TextTrainer):
 
     @overrides
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
-        # Adding this because we're bypassing max_sentence_length in our model, but TextTrainer
+        # Adding this because we're bypassing num_sentence_words in our model, but TextTrainer
         # expects it.
-        max_lengths['max_sentence_length'] = None
+        max_lengths['num_sentence_words'] = None
         super(BidirectionalAttentionFlow, self)._set_max_lengths(max_lengths)
         self.num_passage_words = max_lengths['num_passage_words']
         self.num_question_words = max_lengths['num_question_words']
@@ -222,7 +222,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         # mainly to set self.max_word_length. The decision of whether to pass
         # the passage input or the question input is arbitrary, as the
         # two word lengths are guaranteed to be the same and BiDAF ignores
-        # self.max_sentence_length.
+        # self.num_sentence_words.
         self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][2:])
 
     @classmethod

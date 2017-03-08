@@ -230,18 +230,18 @@ class IndexedInstance(Instance):
         raise NotImplementedError
 
     @staticmethod
-    def _get_max_sentence_lengths(word_indices: List) -> Dict[str, int]:
+    def _get_num_sentence_wordss(word_indices: List) -> Dict[str, int]:
         """
         Because ``TextEncoders`` can return complex data structures, we might
         actually have several things to pad for a single word sequence. We
         check for that and handle it in a single spot here. We return a
-        dictionary containing 'max_sentence_length', which is the number of
+        dictionary containing 'num_sentence_words', which is the number of
         words in word_indices. If the word representations also contain
         characters, the dictionary additionally contains a
         'max_word_length' key, with a value corresponding to the longest
         word in the sequence.
         """
-        lengths = {'max_sentence_length': len(word_indices)}
+        lengths = {'num_sentence_words': len(word_indices)}
         if len(word_indices) > 0 and not isinstance(word_indices[0], int):
             if isinstance(word_indices[0], list):
                 lengths['max_word_length'] = max([len(word) for word in word_indices])
@@ -289,7 +289,7 @@ class IndexedInstance(Instance):
             default_value = lambda: []
 
         padded_word_sequence = IndexedInstance.pad_sequence_to_length(
-                word_sequence, lengths['max_sentence_length'], default_value, truncate_from_right)
+                word_sequence, lengths['num_sentence_words'], default_value, truncate_from_right)
         if 'max_word_length' in lengths:
             padded_word_sequence = [IndexedInstance.pad_sequence_to_length(
                     word, lengths['max_word_length'], truncate_from_right=False)
