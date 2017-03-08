@@ -95,7 +95,7 @@ class IndexedTrueFalseInstance(IndexedInstance):
         """
         This simple IndexedInstance only has one padding dimension: word_indices.
         """
-        return self._get_num_sentence_wordss(self.word_indices)
+        return self._get_word_sequence_lengthss(self.word_indices)
 
     @overrides
     def pad(self, max_lengths: Dict[str, int]):

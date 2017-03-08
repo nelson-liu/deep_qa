@@ -319,7 +319,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
             num_slots = len(indexed_tuple)
             max_num_slots = max(max_num_slots, num_slots)
             for slot in indexed_tuple:
-                num_sentence_wordss = IndexedInstance._get_num_sentence_wordss(slot)
+                num_sentence_wordss = IndexedInstance._get_word_sequence_lengthss(slot)
                 max_slot_words = max(max_slot_words, num_sentence_wordss['num_sentence_words'])
                 if 'num_word_characters' in num_sentence_wordss:
                     num_word_characters = max(num_word_characters, num_sentence_wordss['num_word_characters'])

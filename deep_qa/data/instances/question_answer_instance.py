@@ -96,8 +96,8 @@ class IndexedQuestionAnswerInstance(IndexedInstance):
         number of answer options.  There could also be a fourth: the character length of the words
         in the question and the answers.
         """
-        question_lengths = self._get_num_sentence_wordss(self.question_indices)
-        answer_lengths = [self._get_num_sentence_wordss(option) for option in self.option_indices]
+        question_lengths = self._get_word_sequence_lengthss(self.question_indices)
+        answer_lengths = [self._get_word_sequence_lengthss(option) for option in self.option_indices]
         max_answer_length = max([lengths['num_sentence_words'] for lengths in answer_lengths])
         num_options = len(self.option_indices)
         lengths = {}

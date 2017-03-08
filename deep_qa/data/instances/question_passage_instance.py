@@ -73,8 +73,8 @@ class IndexedQuestionPassageInstance(IndexedInstance):
         add more arguments should also override this method to enable padding on said
         arguments.
         """
-        question_lengths = self._get_num_sentence_wordss(self.question_indices)
-        passage_lengths = self._get_num_sentence_wordss(self.passage_indices)
+        question_lengths = self._get_word_sequence_lengthss(self.question_indices)
+        passage_lengths = self._get_word_sequence_lengthss(self.passage_indices)
         lengths = {}
 
         # the number of words to pad the question to
