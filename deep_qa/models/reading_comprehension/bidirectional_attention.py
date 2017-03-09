@@ -235,3 +235,29 @@ class BidirectionalAttentionFlow(TextTrainer):
         custom_objects["Repeat"] = Repeat
         custom_objects["WeightedSum"] = WeightedSum
         return custom_objects
+
+    def score_instance(self, instance: CharacterSpanInstance):
+        inputs, _ = self._prepare_instance(instance)
+        try:
+            span_begin_probs, span_end_probs = self.model.predict(inputs)
+            best_span, best_span_prob = self.get_best_span(span_begin_probs,
+                                                           span_end_probs)
+        except:
+            print('Inputs were: ' + str(inputs))
+            raise
+
+    def get_best_span(self, span_begin_probs, span_end_probs):
+        max_span_probability = 0
+        best_word_span = (0, 1)
+        begin_span_argmax = 0
+        for j in range(len(span_begin_probs)):
+            val1 = span_begin_probs[begin_span_argmax]
+            if val1 < span_begin_probs[j]:
+                val1 = span_begin_probs[j]
+                begin_span_argmax = j
+
+            val2 = span_end_probs[j]
+            if val1 * val2 > max_span_probability:
+                best_word_span = (begin_span_argmax, j)
+                max_span_probability = val1 * val2
+        return (best_word_span[0], best_word_span[1] + 1)
