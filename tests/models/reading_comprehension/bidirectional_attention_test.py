@@ -27,9 +27,9 @@ class TestBidirectionalAttentionFlow(DeepQaTestCase):
 
         # We should get the same result if we index the data from the
         # original model and the loaded model.
-        indexed_val_data, _ = loaded_model.prepare_data(model.__dict__["validation_files"],
-                                                        update_data_indexer=False)
-        _, indexed_validation_input, indexed_validation_labels = indexed_val_data
+        indexed_validation_input, _ = loaded_model._prepare_data(
+            model.__dict__["validation_dataset"],
+            for_train=False)
         assert_allclose(model.model.predict(model.__dict__["validation_input"]),
                         loaded_model.model.predict(indexed_validation_input))
 
