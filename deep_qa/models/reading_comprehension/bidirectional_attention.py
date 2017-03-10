@@ -236,6 +236,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         custom_objects["WeightedSum"] = WeightedSum
         return custom_objects
 
+    @overrides
     def score_instance(self, instance: CharacterSpanInstance):
         inputs, _ = self._prepare_instance(instance)
         try:
@@ -246,7 +247,8 @@ class BidirectionalAttentionFlow(TextTrainer):
             print('Inputs were: ' + str(inputs))
             raise
 
-    def get_best_span(self, span_begin_probs, span_end_probs):
+    @staticmethod
+    def get_best_span(span_begin_probs, span_end_probs):
         max_span_probability = 0
         best_word_span = (0, 1)
         begin_span_argmax = 0
