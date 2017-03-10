@@ -74,4 +74,3 @@ class TestBidirectionalAttentionFlow(DeepQaTestCase):
         # the final best span returned is actually (1, 3) because we treat the
         # end span as being exclusive.
         assert begin_end_idxs == (1, 3)
-
