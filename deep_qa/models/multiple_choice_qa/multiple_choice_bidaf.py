@@ -4,6 +4,10 @@ from keras.layers import Input
 from overrides import overrides
 
 from ..reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
+from ...layers.attention.attention import Attention
+from ...layers.backend.envelope import Envelope
+from ...layers.backend.multiply import Multiply
+from ...layers.wrappers.encoder_wrapper import EncoderWrapper
 from ...layers.wrappers.time_distributed_with_mask import TimeDistributedWithMask
 from ...training.text_trainer import TextTrainer
 from ...training.models import DeepQaModel
@@ -47,16 +51,23 @@ class MultipleChoiceBidaf(TextTrainer):
     num_option_words : int, optional (default=``None``)
         For padding.  How many words are in each answer option?  If ``None``, this is set from
         the data.
+    passage_option_similarity_function : Dict[str, Any], optional (default={})
+        This is the similarity function used to compare an encoded span representation with encoded
+        option representations.  These parameters get passed to a similarity function (see
+        :mod:`deep_qa.tensors.similarity_functions` for more info on what's acceptable).  The
+        default similarity function with no parameters is a simple dot product.
     """
     # pylint: disable=protected-access
     def __init__(self, params: Dict[str, Any]):
         bidaf_params = params.pop('bidaf_params')
+        # TODO(matt): copy most of the TextTrainer params over from the bidaf params, so you don't
+        # have to duplicate them (and can't mess up the duplication).  And do it before we pass the
+        # params to BiDAF, because that destroys them.
         self._bidaf_model = BidirectionalAttentionFlow(bidaf_params)
         self._bidaf_model.load_model()
         self.num_options = params.pop('num_options', None)
         self.num_option_words = params.pop('num_option_words', None)
-        # TODO(matt): copy most of the TextTrainer params over from the bidaf params, so you don't
-        # have to duplicate them (and can't mess up the duplication).
+        self.passage_option_similarity_function_params = params.pop('passage_option_similarity_function', {})
         super(MultipleChoiceBidaf, self).__init__(params)
 
     @overrides
@@ -81,17 +92,35 @@ class MultipleChoiceBidaf(TextTrainer):
         options_shape = (self.num_options,) + self._get_sentence_shape(self.num_option_words)
         options_input = Input(shape=options_shape, dtype='int32', name='options_input')
 
+        # First we compute a span envelope over the passage, then multiply that by the passage
+        # representation.
         bidaf_passage_model = self._get_model_from_bidaf(['question_input', 'passage_input'],
                                                          ['final_merged_passage',
                                                           'span_begin_softmax',
                                                           'span_end_softmax'])
         modeled_passage, span_begin, span_end = bidaf_passage_model([question_input, passage_input])
-        # TODO(matt): compute the envelope over the passage, get a weighted passage representation,
-        # compare it with the encoded answer options.
+        envelope = Envelope()([span_begin, span_end])
+        weighted_passage = Multiply()([modeled_passage, envelope])
 
+        # Then we encode the answer options the same way we encoded the question.
         bidaf_question_model = self._get_model_from_bidaf(['question_input'], ['phrase_encoder'])
-        encoded_options = TimeDistributedWithMask(bidaf_question_model)(options_input)
-        return self._bidaf_model.model
+        embedded_options = TimeDistributedWithMask(bidaf_question_model)(options_input)
+
+        # Then we compare the weighted passage to each of the encoded options, and get a
+        # distribution over answer options.  We'll use an encoder to get a single vector for the
+        # passage and for each answer option, then do an "attention" to get a distribution over
+        # answer options.  We can think of doing other similarity computations (e.g., a
+        # decomposable attention) later.
+        passage_encoder = self._get_encoder(name="similarity_encoder",
+                                            fallback_behavior="use default params")
+        option_encoder = EncoderWrapper(passage_encoder)
+        encoded_passage = passage_encoder(weighted_passage)
+        encoded_options = option_encoder(embedded_options)
+        attention_layer = Attention(self.passage_option_similarity_function_params)
+        option_scores = attention_layer([encoded_passage, encoded_options])
+
+        return DeepQaModel(inputs=[question_input, passage_input, options_input],
+                           output=option_scores)
 
     def _get_model_from_bidaf(self, input_layer_names: List[str], output_layer_names: List[str]):
         """
