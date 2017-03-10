@@ -1,9 +1,10 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from keras.layers import Input
 from overrides import overrides
 
 from ..reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
+from ...layers.wrappers.time_distributed_with_mask import TimeDistributedWithMask
 from ...training.text_trainer import TextTrainer
 from ...training.models import DeepQaModel
 
@@ -85,6 +86,11 @@ class MultipleChoiceBidaf(TextTrainer):
                                                           'span_begin_softmax',
                                                           'span_end_softmax'])
         modeled_passage, span_begin, span_end = bidaf_passage_model([question_input, passage_input])
+        # TODO(matt): compute the envelope over the passage, get a weighted passage representation,
+        # compare it with the encoded answer options.
+
+        bidaf_question_model = self._get_model_from_bidaf(['question_input'], ['phrase_encoder'])
+        encoded_options = TimeDistributedWithMask(bidaf_question_model)(options_input)
         return self._bidaf_model.model
 
     def _get_model_from_bidaf(self, input_layer_names: List[str], output_layer_names: List[str]):
@@ -95,7 +101,6 @@ class MultipleChoiceBidaf(TextTrainer):
         passage embedding, just before the span prediction layers, by calling
         ``self._get_model_from_bidaf(['question_input', 'passage_input'], ['final_merged_passage'])``.
         """
-        debug_inputs = self.model.get_input_at(0)  # list of all input_layers
         layer_input_dict = {}
         layer_output_dict = {}
         for layer in self._bidaf_model.model.layers:
