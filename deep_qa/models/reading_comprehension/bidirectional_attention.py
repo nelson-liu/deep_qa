@@ -253,7 +253,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         max_span_probability = 0
         best_word_span = (0, 1)
         begin_span_argmax = 0
-        for j in range(len(span_begin_probs)):
+        for j, _ in enumerate(span_begin_probs):
             val1 = span_begin_probs[begin_span_argmax]
             if val1 < span_begin_probs[j]:
                 val1 = span_begin_probs[j]
