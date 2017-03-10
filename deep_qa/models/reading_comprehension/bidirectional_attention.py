@@ -241,8 +241,9 @@ class BidirectionalAttentionFlow(TextTrainer):
         inputs, _ = self._prepare_instance(instance)
         try:
             span_begin_probs, span_end_probs = self.model.predict(inputs)
-            best_span, best_span_prob = self.get_best_span(span_begin_probs,
-                                                           span_end_probs)
+            span_indices = self.get_best_span(span_begin_probs,
+                                              span_end_probs)
+            return span_indices
         except:
             print('Inputs were: ' + str(inputs))
             raise
@@ -262,4 +263,7 @@ class BidirectionalAttentionFlow(TextTrainer):
             if val1 * val2 > max_span_probability:
                 best_word_span = (begin_span_argmax, j)
                 max_span_probability = val1 * val2
+        # Note that this function returns an exclusive span
+        # end, while we assume that it was trained in an
+        # inclusive span end setting.
         return (best_word_span[0], best_word_span[1] + 1)
