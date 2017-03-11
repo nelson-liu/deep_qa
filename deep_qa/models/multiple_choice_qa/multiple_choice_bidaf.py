@@ -1,14 +1,18 @@
+from copy import deepcopy
 from typing import Any, Dict, List
 
 from keras.layers import Input
 from overrides import overrides
 
 from ..reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
+from ...data.instances.instance import TextInstance
+from ...data.instances.mc_question_answer_instance import McQuestionAnswerInstance
 from ...layers.attention.attention import Attention
 from ...layers.backend.envelope import Envelope
 from ...layers.backend.multiply import Multiply
 from ...layers.wrappers.encoder_wrapper import EncoderWrapper
 from ...layers.wrappers.time_distributed_with_mask import TimeDistributedWithMask
+from ...layers.wrappers.output_mask import OutputMask
 from ...training.text_trainer import TextTrainer
 from ...training.models import DeepQaModel
 
@@ -44,7 +48,13 @@ class MultipleChoiceBidaf(TextTrainer):
         These parameters get passed to a
         :class:`~deep_qa.models.reading_comprehension.bidirectional_attention.BidirectionalAttentionFlow`
         object, which we load.  They should be exactly the same as the parameters used to train the
-        saved model.
+        saved model.  There are a few parameters that must be consistent across the contained BiDAF
+        model and this ``TextTrainer`` object, so we copy those parameters from that object,
+        overwriting any parameters that you set for this ``MultipleChoiceBidaf`` model.  Those
+        parameters are: "tokenizer" and "num_word_characters".
+    train_bidaf : bool, optional (default=``False``)
+        Should we optimize the weights in the contained BiDAF model, or just the weights that we
+        define here?
     num_options : int, optional (default=``None``)
         For padding.  How many options should we pad the data to?  If ``None``, this is set from
         the data.
@@ -60,11 +70,13 @@ class MultipleChoiceBidaf(TextTrainer):
     # pylint: disable=protected-access
     def __init__(self, params: Dict[str, Any]):
         bidaf_params = params.pop('bidaf_params')
-        # TODO(matt): copy most of the TextTrainer params over from the bidaf params, so you don't
-        # have to duplicate them (and can't mess up the duplication).  And do it before we pass the
-        # params to BiDAF, because that destroys them.
+        params['num_word_characters'] = bidaf_params.get('num_word_characters', None)
+        params['tokenizer'] = deepcopy(bidaf_params.get('tokenizer', {}))
         self._bidaf_model = BidirectionalAttentionFlow(bidaf_params)
         self._bidaf_model.load_model()
+        train_bidaf = params.pop('train_bidaf', False)
+        if not train_bidaf:
+            self._bidaf_model.trainable = False
         self.num_options = params.pop('num_options', None)
         self.num_option_words = params.pop('num_option_words', None)
         self.passage_option_similarity_function_params = params.pop('passage_option_similarity_function', {})
@@ -85,11 +97,11 @@ class MultipleChoiceBidaf(TextTrainer):
         all, but we'll construct a new model that just changes the outputs to be various layers of
         the original model.
         """
-        question_shape = self._get_sentence_shape(self._bidaf_model.num_question_words)
+        question_shape = self._bidaf_model._get_sentence_shape(self._bidaf_model.num_question_words)
         question_input = Input(shape=question_shape, dtype='int32', name="question_input")
-        passage_shape = self._get_sentence_shape(self._bidaf_model.num_passage_words)
+        passage_shape = self._bidaf_model._get_sentence_shape(self._bidaf_model.num_passage_words)
         passage_input = Input(shape=passage_shape, dtype='int32', name="passage_input")
-        options_shape = (self.num_options,) + self._get_sentence_shape(self.num_option_words)
+        options_shape = (self.num_options,) + self._bidaf_model._get_sentence_shape(self.num_option_words)
         options_input = Input(shape=options_shape, dtype='int32', name='options_input')
 
         # First we compute a span envelope over the passage, then multiply that by the passage
@@ -104,7 +116,11 @@ class MultipleChoiceBidaf(TextTrainer):
 
         # Then we encode the answer options the same way we encoded the question.
         bidaf_question_model = self._get_model_from_bidaf(['question_input'], ['phrase_encoder'])
-        embedded_options = TimeDistributedWithMask(bidaf_question_model)(options_input)
+        # Total hack to make this compatible with TimeDistributedWithMask.  Ok, ok, python's duck
+        # typing is kind of nice sometimes...  At least I can get this to work, even though it's
+        # not supported in Keras.
+        bidaf_question_model.get_output_mask_shape_for = self.bidaf_question_model_mask_shape
+        embedded_options = TimeDistributedWithMask(bidaf_question_model, keep_dims=True)(options_input)
 
         # Then we compare the weighted passage to each of the encoded options, and get a
         # distribution over answer options.  We'll use an encoder to get a single vector for the
@@ -117,10 +133,16 @@ class MultipleChoiceBidaf(TextTrainer):
         encoded_passage = passage_encoder(weighted_passage)
         encoded_options = option_encoder(embedded_options)
         attention_layer = Attention(self.passage_option_similarity_function_params)
+        # TODO(matt): get encoded_passage and encoded_options into the same shape, or use a linear
+        # similarity function that supports uneven shapes.
         option_scores = attention_layer([encoded_passage, encoded_options])
 
         return DeepQaModel(inputs=[question_input, passage_input, options_input],
                            output=option_scores)
+
+    @staticmethod
+    def bidaf_question_model_mask_shape(input_shape):
+        return input_shape[:-1]
 
     def _get_model_from_bidaf(self, input_layer_names: List[str], output_layer_names: List[str]):
         """
@@ -141,7 +163,7 @@ class MultipleChoiceBidaf(TextTrainer):
 
     @overrides
     def _instance_type(self):  # pylint: disable=no-self-use
-        return self._bidaf_model._instance_type()
+        return McQuestionAnswerInstance
 
     @overrides
     def _get_max_lengths(self) -> Dict[str, int]:
