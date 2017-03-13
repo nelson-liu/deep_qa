@@ -61,10 +61,8 @@ class DataIndexer:
         return self.word_indices[namespace].keys()
 
     def get_word_index(self, word: str, namespace: str='words'):
-        if word in self.word_indices[namespace]:
-            return self.word_indices[namespace][word]
-        else:
-            return self.word_indices[namespace][self._oov_token]
+        return self.word_indices[namespace].get(word,
+                                                self.word_indices[namespace][self._oov_token])
 
     def get_word_from_index(self, index: int, namespace: str='words'):
         return self.reverse_word_indices[namespace][index]
