@@ -335,11 +335,19 @@ class IndexedInstance(Instance):
         direction, you can.
         """
         if truncate_from_right:
-            truncated_or_extended = sequence[:desired_length]
+            truncated = sequence[-desired_length:]
         else:
-            truncated_or_extended = sequence[-desired_length:]
-        if len(truncated_or_extended) < desired_length:
-            truncated_or_extended.extend([default_value()] *
-                                         (desired_length -
-                                          len(truncated_or_extended)))
-        return truncated_or_extended
+            truncated = sequence[:desired_length]
+        if len(truncated) < desired_length:
+            # If the length of the truncated sequence is less than the desired
+            # length, we need to pad.
+            padding_sequence = [default_value()] * (desired_length - len(truncated))
+            if truncate_from_right:
+                # When we truncate from the right, we add zeroes to the front.
+                padding_sequence.extend(truncated)
+                return padding_sequence
+            else:
+                # When we do not truncate from the right, we add zeroes to the end.
+                truncated.extend(padding_sequence)
+                return truncated
+        return truncated
