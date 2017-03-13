@@ -334,14 +334,12 @@ class IndexedInstance(Instance):
         much of the question set up. If you want to truncate from the other
         direction, you can.
         """
-
-        padded_sequence = []
-        for _ in range(desired_length):
-            padded_sequence.append(default_value())
-        sequence_length = min(len(sequence), desired_length)
-        if sequence_length != 0:
-            if truncate_from_right:
-                padded_sequence[-sequence_length:] = sequence[-sequence_length:]
-            else:
-                padded_sequence[:sequence_length] = sequence[:sequence_length]
-        return padded_sequence
+        if truncate_from_right:
+            truncated_or_extended = sequence[:desired_length]
+        else:
+            truncated_or_extended = sequence[-desired_length:]
+        if len(truncated_or_extended) < desired_length:
+            truncated_or_extended.extend([default_value()] *
+                                         (desired_length -
+                                          len(truncated_or_extended)))
+        return truncated_or_extended
