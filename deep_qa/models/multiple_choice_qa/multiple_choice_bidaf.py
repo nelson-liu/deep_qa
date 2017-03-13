@@ -5,14 +5,12 @@ from keras.layers import Input
 from overrides import overrides
 
 from ..reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
-from ...data.instances.instance import TextInstance
 from ...data.instances.mc_question_answer_instance import McQuestionAnswerInstance
 from ...layers.attention.attention import Attention
 from ...layers.backend.envelope import Envelope
 from ...layers.backend.multiply import Multiply
 from ...layers.wrappers.encoder_wrapper import EncoderWrapper
 from ...layers.wrappers.time_distributed_with_mask import TimeDistributedWithMask
-from ...layers.wrappers.output_mask import OutputMask
 from ...training.text_trainer import TextTrainer
 from ...training.models import DeepQaModel
 
@@ -61,11 +59,17 @@ class MultipleChoiceBidaf(TextTrainer):
     num_option_words : int, optional (default=``None``)
         For padding.  How many words are in each answer option?  If ``None``, this is set from
         the data.
-    passage_option_similarity_function : Dict[str, Any], optional (default={})
+    similarity_function : Dict[str, Any], optional (default={'type': 'bilinear'})
         This is the similarity function used to compare an encoded span representation with encoded
         option representations.  These parameters get passed to a similarity function (see
         :mod:`deep_qa.tensors.similarity_functions` for more info on what's acceptable).  The
-        default similarity function with no parameters is a simple dot product.
+        default similarity function with no parameters is a set of linear weights on the
+        concatenated inputs.  Note that the inputs to this similarity function will have `different
+        sizes`, so the set of functions you can use is constrained (i.e., no dot product, etc.).
+        Also note that you almost certainly want to have some kind of bilinear interaction, or
+        linear with a hidden layer, or something, because fundamentally we want to say whether two
+        vectors are close in some projected space, which can't really be captured by a simple
+        linear similarity function.
     """
     # pylint: disable=protected-access
     def __init__(self, params: Dict[str, Any]):
@@ -74,12 +78,10 @@ class MultipleChoiceBidaf(TextTrainer):
         params['tokenizer'] = deepcopy(bidaf_params.get('tokenizer', {}))
         self._bidaf_model = BidirectionalAttentionFlow(bidaf_params)
         self._bidaf_model.load_model()
-        train_bidaf = params.pop('train_bidaf', False)
-        if not train_bidaf:
-            self._bidaf_model.trainable = False
+        self.train_bidaf = params.pop('train_bidaf', False)
         self.num_options = params.pop('num_options', None)
         self.num_option_words = params.pop('num_option_words', None)
-        self.passage_option_similarity_function_params = params.pop('passage_option_similarity_function', {})
+        self.similarity_function_params = params.pop('similarity_function', {'type': 'bilinear'})
         super(MultipleChoiceBidaf, self).__init__(params)
 
     @overrides
@@ -115,7 +117,8 @@ class MultipleChoiceBidaf(TextTrainer):
         weighted_passage = Multiply()([modeled_passage, envelope])
 
         # Then we encode the answer options the same way we encoded the question.
-        bidaf_question_model = self._get_model_from_bidaf(['question_input'], ['phrase_encoder'])
+        bidaf_question_model = self._get_model_from_bidaf(['question_input'], ['phrase_encoder'],
+                                                          name="phrase_encoder_model")
         # Total hack to make this compatible with TimeDistributedWithMask.  Ok, ok, python's duck
         # typing is kind of nice sometimes...  At least I can get this to work, even though it's
         # not supported in Keras.
@@ -132,19 +135,22 @@ class MultipleChoiceBidaf(TextTrainer):
         option_encoder = EncoderWrapper(passage_encoder)
         encoded_passage = passage_encoder(weighted_passage)
         encoded_options = option_encoder(embedded_options)
-        attention_layer = Attention(self.passage_option_similarity_function_params)
+        attention_layer = Attention(self.similarity_function_params)
         # TODO(matt): get encoded_passage and encoded_options into the same shape, or use a linear
         # similarity function that supports uneven shapes.
         option_scores = attention_layer([encoded_passage, encoded_options])
 
-        return DeepQaModel(inputs=[question_input, passage_input, options_input],
+        return DeepQaModel(input=[question_input, passage_input, options_input],
                            output=option_scores)
 
     @staticmethod
     def bidaf_question_model_mask_shape(input_shape):
         return input_shape[:-1]
 
-    def _get_model_from_bidaf(self, input_layer_names: List[str], output_layer_names: List[str]):
+    def _get_model_from_bidaf(self,
+                              input_layer_names: List[str],
+                              output_layer_names: List[str],
+                              name=None):
         """
         Returns a new model constructed from ``self._bidaf_model``.  This model will be a subset of
         BiDAF, with the inputs specified by ``input_layer_names`` and the outputs specified by
@@ -159,7 +165,10 @@ class MultipleChoiceBidaf(TextTrainer):
             layer_output_dict[layer.name] = layer.get_output_at(0)
         input_layers = [layer_input_dict[name] for name in input_layer_names]
         output_layers = [layer_output_dict[name] for name in output_layer_names]
-        return DeepQaModel(input=input_layers, output=output_layers)
+        model = DeepQaModel(input=input_layers, output=output_layers, name=name)
+        if not self.train_bidaf:
+            model.trainable = False
+        return model
 
     @overrides
     def _instance_type(self):  # pylint: disable=no-self-use
@@ -186,4 +195,17 @@ class MultipleChoiceBidaf(TextTrainer):
     @classmethod
     def _get_custom_objects(cls):
         custom_objects = BidirectionalAttentionFlow._get_custom_objects()
+        custom_objects['Attention'] = Attention
+        custom_objects['EncoderWrapper'] = EncoderWrapper
+        custom_objects['Envelope'] = Envelope
+        custom_objects['Multiply'] = Multiply
+        custom_objects['TimeDistributedWithMask'] = TimeDistributedWithMask
+        # Above, in `_build_model`, we do a total hack to make the partial BiDAF model compatible
+        # with TimeDistributedWithMask.  As bad as that one was, here we have to do a way nastier
+        # hack, because we need Keras to have this hacked `compute_output_mask_for` method when it
+        # loads the model from a config.  It's bad.
+        class DeepQaModelWithOutputMaskFunction(DeepQaModel):
+            def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
+                return input_shape[:-1]
+        custom_objects['DeepQaModel'] = DeepQaModelWithOutputMaskFunction
         return custom_objects

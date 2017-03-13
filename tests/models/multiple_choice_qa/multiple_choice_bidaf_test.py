@@ -1,4 +1,6 @@
 # pylint: disable=no-self-use,invalid-name
+from keras import backend as K
+
 from deep_qa.models.multiple_choice_qa.multiple_choice_bidaf import MultipleChoiceBidaf
 from deep_qa.models.reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
 from ...common.test_case import DeepQaTestCase
@@ -21,6 +23,10 @@ class TestMultipleChoiceBidaf(DeepQaTestCase):
         args = {
                 'bidaf_params': bidaf_model_params,
                 'train_bidaf': False,
+                'similarity_function': {'type': 'linear', 'combination': 'x,y'},
                 }
         self.write_who_did_what_files()
-        self.ensure_model_trains_and_loads(MultipleChoiceBidaf, args)
+        model, _ = self.ensure_model_trains_and_loads(MultipleChoiceBidaf, args)
+        # All of the params come from the linear similarity function in the attention layer,
+        # because we set `train_bidaf` to `False`.
+        assert sum([K.count_params(p) for p in model.model.trainable_weights]) == 41

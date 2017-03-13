@@ -61,6 +61,7 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
         return model_class(params)
 
     def ensure_model_trains_and_loads(self, model_class, args):
+        args['save_models'] = True
         model = self.get_model(model_class, args)
         model.train()
 
@@ -79,6 +80,7 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
                 for_train=False)
         assert_allclose(model.model.predict(model.__dict__["validation_input"]),
                         loaded_model.model.predict(indexed_validation_input))
+        return model, loaded_model
 
     @staticmethod
     def one_hot(index, length):
