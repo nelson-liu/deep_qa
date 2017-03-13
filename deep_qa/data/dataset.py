@@ -1,10 +1,10 @@
 import codecs
+from collections import OrderedDict
 import itertools
 import logging
-
-from collections import OrderedDict
-import tqdm
 from typing import Dict, List
+
+import tqdm
 
 from .instances.instance import Instance, TextInstance, IndexedInstance
 from .instances.background_instance import BackgroundInstance
