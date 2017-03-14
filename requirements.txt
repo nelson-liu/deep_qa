@@ -40,6 +40,9 @@ overrides
 # imports this.
 nltk
 
+# Mainly used for the faster tokenizer.
+spacy
+
 # Used by span prediction models.
 numpy
 matplotlib

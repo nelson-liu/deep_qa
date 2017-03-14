@@ -10,8 +10,6 @@ class WordSplitter:
     but we need ``Tokenizer`` to refer to something else, so we're using ``WordSplitter`` here
     instead.
     """
-    def __init__(self):
-        raise NotImplementedError
 
     def split_words(self, sentence: str) -> List[str]:
         raise NotImplementedError
@@ -24,7 +22,6 @@ class SimpleWordSplitter(WordSplitter):
     whitespace-delimited token, separating contractions and punctuation.  We assume lower-cased,
     reasonably well-formed English sentences as input.
     """
-    @overrides
     def __init__(self):
         # These are certainly incomplete.  But at least it's a start.
         self.special_cases = set(['mr.', 'mrs.', 'etc.', 'e.g.', 'cf.', 'c.f.', 'eg.', 'al.'])
@@ -87,7 +84,6 @@ class NltkWordSplitter(WordSplitter):
     faster.  But I'm adding this one back so that there's consistency with older versions of the
     code, if you really want it.
     """
-    @overrides
     def __init__(self):
         pass
 
@@ -102,7 +98,6 @@ class SpacyWordSplitter(WordSplitter):
     """
     A tokenizer that uses spaCy's Tokenizer, which is much faster than the others.
     """
-    @overrides
     def __init__(self):
         # Import is here it's slow, and can be unnecessary.
         import spacy
@@ -136,4 +131,3 @@ word_splitters['simple'] = SimpleWordSplitter
 word_splitters['nltk'] = NltkWordSplitter
 word_splitters['spacy'] = SpacyWordSplitter
 word_splitters['no_op'] = NoOpWordSplitter
-
