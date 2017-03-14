@@ -182,8 +182,9 @@ def l1_normalize(tensor_to_normalize, mask=None):
     normalized_tensor : Tensor
         Normalized tensor with shape (batch size, x).
     """
+    ones_like_mask = K.ones_like(tensor_to_normalize)
     if mask is None:
-        mask = K.ones_like(tensor_to_normalize)
+        mask = ones_like_mask
 
     # We cast the  mask to float32 to prevent dtype
     # issues when multiplying it with other things
@@ -204,14 +205,14 @@ def l1_normalize(tensor_to_normalize, mask=None):
     # The number of non-masked elements in the tensor to normalize.
     # If all the elements in the tensor to normalize are masked,
     # we set it to be the number of elements in the tensor to normalize.
-    divisor = K.sum(switch(mask_row_sum, mask, K.ones_like(mask)), axis=1,
+    divisor = K.sum(switch(mask_row_sum, mask, ones_like_mask), axis=1,
                     keepdims=True)
 
     # This handles the case where mask is all 0 and all values are 0.
     # If the sum of mask_row_sum and row_sum is 0, make mask all ones,
     # else just keep the mask as it is.
-    temp_mask = switch(mask_row_sum+row_sum, mask, K.ones_like(mask))
+    temp_mask = switch(mask_row_sum+row_sum, mask, ones_like_mask)
 
-    uniform = (K.ones_like(mask)/(divisor)) * temp_mask
+    uniform = (ones_like_mask/(divisor)) * temp_mask
     normalized_tensors = switch(row_sum, normal_result, uniform)
     return normalized_tensors
