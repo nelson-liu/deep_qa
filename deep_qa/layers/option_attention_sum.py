@@ -88,16 +88,16 @@ class OptionAttentionSum(Layer):
         # same thing for `document_probababilities` to select the probability
         # values corresponding to the words in the options.
         expanded_indices = K.expand_dims(K.expand_dims(document_indices, 1), 1)
-        tiled_indices = K.tile(expanded_indices, [1, K.int_shape(options)[1],
-                                                  K.int_shape(options)[2], 1])
+        tiled_indices = K.tile(expanded_indices,
+                               [1, K.int_shape(options)[1], K.int_shape(options)[2], 1])
 
         expanded_probabilities = K.expand_dims(K.expand_dims(document_probabilities, 1), 1)
         tiled_probabilities = K.tile(expanded_probabilities,
-                                     [1, K.int_shape(options)[1],
-                                      K.int_shape(options)[2], 1])
+                                     [1, K.int_shape(options)[1], K.int_shape(options)[2], 1])
 
         expanded_options = K.expand_dims(options, 3)
-        tiled_options = K.tile(expanded_options, [1, 1, 1, K.int_shape(document_indices)[-1]])
+        tiled_options = K.tile(expanded_options,
+                               [1, 1, 1, K.int_shape(document_indices)[-1]])
 
         # This generates a binary tensor of the same shape as tiled_options /
         # tiled_indices that indicates if index is option or padding.
