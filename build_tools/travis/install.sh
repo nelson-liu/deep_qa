@@ -21,7 +21,7 @@ if [[ ! -f /home/travis/miniconda3/bin/activate ]]
             wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
                 -O miniconda.sh
     fi
-    chmod +x miniconda.sh && ./miniconda.sh -b
+    chmod +x miniconda.sh && ./miniconda.sh -b -f
     export PATH=/home/travis/miniconda3/bin:$PATH
     echo $PATH
     conda update --yes conda
