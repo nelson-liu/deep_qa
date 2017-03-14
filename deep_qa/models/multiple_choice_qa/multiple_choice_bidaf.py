@@ -46,10 +46,10 @@ class MultipleChoiceBidaf(TextTrainer):
         These parameters get passed to a
         :class:`~deep_qa.models.reading_comprehension.bidirectional_attention.BidirectionalAttentionFlow`
         object, which we load.  They should be exactly the same as the parameters used to train the
-        saved model.  There are a few parameters that must be consistent across the contained BiDAF
-        model and this ``TextTrainer`` object, so we copy those parameters from that object,
-        overwriting any parameters that you set for this ``MultipleChoiceBidaf`` model.  Those
-        parameters are: "tokenizer" and "num_word_characters".
+        saved model.  There is one parameter that must be consistent across the contained BiDAF
+        model and this ``TextTrainer`` object, so we copy that parameter from the BiDAF params,
+        overwriting any parameters that you set for this ``MultipleChoiceBidaf`` model.  This
+        parameter is "tokenizer".
     train_bidaf : bool, optional (default=``False``)
         Should we optimize the weights in the contained BiDAF model, or just the weights that we
         define here?
@@ -74,7 +74,6 @@ class MultipleChoiceBidaf(TextTrainer):
     # pylint: disable=protected-access
     def __init__(self, params: Dict[str, Any]):
         bidaf_params = params.pop('bidaf_params')
-        params['num_word_characters'] = bidaf_params.get('num_word_characters', None)
         params['tokenizer'] = deepcopy(bidaf_params.get('tokenizer', {}))
         self._bidaf_model = BidirectionalAttentionFlow(bidaf_params)
         self._bidaf_model.load_model()
@@ -87,7 +86,7 @@ class MultipleChoiceBidaf(TextTrainer):
     @overrides
     def _build_model(self):
         """
-        Our basic outline here will be to run the BiDAF model on the question and the passage, the
+        Our basic outline here will be to run the BiDAF model on the question and the passage, then
         compute an envelope over the passage for what words BiDAF thought were in the answer span.
         Then we'll weight the BiDAF passage, and use the BiDAF encoder to encode the answer
         options.  Then we'll have a simple similarity function on top to score the similarity
@@ -135,9 +134,7 @@ class MultipleChoiceBidaf(TextTrainer):
         option_encoder = EncoderWrapper(passage_encoder)
         encoded_passage = passage_encoder(weighted_passage)
         encoded_options = option_encoder(embedded_options)
-        attention_layer = Attention(self.similarity_function_params)
-        # TODO(matt): get encoded_passage and encoded_options into the same shape, or use a linear
-        # similarity function that supports uneven shapes.
+        attention_layer = Attention(deepcopy(self.similarity_function_params))
         option_scores = attention_layer([encoded_passage, encoded_options])
 
         return DeepQaModel(input=[question_input, passage_input, options_input],
@@ -190,7 +187,9 @@ class MultipleChoiceBidaf(TextTrainer):
     @overrides
     def _set_max_lengths_from_model(self):
         self._bidaf_model._set_max_lengths_from_model()
-        # TODO(matt): finish this
+        options_input_shape = self.model.get_input_shape_at(0)[2]
+        self.num_options = options_input_shape[1]
+        self.num_option_words = options_input_shape[2]
 
     @classmethod
     def _get_custom_objects(cls):
@@ -201,9 +200,9 @@ class MultipleChoiceBidaf(TextTrainer):
         custom_objects['Multiply'] = Multiply
         custom_objects['TimeDistributedWithMask'] = TimeDistributedWithMask
         # Above, in `_build_model`, we do a total hack to make the partial BiDAF model compatible
-        # with TimeDistributedWithMask.  As bad as that one was, here we have to do a way nastier
-        # hack, because we need Keras to have this hacked `compute_output_mask_for` method when it
-        # loads the model from a config.  It's bad.
+        # with TimeDistributedWithMask.  We need a similar hack here, because we need Keras to have
+        # this hacked `compute_output_mask_for` method when it loads the model from a config.  This
+        # is really brittle...
         class DeepQaModelWithOutputMaskFunction(DeepQaModel):
             def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
                 return input_shape[:-1]

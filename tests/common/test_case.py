@@ -244,7 +244,7 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
             train_file.write('1\tHe went to the store to buy goods, because he wanted to.'
                              '\tHe bought xxxxx\tgoods###store\t0\n')
             train_file.write('1\tShe hiking on the weekend with her friend.'
-                             '\tShe went xxxxx\thiking###friend###weekend\t0\n')
+                             '\tShe went xxxxx\thiking###friend###weekend###her friend\t0\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             # document, question, answers
             train_file.write('1\tFred hit the ball with the bat.\tHe hit the ball with the xxxxx\tbat###ball\t0\n')
