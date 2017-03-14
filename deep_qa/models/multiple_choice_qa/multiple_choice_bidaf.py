@@ -52,7 +52,10 @@ class MultipleChoiceBidaf(TextTrainer):
         parameter is "tokenizer".
     train_bidaf : bool, optional (default=``False``)
         Should we optimize the weights in the contained BiDAF model, or just the weights that we
-        define here?
+        define here?  TODO(matt): setting this to ``True`` is currently incompatible with saving
+        and loading the ``MultipleChoiceBidaf`` model.  Getting that to work is not a high
+        priority, as we're assuming you have far less multiple choice data, so you want a smaller
+        model, anyway.
     num_options : int, optional (default=``None``)
         For padding.  How many options should we pad the data to?  If ``None``, this is set from
         the data.
