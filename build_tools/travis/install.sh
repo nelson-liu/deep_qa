@@ -14,7 +14,7 @@ pushd .
 cd
 mkdir -p download
 cd download
-if [[ ! -d /home/travis/miniconda3 ]]
+if [[ ! -f /home/travis/miniconda3/bin/activate ]]
     then
     if [[ ! -f miniconda.sh ]]
         then
