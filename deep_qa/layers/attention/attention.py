@@ -49,6 +49,6 @@ class Attention(Layer):
         vector, matrix = inputs
         matrix_mask = mask[1]
         num_rows = K.int_shape(matrix)[1]
-        tiled_vector = K.repeat_elements(K.expand_dims(vector, dim=1), num_rows, axis=1)
+        tiled_vector = K.tile(K.expand_dims(vector, dim=1), [1, num_rows, 1])
         similarities = self.similarity_function.compute_similarity(tiled_vector, matrix)
         return masked_softmax(similarities, matrix_mask)
