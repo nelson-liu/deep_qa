@@ -4,9 +4,15 @@ from keras import backend as K
 from deep_qa.models.multiple_choice_qa.multiple_choice_bidaf import MultipleChoiceBidaf
 from deep_qa.models.reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
 from ...common.test_case import DeepQaTestCase
+from ...common.test_markers import requires_tensorflow
 
 
 class TestMultipleChoiceBidaf(DeepQaTestCase):
+    # Theano has some problems with saving the loaded model in h5, because of how it names weights
+    # (pretty sure this arises because we're using two different BiDAF-based submodels in our
+    # model).  We'll punt on fixing that for now; the fix would likely be a pretty major hack.
+    # Theano can _train_ the model alright, but it can't _save_ it, or (presumably) load it.
+    @requires_tensorflow
     def test_trains_and_loads_correctly(self):
         self.write_span_prediction_files()
         args = {
