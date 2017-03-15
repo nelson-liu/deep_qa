@@ -22,8 +22,8 @@ import numpy as np
 
 from keras.engine import InputSpec
 from keras import backend as K
-from keras.layers.recurrent import GRU, time_distributed_dense
-from keras.layers import Layer
+from keras.layers import Dense, Layer
+from keras.layers.recurrent import GRU, _time_distributed_dense
 
 
 class WeightedAverageKnowledgeCombiner(Layer):
@@ -258,12 +258,12 @@ class AttentiveGRUKnowledgeCombiner(GRU):
             input_dim = input_shape[2] - 1
             timesteps = input_shape[1]
 
-            x_z = time_distributed_dense(x, self.W_z, self.b_z, self.dropout_W,
-                                         input_dim, self.output_dim, timesteps)
-            x_r = time_distributed_dense(x, self.W_r, self.b_r, self.dropout_W,
-                                         input_dim, self.output_dim, timesteps)
-            x_h = time_distributed_dense(x, self.W_h, self.b_h, self.dropout_W,
-                                         input_dim, self.output_dim, timesteps)
+            x_z = _time_distributed_dense(x, self.W_z, self.b_z, self.dropout_W,
+                                          input_dim, self.output_dim, timesteps)
+            x_r = _time_distributed_dense(x, self.W_r, self.b_r, self.dropout_W,
+                                          input_dim, self.output_dim, timesteps)
+            x_h = _time_distributed_dense(x, self.W_h, self.b_h, self.dropout_W,
+                                          input_dim, self.output_dim, timesteps)
 
             # Add attention back on to it's original place.
             return K.concatenate([K.expand_dims(attention, 2), x_z, x_r, x_h], axis=2)
