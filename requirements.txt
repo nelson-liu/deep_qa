@@ -4,8 +4,7 @@
 #### ESSENTIAL LIBRARIES FOR MAIN FUNCTIONALITY ####
 
 # Neural net and related libraries.
-# We need at least keras 1.2.2 due to bugfixes in `keras.backend.batch_dot()`
-keras==1.2.2
+keras
 h5py
 scikit-learn
 theano
@@ -18,7 +17,7 @@ theano
 # https://developer.nvidia.com/cudnn
 # Note that if you want to use the GPU version, you have to `pip uninstall tensorflow`
 # and `pip install tensorflow-gpu`, since both cannot coexist. 
-tensorflow==0.12.1
+tensorflow
 
 # These are for running this as an Aristo solver using gRPC.
 grpcio
