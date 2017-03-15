@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from keras import backend as K
 from keras import initializers, activations
-from keras.regularizers import L1L2Regularizer
+from keras.regularizers import l1_l2
 from keras.layers import Layer
 from overrides import overrides
 
@@ -108,7 +108,7 @@ class ThresholdTupleMatcher(Layer):
         self.similarity_threshold = self.add_weight(shape=(),
                                                     name=self.name + '_similarity_thresh',
                                                     initializer=self.hidden_layer_init,
-                                                    regularizer=L1L2Regularizer(l2=0.001),
+                                                    regularizer=l1_l2(l2=0.001),
                                                     trainable=True)
 
         # Add the weights for the hidden layers.

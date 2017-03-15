@@ -1,7 +1,7 @@
 from keras import backend as K
 from keras.layers import Layer
 from keras.constraints import Constraint
-from keras.regularizers import L1L2Regularizer
+from keras.regularizers import l1_l2
 from overrides import overrides
 
 class BetweenZeroAndOne(Constraint):
@@ -63,7 +63,7 @@ class NoisyOr(Layer):
         self.noise_parameter = self.add_weight(shape=(),
                                                name=self.name + '_noise_param',
                                                initializer=self.param_init,
-                                               regularizer=L1L2Regularizer(l2=0.001),
+                                               regularizer=l1_l2(l2=0.001),
                                                constraint=self.noise_param_constraint,
                                                trainable=True)
         super(NoisyOr, self).build(input_shape)
