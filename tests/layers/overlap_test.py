@@ -47,5 +47,7 @@ class TestOverlap:
                                         [0.0, 1.0], [1.0, 0.0], [1.0, 0.0]]])
 
         # Testing the masked general batched case
-        result = K.eval(Overlap()([tensor_a, tensor_b], [mask_a, mask_b]))
+        # TODO(nelson/matt): figure out why I can't use __call__
+        # To reproduce, try removing .call below.
+        result = K.eval(Overlap().call([tensor_a, tensor_b], [mask_a, mask_b]))
         assert_almost_equal(result, expected_output)

@@ -1,6 +1,9 @@
 from keras import backend as K
 from keras.layers import Layer
+from overrides import overrides
+
 from ..tensors.backend import switch
+
 
 class Overlap(Layer):
     """
@@ -24,16 +27,18 @@ class Overlap(Layer):
     discussed in section 3.2.4 of `Dhingra et. al, 2016
     <https://arxiv.org/pdf/1606.01549.pdf>`_.
     """
+    @overrides
     def __init__(self, **kwargs):
         self.supports_masking = True
         super(Overlap, self).__init__(**kwargs)
 
+    @overrides
     def compute_output_shape(self, input_shapes):
         return (input_shapes[0][0], input_shapes[0][1], 2)
 
-
     # This is a hack made necessary by
     # https://github.com/fchollet/keras/issues/5311
+    @overrides
     def compute_mask(self, inputs, input_mask=None):  # pylint: disable=unused-argument
         if K.backend() == "tensorflow":
             tensor_a = inputs[0]
@@ -44,13 +49,15 @@ class Overlap(Layer):
         else:
             return None
 
+    @overrides
     def call(self, inputs, mask=None):
         # tensor_a, mask_a are of shape (batch size, length_a)
         # tensor_b mask_b are of shape (batch size, length_b)
         tensor_a, tensor_b = inputs
-        mask_b = mask[1]
-        if mask_b is None:
+        if mask is None:
             mask_b = K.ones_like(tensor_b)
+        else:
+            mask_b = mask[1]
         length_a = K.int_shape(tensor_a)[1]
         length_b = K.int_shape(tensor_b)[1]
         # change the indices that are masked in b to -1, since no indices
