@@ -1,7 +1,7 @@
 from keras import backend as K
 from keras.engine import InputSpec
 from keras.layers import Layer, Convolution1D, MaxPooling1D, merge, Dense
-from keras.regularizers import l1l2
+from keras.regularizers import l1_l2
 
 class CNNEncoder(Layer):
     '''
@@ -42,7 +42,7 @@ class CNNEncoder(Layer):
 
         self.l1_regularization = kwargs.pop("l1_regularization", None)
         self.l2_regularization = kwargs.pop("l2_regularization", None)
-        self.regularizer = lambda: l1l2(l1=self.l1_regularization, l2=self.l2_regularization)
+        self.regularizer = lambda: l1_l2(l1=self.l1_regularization, l2=self.l2_regularization)
 
         # These are member variables that will be defined during self.build().
         self.convolution_layers = None

@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from keras.layers import LSTM
 from keras.layers.wrappers import Bidirectional
-from keras.regularizers import l1l2
+from keras.regularizers import l1_l2
 
 from .bag_of_words import BOWEncoder
 from .convolutional_encoder import CNNEncoder
@@ -23,7 +23,7 @@ def set_regularization_params(encoder_type: str, params: Dict[str, Any]):
     """
     l1_regularization = params.pop("l1_regularization", None)
     l2_regularization = params.pop("l2_regularization", None)
-    regularizer = lambda: l1l2(l1=l1_regularization, l2=l2_regularization)
+    regularizer = lambda: l1_l2(l1=l1_regularization, l2=l2_regularization)
     if encoder_type == 'cnn':
         # Regularization with the CNN encoder is complicated, so we'll just pass in the L1 and L2
         # values directly, and let the encoder deal with them.
