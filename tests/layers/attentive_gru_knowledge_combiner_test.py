@@ -23,7 +23,7 @@ class TestAttentiveGRUKnowledgeCombiner:
                                                       return_sequences=True,
                                                       name='attentive_gru_test')
         embedded_input = embedding(input_layer)
-        concat_mode = lambda layer_outs: K.concatenate([K.expand_dims(layer_outs[0], dim=2),
+        concat_mode = lambda layer_outs: K.concatenate([K.expand_dims(layer_outs[0], axis=2),
                                                         layer_outs[1]],
                                                        axis=2)
 

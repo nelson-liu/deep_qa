@@ -64,7 +64,7 @@ class BatchDot(Layer):
     >>> import keras.backend as K
     >>> tensor_a = K.ones(shape=(2, 4, 2))
     >>> tensor_b = K.ones(shape=(2, 4, 3, 2))
-    >>> tensor_a_expanded = K.expand_dims(tensor_a, dim=-1)
+    >>> tensor_a_expanded = K.expand_dims(tensor_a, axis=-1)
     >>> unsqueezed_bd = K.batch_dot(tensor_a_expanded, tensor_b, axes=(2,3))
     >>> final_bd = K.squeeze(unsqueezed_bd, axis=K.ndim(tensor_a)-1)
     >>> K.eval(final_bd).shape
@@ -85,7 +85,7 @@ class BatchDot(Layer):
     >>> import keras.backend as K
     >>> tensor_a = K.ones(shape=(2, 3, 4, 2))
     >>> tensor_b = K.ones(shape=(2, 3, 2))
-    >>> tensor_b_expanded = K.expand_dims(tensor_b, dim=-1)
+    >>> tensor_b_expanded = K.expand_dims(tensor_b, axis=-1)
     >>> unsqueezed_bd = K.batch_dot(tensor_a, tensor_b_expanded, axes=(3, 2))
     >>> final_bd = K.squeeze(unsqueezed_bd, axis=K.ndim(tensor_a)-1)
     >>> K.eval(final_bd).shape
@@ -115,8 +115,8 @@ class BatchDot(Layer):
         float_mask_b = K.cast(mask_b, "float32")
         if b_dot_axis == a_dot_axis:
             # tensor_a and tensor_b have the same length.
-            float_mask_a = K.expand_dims(float_mask_a, dim=-1)
-            float_mask_b = K.expand_dims(float_mask_b, dim=-1)
+            float_mask_a = K.expand_dims(float_mask_a, axis=-1)
+            float_mask_b = K.expand_dims(float_mask_b, axis=-1)
             final_mask = K.batch_dot(float_mask_a, float_mask_b,
                                      axes=(a_dot_axis, b_dot_axis))
         elif a_dot_axis < b_dot_axis:
@@ -124,14 +124,14 @@ class BatchDot(Layer):
             # We would tile tensor_a to have the same shape as tensor_b,
             # but we can just expand tensor_a and have Theano/TF broadcast
             # over the last dimension
-            float_mask_a = K.expand_dims(float_mask_a, dim=-1)
+            float_mask_a = K.expand_dims(float_mask_a, axis=-1)
             final_mask = float_mask_a * float_mask_b
         else:
             # tensor_a has more dimensions than tensor_b.
             # We would tile tensor_b to have the same shape as tensor_a,
             # but we can just expand tensor_b and have Theano/TF broadcast
             # over the last dimension
-            float_mask_b = K.expand_dims(float_mask_b, dim=-1)
+            float_mask_b = K.expand_dims(float_mask_b, axis=-1)
             final_mask = float_mask_a * float_mask_b
         return final_mask
 
@@ -170,9 +170,9 @@ class BatchDot(Layer):
         a_dot_axis = K.ndim(tensor_a) - 1
         b_dot_axis = K.ndim(tensor_b) - 1
         if a_dot_axis > b_dot_axis:
-            tensor_b = K.expand_dims(tensor_b, dim=-1)
+            tensor_b = K.expand_dims(tensor_b, axis=-1)
         if a_dot_axis < b_dot_axis:
-            tensor_a = K.expand_dims(tensor_a, dim=-1)
+            tensor_a = K.expand_dims(tensor_a, axis=-1)
         a_dot_b = K.batch_dot(tensor_a, tensor_b, axes=(a_dot_axis, b_dot_axis))
         if a_dot_axis != b_dot_axis:
             a_dot_b = K.squeeze(a_dot_b, axis=a_dot_axis)

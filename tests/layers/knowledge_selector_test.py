@@ -47,14 +47,14 @@ class TestDotProductKnowledgeSelector(DeepQaTestCase):
         encoder = BOWEncoder(output_dim=2)
         encoded_sentence = encoder(embedded_sentence)
         encoded_background = EncoderWrapper(encoder)(embedded_background)
-        merge_mode = lambda layer_outs: K.concatenate([K.expand_dims(layer_outs[0], dim=1),
-                                                       K.expand_dims(layer_outs[0], dim=1),
+        merge_mode = lambda layer_outs: K.concatenate([K.expand_dims(layer_outs[0], axis=1),
+                                                       K.expand_dims(layer_outs[0], axis=1),
                                                        layer_outs[1]],
                                                       axis=1)
         merge_masks = lambda mask_outs: K.concatenate([K.expand_dims(K.zeros_like(mask_outs[1][:, 0]),
-                                                                     dim=1),
+                                                                     axis=1),
                                                        K.expand_dims(K.zeros_like(mask_outs[1][:, 0]),
-                                                                     dim=1),
+                                                                     axis=1),
                                                        mask_outs[1]], axis=1)
 
         merged = merge([encoded_sentence, encoded_background],

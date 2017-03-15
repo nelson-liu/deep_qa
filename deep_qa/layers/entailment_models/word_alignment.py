@@ -53,7 +53,7 @@ class WordAlignmentEntailment(Layer):
                 float_source_mask = K.cast(source_mask, 'float32')
                 float_target_mask = K.cast(target_mask, 'float32')
                 # (batch_size, source_length, target_length)
-                s2t_mask = K.expand_dims(float_source_mask, dim=-1) * K.expand_dims(float_target_mask, dim=1)
+                s2t_mask = K.expand_dims(float_source_mask, axis=-1) * K.expand_dims(float_target_mask, axis=1)
                 flattened_s2t_mask = last_dim_flatten(s2t_mask)
                 flattened_s2t_attention = masked_softmax(flattened_products_with_source, flattened_s2t_mask)
             else:

@@ -96,7 +96,7 @@ class GatedAttention(Layer):
             # Apply the mask from the document to zero out things that should be masked.
             # The mask is of shape (batch, document length), so we tile it to
             # shape (batch, document length, biGRU hidden length*2)
-            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+            tiled_mask = K.repeat_elements(K.expand_dims(document_mask, axis=2),
                                            (2*K.int_shape(document_matrix)[2]), 2)
             masked_representation = switch(tiled_mask, unmasked_representation,
                                            K.zeros_like(unmasked_representation))
@@ -112,7 +112,7 @@ class GatedAttention(Layer):
         # Apply the mask from the document to zero out things that should be masked.
         # The mask is of shape (batch, document length), so we tile it to
         # shape (batch, document length, biGRU hidden length)
-        tiled_mask = K.repeat_elements(K.expand_dims(document_mask, dim=2),
+        tiled_mask = K.repeat_elements(K.expand_dims(document_mask, axis=2),
                                        K.int_shape(document_matrix)[2], 2)
         masked_representation = switch(tiled_mask, unmasked_representation, K.zeros_like(unmasked_representation))
 
