@@ -90,7 +90,7 @@ class SlotSimilarityTupleMatcher(Layer):
         config.update(base_config)
         return config
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         # pylint: disable=unused-argument
         return (input_shapes[0][0], 1)
 

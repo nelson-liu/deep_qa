@@ -68,7 +68,7 @@ class CNNEncoder(Layer):
         # Building all layers because these sub-layers are not explitly part of the computatonal graph.
         for convolution_layer, max_pooling_layer in zip(self.convolution_layers, self.max_pooling_layers):
             convolution_layer.build(input_shape)
-            max_pooling_layer.build(convolution_layer.get_output_shape_for(input_shape))
+            max_pooling_layer.build(convolution_layer.compute_output_shape(input_shape))
         maxpool_output_dim = self.num_filters * len(self.ngram_filter_sizes)
         projection_input_shape = (input_shape[0], maxpool_output_dim)
         self.projection_layer.build(projection_input_shape)
@@ -95,7 +95,7 @@ class CNNEncoder(Layer):
         maxpool_output = merge(filter_outputs, mode='concat') if len(filter_outputs) > 1 else filter_outputs[0]
         return self.projection_layer.call(maxpool_output)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], self.output_dim)
 
     def compute_mask(self, input, input_mask=None):  # pylint: disable=redefined-builtin

@@ -58,7 +58,7 @@ class Attention(Layer):
         return None
 
     @overrides
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         return (input_shapes[1][0], input_shapes[1][1])
 
     @overrides

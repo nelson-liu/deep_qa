@@ -33,7 +33,7 @@ class SumMemoryUpdater(Layer):
         _, current_memory, attended_knowledge = split_updater_inputs(x, self.output_dim)
         return current_memory + attended_knowledge
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], int(input_shape[1] / 3))
 
     def get_config(self):
@@ -62,7 +62,7 @@ class DenseConcatNoQuestionMemoryUpdater(Dense):
         x = x[:, self.output_dim:]
         return super(DenseConcatNoQuestionMemoryUpdater, self).call(x)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], int(input_shape[1] / 3))
 
 
@@ -77,7 +77,7 @@ class DenseConcatMemoryUpdater(Dense):
     def __init__(self, output_dim, name="dense_concat_memory_updater", **kwargs):
         super(DenseConcatMemoryUpdater, self).__init__(output_dim, name=name, **kwargs)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], int(input_shape[1] / 3))
 
 

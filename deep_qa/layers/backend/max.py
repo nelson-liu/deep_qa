@@ -32,7 +32,7 @@ class Max(Layer):
         return K.any(mask, axis=self.axis)
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         axis = self.axis
         if axis < 0:
             axis += len(input_shape)

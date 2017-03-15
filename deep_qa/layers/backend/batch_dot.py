@@ -136,7 +136,7 @@ class BatchDot(Layer):
         return final_mask
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         tensor_a_shape, tensor_b_shape = input_shape
         a_dot_axis = len(tensor_a_shape) - 1
         b_dot_axis = len(tensor_b_shape) - 1

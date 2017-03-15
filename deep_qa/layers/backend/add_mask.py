@@ -32,7 +32,7 @@ class AddMask(Layer):
         return K.cast(K.not_equal(inputs, self.mask_value), 'uint8')
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return input_shape
 
     @overrides

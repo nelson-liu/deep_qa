@@ -56,7 +56,7 @@ class ComplexConcat(Layer):
         return mask[0]
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         if not isinstance(input_shape, list):
             raise ConfigurationError("ComplexConcat input must be a list")
         output_shape = list(input_shape[0])

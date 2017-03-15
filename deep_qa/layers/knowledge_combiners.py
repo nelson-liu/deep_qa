@@ -47,7 +47,7 @@ class WeightedAverageKnowledgeCombiner(Layer):
         x = x[:, :, 1:]  # (samples, knowledge_length, word_dim)
         return K.sum(K.expand_dims(attention, 2) * x, 1)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], input_shape[2] - 1)
 
     @overrides

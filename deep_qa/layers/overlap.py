@@ -28,7 +28,7 @@ class Overlap(Layer):
         self.supports_masking = True
         super(Overlap, self).__init__(**kwargs)
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         return (input_shapes[0][0], input_shapes[0][1], 2)
 
 

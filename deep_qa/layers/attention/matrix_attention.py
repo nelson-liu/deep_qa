@@ -76,7 +76,7 @@ class MatrixAttention(Layer):
         return K.cast(K.batch_dot(mask_1, mask_2), 'uint8')
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0][0], input_shape[0][1], input_shape[1][1])
 
     @overrides

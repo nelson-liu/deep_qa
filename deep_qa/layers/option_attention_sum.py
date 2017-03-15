@@ -43,7 +43,7 @@ class OptionAttentionSum(Layer):
         self.supports_masking = True
         super(OptionAttentionSum, self).__init__(**kwargs)
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         return (input_shapes[2][0], input_shapes[2][1])
 
     def compute_mask(self, inputs, input_mask=None):  # pylint: disable=unused-argument

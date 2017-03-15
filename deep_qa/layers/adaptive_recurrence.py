@@ -310,7 +310,7 @@ class AdaptiveStep(Layer):
         # We don't want to mask either of the outputs here, so we return None for both of them.
         return [None, None]
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         # We output two tensors from this layer, the final memory representation and
         # the attended knowledge from the final memory network step. Both have the same
         # shape as the initial memory vector, likely (samples, encoding_dim), which is

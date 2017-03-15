@@ -28,7 +28,7 @@ class BiGRUIndexSelector(Layer):
         self.target_index = target_index
         super(BiGRUIndexSelector, self).__init__(**kwargs)
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         return (input_shapes[1][0], input_shapes[1][2]*2)
 
     def compute_mask(self, inputs, input_mask=None):  # pylint: disable=unused-argument

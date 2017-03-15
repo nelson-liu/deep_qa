@@ -68,7 +68,7 @@ class NoisyOr(Layer):
                                                trainable=True)
         super(NoisyOr, self).build(input_shape)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         if self.axis == -1:
             return input_shape[:-1]
         return input_shape[:self.axis - 1] + input_shape[self.axis:]

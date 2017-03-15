@@ -239,4 +239,4 @@ class TestBatchDotLayer(DeepQaTestCase):
                                   [K.ones(shape=a_shape), K.ones(shape=b_shape)])
             else:
                 assert K.eval(bd([K.ones(shape=a_shape), K.ones(shape=b_shape)])).shape == expected_shape
-            assert bd.get_output_shape_for([a_shape, b_shape]) == expected_shape
+            assert bd.compute_output_shape([a_shape, b_shape]) == expected_shape

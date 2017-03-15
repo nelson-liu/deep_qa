@@ -33,7 +33,7 @@ class VectorMatrixSplit(Layer):
     def call(self, inputs, mask=None):
         return self._split_tensor(inputs, self.split_axis)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         vector_shape = list(input_shape)
         del vector_shape[self.split_axis]
         matrix_shape = list(input_shape)

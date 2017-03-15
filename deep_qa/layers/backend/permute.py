@@ -30,7 +30,7 @@ class Permute(Layer):
         return K.permute_dimensions(mask, self.pattern)
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return tuple([input_shape[i] for i in self.pattern])
 
     @overrides

@@ -38,7 +38,7 @@ class Multiply(Layer):
         return K.cast(tensor_1_mask, 'uint8') * K.cast(tensor_2_mask, 'uint8')
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return input_shape[0]
 
     @overrides

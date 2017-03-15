@@ -64,7 +64,7 @@ class WeightedSum(Layer):
         return None
 
     @overrides
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         matrix_shape, attention_shape = input_shapes
         return attention_shape[:-1] + matrix_shape[-1:]
 

@@ -77,7 +77,7 @@ class DotProductKnowledgeSelector(Layer):
             knowledge_attention = masked_softmax(unnormalized_attention, mask)
         return knowledge_attention
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # For each sample, the output is a vector of size knowledge_length, indicating the weights
         # over background information.
         return (input_shape[0], input_shape[1] - 2)  # (num_samples, knowledge_length)
@@ -207,7 +207,7 @@ class ParameterizedKnowledgeSelector(Layer):
             knowledge_attention = masked_softmax(unnormalized_attention, mask)
         return knowledge_attention
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # For each sample, the output is a vector of size knowledge_length, indicating the weights
         # over background information.
         return (input_shape[0], input_shape[1] - 2)  # (num_samples, knowledge_length)
@@ -337,7 +337,7 @@ class ParameterizedHeuristicMatchingKnowledgeSelector(Layer):
             knowledge_attention = masked_softmax(unnormalized_attention, mask)
         return knowledge_attention
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # For each sample, the output is a vector of size knowledge_length, indicating the weights
         # over background information.
         return (input_shape[0], input_shape[1] - 2)  # (num_samples, knowledge_length)

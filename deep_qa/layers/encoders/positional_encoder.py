@@ -40,7 +40,7 @@ class PositionalEncoder(Layer):
 
         super(PositionalEncoder, self).__init__(**kwargs)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], input_shape[2])  # removing second dimension
 
     def call(self, x, mask=None):

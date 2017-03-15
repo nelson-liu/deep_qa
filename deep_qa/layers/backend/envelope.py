@@ -43,7 +43,7 @@ class Envelope(Layer):
         return span_begin_mask if span_begin_mask is not None else span_end_mask
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         span_begin_shape, _ = input_shape
         return span_begin_shape
 

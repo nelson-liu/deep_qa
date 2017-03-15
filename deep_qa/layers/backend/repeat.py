@@ -31,7 +31,7 @@ class Repeat(Layer):
         return K.repeat_elements(K.expand_dims(mask, self.axis), self.repetitions, self.axis)
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return input_shape[:self.axis] + (self.repetitions,) + input_shape[self.axis:]
 
     @overrides

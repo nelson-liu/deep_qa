@@ -85,7 +85,7 @@ class DecomposableAttentionEntailment(WordAlignmentEntailment):
         self.scorer = self.init((self.hidden_layer_width, self.output_dim), name='%s_score' % self.name)
         self.trainable_weights.append(self.scorer)
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # (batch_size, 2)
         if isinstance(input_shape, list):
             return (input_shape[0][0], self.output_dim)

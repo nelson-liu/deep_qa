@@ -45,7 +45,7 @@ class VectorMatrixMerge(Layer):
             result = K.concatenate([expanded_vector, result], axis=self.concat_axis)
         return result
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         num_vectors = len(input_shapes) - 1
         matrix_shape = input_shapes[-1]
         new_shape = list(matrix_shape)

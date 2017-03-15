@@ -13,7 +13,7 @@ class TimeDistributed(KerasTimeDistributed):
     -----
     If the output shape for TimeDistributed has a final dimension of 1, we essentially sqeeze it,
     reshaping to have one fewer dimension.  That change takes place in the actual ``call`` method as well as
-    the ``get_output_shape_for`` method.
+    the ``compute_output_shape`` method.
     """
     def __init__(self, layer, keep_dims=False, **kwargs):
         self.keep_dims = keep_dims
@@ -41,14 +41,14 @@ class TimeDistributed(KerasTimeDistributed):
         super(KerasTimeDistributed, self).build(input_shape)  # pylint: disable=bad-super-call
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         if not isinstance(input_shape, list):
             input_shape = [input_shape]
         child_input_shape = [(shape[0],) + shape[2:] for shape in input_shape]
         timesteps = input_shape[0][1]
         if len(input_shape) == 1:
             child_input_shape = child_input_shape[0]
-        child_output_shape = self.layer.get_output_shape_for(child_input_shape)
+        child_output_shape = self.layer.compute_output_shape(child_input_shape)
         reshaped_shape = (child_output_shape[0], timesteps) + child_output_shape[1:]
         if reshaped_shape[-1] == 1 and not self.keep_dims:
             reshaped_shape = reshaped_shape[:-1]
@@ -114,7 +114,7 @@ class TimeDistributed(KerasTimeDistributed):
         else:
             reshaped_xs, reshaped_masks = self.reshape_inputs_and_masks(x, mask)
             outputs = self.layer.call(reshaped_xs, mask=reshaped_masks)
-            output_shape = self.get_output_shape_for(input_shape)
+            output_shape = self.compute_output_shape(input_shape)
             reshaped_shape = (-1, timesteps) + output_shape[2:]
             if reshaped_shape[-1] == 1 and not self.keep_dims:
                 reshaped_shape = reshaped_shape[:-1]

@@ -36,7 +36,7 @@ class MaskedSoftmax(Layer):
         return None
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         if input_shape[-1] == 1:
             return input_shape[:-1]
         else:

@@ -32,7 +32,7 @@ class TopKnowledgeSelector(Layer):
         mask_shape = (input_shape[0], input_shape[2])
         return mask_shape
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # input_shape is (batch_size, knowledge_length, sentence_length, embed_dim)
         return (input_shape[0], input_shape[2], input_shape[3])
 

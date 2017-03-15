@@ -28,7 +28,7 @@ class MaxSimilaritySoftmax(Layer):
         # pylint: disable=unused-argument
         return None
 
-    def get_output_shape_for(self, input_shapes):
+    def compute_output_shape(self, input_shapes):
         # (batch_size, num_options)
         return (input_shapes[0][0], input_shapes[0][1])
 

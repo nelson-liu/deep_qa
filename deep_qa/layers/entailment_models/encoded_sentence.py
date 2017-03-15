@@ -176,7 +176,7 @@ class MemoryOnlyCombiner(Layer):
         _, current_memory, _ = split_combiner_inputs(x, self.encoding_dim)
         return current_memory
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], self.encoding_dim)
 
     def get_config(self):
@@ -204,7 +204,7 @@ class HeuristicMatchingCombiner(Layer):
                               sentence_memory_product,
                               sentence_memory_diff])
 
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         # There are four components we've concatenated above: (1) the sentence encoding, (2) the
         # current memory, (3) the elementwise product of these two, and (4) their difference.  Each
         # of these has dimension `self.encoding_dim`.

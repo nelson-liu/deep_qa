@@ -20,7 +20,7 @@ class BOWEncoder(Layer):
         super(BOWEncoder, self).__init__(**kwargs)
 
     @overrides
-    def get_output_shape_for(self, input_shape):
+    def compute_output_shape(self, input_shape):
         return (input_shape[0], input_shape[2])  # removing second dimension
 
     @overrides
