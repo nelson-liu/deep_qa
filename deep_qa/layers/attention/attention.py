@@ -64,7 +64,10 @@ class Attention(Layer):
     @overrides
     def call(self, inputs, mask=None):
         vector, matrix = inputs
-        matrix_mask = mask[1]
+        if mask is None:
+            matrix_mask = None
+        else:
+            matrix_mask = mask[1]
         num_rows = K.int_shape(matrix)[1]
         tiled_vector = K.repeat_elements(K.expand_dims(vector, axis=1), num_rows, axis=1)
         similarities = self.similarity_function.compute_similarity(tiled_vector, matrix)
