@@ -73,7 +73,10 @@ class WeightedSum(Layer):
         matrix, attention_vector = inputs
         matrix_shape = K.int_shape(matrix)
         matrix = self._expand_matrix_if_necessary(matrix, matrix_shape[:-1], attention_vector)
-        matrix_mask = mask[0]
+        if mask is None:
+            matrix_mask = None
+        else:
+            matrix_mask = mask[0]
         if self.use_masking and matrix_mask is not None:
             matrix_mask = self._expand_matrix_if_necessary(matrix_mask, matrix_shape[:-1], attention_vector)
             # Doing a multiply here instead of a `switch` to avoid allocating another large tensor.
