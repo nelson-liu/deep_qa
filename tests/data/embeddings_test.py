@@ -42,7 +42,8 @@ class TestPretrainedEmbeddings(DeepQaTestCase):
             embeddings_file.write("word1 1.0 2.3 -1.0\n".encode('utf-8'))
             embeddings_file.write("word2 0.1 0.4 \n".encode('utf-8'))
         embedding_layer = PretrainedEmbeddings.get_embedding_layer(embeddings_filename, data_indexer)
-        word_vector = embedding_layer.initial_weights[0][data_indexer.get_word_index("word2")]
+        print(embedding_layer.weights)
+        word_vector = embedding_layer._initial_weights[0][data_indexer.get_word_index("word2")]
         assert not numpy.allclose(word_vector[:2], numpy.asarray([0.1, 0.4]))
 
     def test_get_embedding_layer_actually_initializes_word_vectors_correctly(self):
@@ -52,7 +53,7 @@ class TestPretrainedEmbeddings(DeepQaTestCase):
         with gzip.open(embeddings_filename, 'wb') as embeddings_file:
             embeddings_file.write("word 1.0 2.3 -1.0\n".encode('utf-8'))
         embedding_layer = PretrainedEmbeddings.get_embedding_layer(embeddings_filename, data_indexer)
-        word_vector = embedding_layer.initial_weights[0][data_indexer.get_word_index("word")]
+        word_vector = embedding_layer._initial_weights[0][data_indexer.get_word_index("word")]
         assert numpy.allclose(word_vector, numpy.asarray([1.0, 2.3, -1.0]))
 
     def test_get_embedding_layer_initializes_unseen_words_randomly_not_zero(self):
@@ -62,5 +63,5 @@ class TestPretrainedEmbeddings(DeepQaTestCase):
         with gzip.open(embeddings_filename, 'wb') as embeddings_file:
             embeddings_file.write("word 1.0 2.3 -1.0\n".encode('utf-8'))
         embedding_layer = PretrainedEmbeddings.get_embedding_layer(embeddings_filename, data_indexer)
-        word_vector = embedding_layer.initial_weights[0][data_indexer.get_word_index("word2")]
+        word_vector = embedding_layer._initial_weights[0][data_indexer.get_word_index("word2")]
         assert not numpy.allclose(word_vector, numpy.asarray([0.0, 0.0, 0.0]))
