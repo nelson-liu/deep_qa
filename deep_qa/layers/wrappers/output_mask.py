@@ -10,8 +10,10 @@ class OutputMask(Layer):
     Don't try to use this in an actual model.
     """
     def __init__(self, **kwargs):
-        self.supports_masking = True
+        # The base layer class overwrites self.supports_masking,
+        # so we add it afterwards.
         super(OutputMask, self).__init__(**kwargs)
+        self.supports_masking = True
 
     def call(self, x, mask=None):  # pylint: disable=unused-argument
         return mask
