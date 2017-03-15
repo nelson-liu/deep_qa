@@ -16,7 +16,6 @@ class TestRepeatLayer:
         model = Model(input=[input_layer], output=[repeat_output])
         input_tensor = numpy.asarray([[2, 5, 3], [-1, -4, -2]])
         repeat_tensor = model.predict([input_tensor])
-        print(repeat_tensor)
         assert repeat_tensor.shape == (batch_size, repetitions, input_length)
         for i in range(repetitions):
             numpy.testing.assert_almost_equal(repeat_tensor[:, i, :], [[2, 5, 3], [-1, -4, -2]])
