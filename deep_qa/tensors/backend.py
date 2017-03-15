@@ -14,7 +14,7 @@ def switch(cond, then_tensor, else_tensor):
     Keras' implementation of K.switch currently uses tensorflow's switch function, which only
     accepts scalar value conditions, rather than boolean tensors which are treated in an
     elementwise function.  This doesn't match with Theano's implementation of switch, but using
-    tensorflow's select, we can exactly retrieve this functionality.
+    tensorflow's where, we can exactly retrieve this functionality.
     """
 
     if K.backend() == 'tensorflow':
@@ -26,7 +26,7 @@ def switch(cond, then_tensor, else_tensor):
             # mask the values along that dimension. Theano broadcasts the value passed along this dimension,
             # but TF does not. Using K.dot() since cond can be a tensor.
             cond = K.dot(tf.cast(cond, tf.float32), tf.ones((1, input_shape[-1])))
-        return tf.select(tf.cast(cond, dtype=tf.bool), then_tensor, else_tensor)
+        return tf.where(tf.cast(cond, dtype=tf.bool), then_tensor, else_tensor)
     else:
         import theano.tensor as T
         return T.switch(cond, then_tensor, else_tensor)
