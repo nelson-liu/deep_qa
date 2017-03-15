@@ -25,6 +25,8 @@ class CharacterSpanInstance(QuestionPassageInstance):
     This class should be used to represent training instances for the SQuAD (Stanford Question
     Answering) and NewsQA datasets, to name a few.
     """
+    stop_token = "@@STOP@@"
+
     def __init__(self, question: str, passage: str, label: Tuple[int, int], index: int=None):
         super(CharacterSpanInstance, self).__init__(question, passage, label, index)
 
@@ -72,6 +74,11 @@ class CharacterSpanInstance(QuestionPassageInstance):
     @overrides
     def to_indexed_instance(self, data_indexer: DataIndexer):
         instance = super(CharacterSpanInstance, self).to_indexed_instance(data_indexer)
+        stop_index = data_indexer.add_word_to_index(self.stop_token)
+        if isinstance(instance.passage_indices[0], list):
+            instance.passage_indices.append([stop_index])
+        else:
+            instance.passage_indices.append(stop_index)
         return IndexedCharacterSpanInstance(instance.question_indices, instance.passage_indices,
                                             instance.label, instance.index)
 
