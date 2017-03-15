@@ -10,7 +10,7 @@ from collections import OrderedDict
 
 from keras.engine import InputSpec
 from keras import backend as K
-from keras import activations, initializations
+from keras import activations, initializers
 from keras.layers import Layer
 
 from ..tensors.backend import tile_vector, hardmax
@@ -128,7 +128,7 @@ class ParameterizedKnowledgeSelector(Layer):
                  weights=None,
                  **kwargs):
         self.activation = activations.get(activation)
-        self.init = initializations.get(initialization)
+        self.init = initializers.get(initialization)
         self.hard_selection = hard_selection
         self.input_spec = [InputSpec(ndim=3)]
         self.initial_weights = weights
@@ -242,7 +242,7 @@ class ParameterizedHeuristicMatchingKnowledgeSelector(Layer):
                  weights=None,
                  **kwargs):
         self.activation = activations.get(activation)
-        self.init = initializations.get(initialization)
+        self.init = initializers.get(initialization)
         self.hard_selection = hard_selection
         self.input_spec = [InputSpec(ndim=3)]
         self.initial_weights = weights

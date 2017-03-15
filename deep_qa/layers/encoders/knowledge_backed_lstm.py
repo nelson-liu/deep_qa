@@ -1,7 +1,7 @@
 import warnings
 
 from keras import backend as K
-from keras import initializations, activations
+from keras import initializers, activations
 from keras.engine import InputSpec
 from keras.layers import LSTM
 
@@ -28,7 +28,7 @@ class KnowledgeBackedLSTM(LSTM):
         self.token_dim = token_dim
         self.knowledge_dim = knowledge_dim
         self.knowledge_length = knowledge_length
-        self.attention_init = initializations.get(attention_init)
+        self.attention_init = initializers.get(attention_init)
         self.attention_activation = activations.get(attention_activation)
         # LSTM's constructor expects output_dim. So pass it along.
         kwargs['output_dim'] = output_dim

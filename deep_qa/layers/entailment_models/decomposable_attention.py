@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
 from keras import backend as K
-from keras import initializations, activations
+from keras import initializers, activations
 
 from .word_alignment import WordAlignmentEntailment
 from ...tensors.backend import switch, apply_feed_forward
@@ -36,7 +36,7 @@ class DecomposableAttentionEntailment(WordAlignmentEntailment):
         self.hidden_layer_activation = params.pop('hidden_layer_activation', 'relu')
         self.final_activation = params.pop('final_activation', 'softmax')
         self.output_dim = 2 if self.final_activation == 'softmax' else 1
-        self.init = initializations.get(params.pop('init', 'uniform'))
+        self.init = initializers.get(params.pop('init', 'uniform'))
         self.premise_length = None
         self.hypothesis_length = None
         # Making the name end with 'softmax' to let debug handle this layer's output correctly.

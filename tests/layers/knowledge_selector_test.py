@@ -1,6 +1,6 @@
 # pylint: disable=no-self-use,invalid-name
 import numpy
-from keras import initializations
+from keras import initializers
 from keras.layers import Input, merge
 from keras import backend as K
 
@@ -18,7 +18,7 @@ class TestKnowledgeSelector(DeepQaTestCase):
     def test_hardmax(self):
         num_samples = 10
         knowledge_length = 5
-        init = initializations.get('uniform')
+        init = initializers.get('uniform')
         unnormalized_attention = init((num_samples, knowledge_length))
         hardmax_output = hardmax(unnormalized_attention, knowledge_length)
         input_value = K.eval(unnormalized_attention)

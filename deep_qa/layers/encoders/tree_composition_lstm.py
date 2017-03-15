@@ -2,7 +2,7 @@ import copy
 import warnings
 
 from keras import backend as K
-from keras import activations, initializations, regularizers
+from keras import activations, initializers, regularizers
 from keras.engine import InputSpec
 from keras.layers import Recurrent
 import numpy as np
@@ -39,11 +39,11 @@ class TreeCompositionLSTM(Recurrent):
         self.buffer_ops_limit = kwargs["buffer_ops_limit"]
         self.output_dim = kwargs["output_dim"]
         init = kwargs.get("init", "glorot_uniform")
-        self.init = initializations.get(init)
+        self.init = initializers.get(init)
         inner_init = kwargs.get("inner_init", "orthogonal")
-        self.inner_init = initializations.get(inner_init)
+        self.inner_init = initializers.get(inner_init)
         forget_bias_init = kwargs.get("forget_bias_init", "one")
-        self.forget_bias_init = initializations.get(forget_bias_init)
+        self.forget_bias_init = initializers.get(forget_bias_init)
         activation = kwargs.get("activation", "tanh")
         self.activation = activations.get(activation)
         inner_activation = kwargs.get("inner_activation", "hard_sigmoid")

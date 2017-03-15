@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from keras import backend as K
 from keras.layers import Layer
-from keras import initializations
+from keras import initializers
 from keras.regularizers import l1
 from keras.engine import InputSpec
 
@@ -87,7 +87,7 @@ class AdaptiveStep(Layer):
         # in mind when doing grid searches over this parameter.
         self.ponder_cost_strength = layer_params.pop("ponder_cost_strength", 0.05)
         self.memory_network = memory_network
-        self.init = initializations.get(initialization)
+        self.init = initializers.get(initialization)
         self.name = name
         # Attributes to be defined when we build this layer.
         self.halting_weight = None

@@ -1,4 +1,4 @@
-from keras import initializations
+from keras import initializers
 from keras.layers import Layer
 
 class Additive(Layer):
@@ -11,7 +11,7 @@ class Additive(Layer):
         super(Additive, self).__init__(**kwargs)
 
         initialization = kwargs.pop('initialization', 'glorot_uniform')
-        self.init = initializations.get(initialization)
+        self.init = initializers.get(initialization)
         self.initial_weights = kwargs.pop('weights', None)
         self._additive_weights = None
 

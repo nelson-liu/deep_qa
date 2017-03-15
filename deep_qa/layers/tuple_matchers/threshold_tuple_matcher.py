@@ -2,7 +2,7 @@ from copy import deepcopy
 from typing import Any, Dict
 
 from keras import backend as K
-from keras import initializations, activations
+from keras import initializers, activations
 from keras.regularizers import L1L2Regularizer
 from keras.layers import Layer
 from overrides import overrides
@@ -115,13 +115,13 @@ class ThresholdTupleMatcher(Layer):
         hidden_layer_input_dim = input_shape[0][1]
         for i in range(self.num_hidden_layers):
             hidden_layer = self.add_weight(shape=(hidden_layer_input_dim, self.hidden_layer_width),
-                                           initializer=initializations.get(self.hidden_layer_init),
+                                           initializer=initializers.get(self.hidden_layer_init),
                                            name='%s_hiddenlayer_%d' % (self.name, i))
             self.hidden_layer_weights.append(hidden_layer)
             hidden_layer_input_dim = self.hidden_layer_width
         # Add the weights for the final layer.
         self.score_layer = self.add_weight(shape=(self.hidden_layer_width, 1),
-                                           initializer=initializations.get(self.hidden_layer_init),
+                                           initializer=initializers.get(self.hidden_layer_init),
                                            name='%s_score' % self.name)
 
     def compute_output_shape(self, input_shapes):
