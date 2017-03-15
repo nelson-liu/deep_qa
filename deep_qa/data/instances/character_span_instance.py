@@ -25,6 +25,10 @@ class CharacterSpanInstance(QuestionPassageInstance):
     This class should be used to represent training instances for the SQuAD (Stanford Question
     Answering) and NewsQA datasets, to name a few.
     """
+    # We add a special token to the end of the passage.  This is because our span labels are
+    # end-exclusive, and we do a softmax over the passage to determine span end.  So if we want to
+    # be able to include the last token of the passage, we need to have a special symbol at the
+    # end.
     stop_token = "@@STOP@@"
 
     def __init__(self, question: str, passage: str, label: Tuple[int, int], index: int=None):
