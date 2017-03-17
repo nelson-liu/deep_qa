@@ -1,6 +1,5 @@
 # pylint: disable=no-self-use,invalid-name
-from os.path import dirname, realpath, join
-import shutil
+from os.path import join
 
 from overrides import overrides
 from deep_qa.data.dataset_readers.squad_sentence_selection_reader import SquadSentenceSelectionReader

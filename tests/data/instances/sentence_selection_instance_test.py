@@ -95,18 +95,18 @@ class TestIndexedSentenceSelectionInstance(DeepQaTestCase):
                            'num_sentence_words': 2,
                            'num_sentences': 4})
         assert self.instance.question_indices == [3, 5, 6]
-        assert self.instance.sentences_indices[0] == [0, 0]
-        assert self.instance.sentences_indices[1] == [3, 4]
-        assert self.instance.sentences_indices[2] == [5, 1]
-        assert self.instance.sentences_indices[3] == [5, 6]
+        assert self.instance.sentences_indices[0] == [3, 4]
+        assert self.instance.sentences_indices[1] == [5, 1]
+        assert self.instance.sentences_indices[2] == [5, 6]
+        assert self.instance.sentences_indices[3] == [0, 0]
 
     def test_pad_removes_sentences(self):
         self.instance.pad({'num_question_words': 4,
                            'num_sentence_words': 3,
                            'num_sentences': 2})
         assert self.instance.question_indices == [2, 3, 5, 6]
-        assert self.instance.sentences_indices[0] == [6, 5, 1]
-        assert self.instance.sentences_indices[1] == [4, 5, 6]
+        assert self.instance.sentences_indices[0] == [2, 3, 4]
+        assert self.instance.sentences_indices[1] == [6, 5, 1]
 
     def test_as_training_data_produces_correct_numpy_arrays(self):
         self.instance.pad({'num_question_words': 7,
@@ -115,7 +115,7 @@ class TestIndexedSentenceSelectionInstance(DeepQaTestCase):
         inputs, label = self.instance.as_training_data()
         assert numpy.all(label == numpy.asarray([0, 1, 0, 0]))
         assert numpy.all(inputs[0] == numpy.asarray([0, 0, 1, 2, 3, 5, 6]))
-        assert numpy.all(inputs[1] == numpy.asarray([[0, 0, 0, 0],
-                                                     [0, 2, 3, 4],
+        assert numpy.all(inputs[1] == numpy.asarray([[0, 2, 3, 4],
                                                      [4, 6, 5, 1],
-                                                     [3, 4, 5, 6]]))
+                                                     [3, 4, 5, 6],
+                                                     [0, 0, 0, 0]]))
