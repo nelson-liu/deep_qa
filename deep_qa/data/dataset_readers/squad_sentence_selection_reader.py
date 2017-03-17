@@ -4,7 +4,6 @@ import logging
 import os
 import random
 
-import nltk
 from tqdm import tqdm
 
 logger = logging.getLogger(__name__) # pylint: disable=invalid-name
@@ -31,6 +30,8 @@ class SquadSentenceSelectionReader():
         self.output_directory = output_directory
 
     def read_file(self, input_filepath):
+        # Import is here, since it isn't necessary by default.
+        import nltk
         processed_rows = []
         logger.info("Reading file at %s", input_filepath)
         with open(input_filepath) as dataset_file:

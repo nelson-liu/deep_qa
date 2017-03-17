@@ -137,7 +137,8 @@ class IndexedSentenceSelectionInstance(IndexedInstance):
         num_sentences = max_lengths['num_sentences']
         self.sentences_indices = self.pad_sequence_to_length(self.sentences_indices,
                                                              num_sentences,
-                                                             lambda: [])
+                                                             lambda: [],
+                                                             truncate_from_right=False)
 
         # Pad the number of words in a sentence.
         # Since the number of words in the sentence is set
