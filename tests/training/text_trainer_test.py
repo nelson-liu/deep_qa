@@ -9,7 +9,6 @@ from deep_qa.layers.encoders import encoders
 from deep_qa.models.text_classification.true_false_model import TrueFalseModel
 from deep_qa.models.multiple_choice_qa.question_answer_similarity import QuestionAnswerSimilarity
 from ..common.test_case import DeepQaTestCase
-from ..common.test_markers import requires_tensorflow, requires_theano
 
 
 class TestTextTrainer(DeepQaTestCase):
@@ -27,7 +26,7 @@ class TestTextTrainer(DeepQaTestCase):
     def test_padding_works_correctly(self, _output_debug_info):
         self.write_true_false_model_files()
         args = {
-                'embedding_size': 4,
+                'embedding_dim': {'words': 2, 'characters': 2},
                 'tokenizer': {'type': 'words and characters'},
                 'show_summary_with_masking_info': True,
                 'debug': {
@@ -73,7 +72,7 @@ class TestTextTrainer(DeepQaTestCase):
     def test_words_and_characters_works_with_matrices(self, _output_debug_info):
         self.write_question_answer_memory_network_files()
         args = {
-                'embedding_size': 4,
+                'embedding_dim': {'words': 2, 'characters': 2},
                 'tokenizer': {'type': 'words and characters'},
                 'debug': {
                         'data': 'training',
@@ -118,7 +117,7 @@ class TestTextTrainer(DeepQaTestCase):
     def test_load_model(self):
         # train a model and serialize it.
         args = {
-                'embedding_size': 4,
+                'embedding_dim': {'words': 4, 'characters': 4},
                 'save_models': True,
                 'tokenizer': {'type': 'words and characters'},
                 'show_summary_with_masking_info': True,
@@ -135,12 +134,10 @@ class TestTextTrainer(DeepQaTestCase):
         assert_allclose(model.model.predict(model.__dict__["validation_input"]),
                         loaded_model.model.predict(model.__dict__["validation_input"]))
 
-
-    @requires_theano
     def test_load_model_and_fit(self):
         # train a model and serialize it.
         args = {
-                'embedding_size': 4,
+                'embedding_dim': {'words': 4, 'characters': 4},
                 'save_models': True,
                 'tokenizer': {'type': 'words and characters'},
                 'show_summary_with_masking_info': True,
@@ -174,18 +171,11 @@ class TestTextTrainer(DeepQaTestCase):
         # assert_allclose(model.model.predict(validation_input),
         #                 loaded_model.model.predict(validation_input))
 
-
-    @requires_tensorflow
-    def test_tensorboard_logs_does_not_crash(self):
-        self.write_true_false_model_files()
-        model = self.get_model(TrueFalseModel, {'tensorboard_log': self.TEST_DIR})
-        model.train()
-
     def test_pretrained_embeddings_works_correctly(self):
         self.write_true_false_model_files()
         self.write_pretrained_vector_files()
         args = {
-                'embedding_size': 8,
+                'embedding_dim': {'words': 8, 'characters': 8},
                 'pretrained_embeddings_file': self.PRETRAINED_VECTORS_GZIP,
                 'fine_tune_embeddings': False,
                 'project_embeddings': False,
