@@ -215,3 +215,28 @@ def l1_normalize(tensor_to_normalize, mask=None):
     uniform = (K.ones_like(mask)/(divisor)) * temp_mask
     normalized_tensors = switch(row_sum, normal_result, uniform)
     return normalized_tensors
+
+
+def cosine_similarity(vector_1, tensor_2):
+    """
+    Calcullate the cosine similarities between a vector and a collection of
+    vectors with broadcasting.
+
+    Parameters
+    ----------
+    vector_1: Tensor
+        Tensor of shape (batch size, x) to use in calculating the cosine
+        similarity against tensor_2, where x is arbitrary.
+
+    tensor_2: Tensor
+        Tensor of shape (batch size, num_tensors, x).
+
+    Returns
+    -------
+    cosine_similarities : Tensor
+        Tensor of cosine similarities of shape (batch size, num_tensors)
+    """
+
+    vector_1 = K.l2_normalize(vector_1, axis=-1)
+    vector_2 = K.l2_normalize(tensor_2, axis=-1)
+    return K.sum((vector_1 * vector_2), axis=-1)
