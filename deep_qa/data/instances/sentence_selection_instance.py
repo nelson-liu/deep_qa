@@ -9,7 +9,7 @@ from ..data_indexer import DataIndexer
 
 class SentenceSelectionInstance(TextInstance):
     """
-    A SentenceSelectionInstance an instance for the sentence selection
+    A SentenceSelectionInstance is an instance for the sentence selection
     task. A SentenceSelectionInstance stores a question as a string, and a set of sentences
     as a list of strings. The labels is a single int, indicating the index of
     the sentence that contains the answer to the question.
@@ -37,8 +37,8 @@ class SentenceSelectionInstance(TextInstance):
     @overrides
     def to_indexed_instance(self, data_indexer: DataIndexer):
         question_indices = self._index_text(self.question_text, data_indexer)
-        sentences_indices = [self._index_text(sentence, data_indexer) for
-                             sentence in self.sentences]
+        sentences_indices = [self._index_text(sentence, data_indexer)
+                             for sentence in self.sentences]
         return IndexedSentenceSelectionInstance(question_indices,
                                                 sentences_indices,
                                                 self.label,
@@ -68,7 +68,6 @@ class SentenceSelectionInstance(TextInstance):
             index = None
         else:
             raise RuntimeError("Unrecognized line format: " + line)
-        # get the answer options
         sentences_split = sentences.split("###")
         label = int(label_string)
 
@@ -116,8 +115,8 @@ class IndexedSentenceSelectionInstance(IndexedInstance):
         lengths['num_question_words'] = question_lengths['num_sentence_words']
 
         # the number of words in each passage
-        lengths['num_passage_words'] = max(sentence_lengths['num_sentence_words']
-                                           for sentence_lengths in sentences_lengths)
+        lengths['num_sentence_words'] = max(sentence_lengths['num_sentence_words']
+                                            for sentence_lengths in sentences_lengths)
 
         if 'num_word_characters' in question_lengths and 'num_word_characters' in sentences_lengths[0]:
             # the length of the longest word across all the sentences and the question
@@ -134,20 +133,21 @@ class IndexedSentenceSelectionInstance(IndexedInstance):
         as well as the individual words in the questions and sentences themselves.
         """
         max_lengths_tmp = max_lengths.copy()
-        # pad the number of words in a question
-        max_lengths_tmp['num_sentence_words'] = max_lengths_tmp['num_question_words']
-        self.question_indices = self.pad_word_sequence(self.question_indices, max_lengths_tmp)
-        # pad the number of sentences
+        # Pad the number of sentences.
         num_sentences = max_lengths['num_sentences']
         while len(self.sentences_indices) < num_sentences:
             self.sentences_indices.append([])
         self.sentences_indices = self.sentences_indices[:num_sentences]
 
-        # pad the number of words in a sentence
-        max_lengths_tmp['num_sentence_words'] = max_lengths_tmp['num_passage_words']
+        # Pad the number of words in a sentence.
+        # Note that max_lengths_tmp['num_sentence_words'] is set to
+        # ['num_sentence_words'] by default.
         self.sentences_indices = [self.pad_word_sequence(sentence_indices,
                                                          max_lengths_tmp)
                                   for sentence_indices in self.sentences_indices]
+        # Pad the number of words in a question.
+        max_lengths_tmp['num_sentence_words'] = max_lengths_tmp['num_question_words']
+        self.question_indices = self.pad_word_sequence(self.question_indices, max_lengths_tmp)
 
     @overrides
     def as_training_data(self):

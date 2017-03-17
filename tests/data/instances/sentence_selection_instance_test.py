@@ -88,11 +88,11 @@ class TestIndexedSentenceSelectionInstance(DeepQaTestCase):
     def test_get_lengths(self):
         assert self.instance.get_lengths() == {'num_question_words': 5,
                                                'num_sentences': 3,
-                                               'num_passage_words': 6}
+                                               'num_sentence_words': 6}
 
     def test_pad_adds_empty_sentences(self):
         self.instance.pad({'num_question_words': 3,
-                           'num_passage_words': 2,
+                           'num_sentence_words': 2,
                            'num_sentences': 4})
         assert self.instance.question_indices == [3, 5, 6]
         assert self.instance.sentences_indices[0] == [3, 4]
@@ -102,7 +102,7 @@ class TestIndexedSentenceSelectionInstance(DeepQaTestCase):
 
     def test_pad_removes_sentences(self):
         self.instance.pad({'num_question_words': 4,
-                           'num_passage_words': 3,
+                           'num_sentence_words': 3,
                            'num_sentences': 2})
         assert self.instance.question_indices == [2, 3, 5, 6]
         assert self.instance.sentences_indices[0] == [2, 3, 4]
@@ -110,7 +110,7 @@ class TestIndexedSentenceSelectionInstance(DeepQaTestCase):
 
     def test_as_training_data_produces_correct_numpy_arrays(self):
         self.instance.pad({'num_question_words': 7,
-                           'num_passage_words': 4,
+                           'num_sentence_words': 4,
                            'num_sentences': 4})
         inputs, label = self.instance.as_training_data()
         assert numpy.all(label == numpy.asarray([0, 1, 0, 0]))
