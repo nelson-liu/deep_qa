@@ -135,13 +135,14 @@ class IndexedSentenceSelectionInstance(IndexedInstance):
         max_lengths_tmp = max_lengths.copy()
         # Pad the number of sentences.
         num_sentences = max_lengths['num_sentences']
-        while len(self.sentences_indices) < num_sentences:
-            self.sentences_indices.append([])
-        self.sentences_indices = self.sentences_indices[:num_sentences]
+        self.sentences_indices = self.pad_sequence_to_length(self.sentences_indices,
+                                                             num_sentences,
+                                                             lambda: [])
 
         # Pad the number of words in a sentence.
-        # Note that max_lengths_tmp['num_sentence_words'] is set to
-        # ['num_sentence_words'] by default.
+        # Since the number of words in the sentence is set
+        # to ['num_sentence_words'] (the key defined in the TextTrainer)
+        # by default, we don't have to modify it.
         self.sentences_indices = [self.pad_word_sequence(sentence_indices,
                                                          max_lengths_tmp)
                                   for sentence_indices in self.sentences_indices]

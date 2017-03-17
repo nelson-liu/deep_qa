@@ -65,6 +65,8 @@ class SquadSentenceSelectionReader():
                         if start_span <= answer_start_index and answer_start_index < end_span:
                             answer_sentence = span_to_sentence_index[span_tuple]
                             break
+                    # This runs if we did not break, and thus
+                    # answer_sentence is None
                     else:
                         raise ValueError("Index of answer start was out of bounds. "
                                          "This should never happen, please raise "
