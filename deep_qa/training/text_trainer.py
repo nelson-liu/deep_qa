@@ -4,7 +4,7 @@ import logging
 import dill as pickle
 
 from keras import backend as K
-from keras.layers import Dense, Dropout, Input, Layer
+from keras.layers import Dense, Dropout, Input, Layer, TimeDistributed
 from overrides import overrides
 import numpy
 
@@ -18,7 +18,6 @@ from ..data.tokenizers import tokenizers
 from ..data.data_indexer import DataIndexer
 from ..layers.encoders import encoders, set_regularization_params, seq2seq_encoders
 from ..layers.time_distributed_embedding import TimeDistributedEmbedding
-from ..layers.wrappers.time_distributed import TimeDistributed
 from .models import DeepQaModel
 from .trainer import Trainer
 
@@ -608,7 +607,6 @@ class TextTrainer(Trainer):
         # These are used in the words_and_characters tokenizer.
         # TODO(nelson/matt): We might consider making the Tokenizer API
         # return custom objects.
-        custom_objects["TimeDistributed"] = TimeDistributed
         from ..layers.vector_matrix_split import VectorMatrixSplit
         custom_objects["VectorMatrixSplit"] = VectorMatrixSplit
         return custom_objects

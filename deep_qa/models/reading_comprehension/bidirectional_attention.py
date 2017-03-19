@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from keras.layers import Dense, Input, merge
+from keras.layers import Dense, Input, merge, TimeDistributed
 from overrides import overrides
 
 from ...data.instances.character_span_instance import CharacterSpanInstance
@@ -11,7 +11,6 @@ from ...layers.backend.max import Max
 from ...layers.backend.repeat import Repeat
 from ...layers.complex_concat import ComplexConcat
 from ...layers.highway import Highway
-from ...layers.wrappers.time_distributed import TimeDistributed
 from ...training.text_trainer import TextTrainer
 from ...training.models import DeepQaModel
 

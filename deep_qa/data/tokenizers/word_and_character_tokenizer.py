@@ -2,13 +2,12 @@ from typing import Any, Dict, List, Tuple
 
 from overrides import overrides
 from keras import backend as K
-from keras.layers import merge
+from keras.layers import Lambda, TimeDistributed
 
 from .tokenizer import Tokenizer
 from .word_processor import WordProcessor
 from ..data_indexer import DataIndexer
 from ...layers.vector_matrix_split import VectorMatrixSplit
-from ...layers.wrappers.time_distributed import TimeDistributed
 
 class WordAndCharacterTokenizer(Tokenizer):
     """
@@ -99,22 +98,23 @@ class WordAndCharacterTokenizer(Tokenizer):
             output_shape = list(input_shapes[0])
             output_shape[-1] += input_shapes[1][-1]
             return tuple(output_shape)
-        merge_mask = lambda masks: masks[0]
+        merge_mask = lambda inputs, masks: masks[0]
 
-        # If you're embedding multiple inputs in your model, we need the final merge layer here to
-        # have a unique name each time.  In order to get a unique name, we use the name of the
-        # input layer.  Except sometimes Keras adds funny things to the end of the input layer, so
+        # If you're embedding multiple inputs in your model, we need the final concatenation here
+        # to have a unique name each time.  In order to get a unique name, we use the name of the
+        # input layer.  Except sometimes Keras adds funny things to the ends of the input layer, so
         # we'll strip those off.
         input_name = input_layer.name
+        if input_name.startswith('/'):
+            input_name = input_name[1:]
         if ':' in input_name:
             input_name = input_name.split(':')[0]
         if input_name.split('_')[-1].isdigit():
             input_name = '_'.join(input_name.split('_')[:-1])
-        final_embedded_input = merge([word_embedding, word_encoding],
-                                     mode=merge_mode,
-                                     output_shape=merge_shape,
-                                     output_mask=merge_mask,
-                                     name='combined_word_embedding_for_' + input_name)
+        name = 'combined_word_embedding_for_' + input_name
+        merge_layer = Lambda(merge_mode, output_shape=merge_shape, mask=merge_mask,
+                             name='combined_word_embedding_for_' + input_name)
+        final_embedded_input = merge_layer([word_embedding, word_encoding])
         return final_embedded_input
 
     @overrides
