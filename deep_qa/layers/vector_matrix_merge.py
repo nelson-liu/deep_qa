@@ -52,11 +52,12 @@ class VectorMatrixMerge(Layer):
         new_shape[self.concat_axis] += num_vectors
         return tuple(new_shape)
 
-    def compute_mask(self, inputs, input_masks=None):  # pylint: disable=unused-argument
-        if input_masks is None or not self.propagate_mask:
+    def compute_mask(self, inputs, mask=None):  # pylint: disable=unused-argument
+        if mask is None or all(m is None for m in mask) or not self.propagate_mask:
             return None
-        num_vectors = len(input_masks) - 1
-        matrix_mask = input_masks[-1]
+        print(mask)
+        num_vectors = len(mask) - 1
+        matrix_mask = mask[-1]
         # We're just trying to get a mask of the right shape, here, so we can call K.ones_like() on
         # it.  We'll ignore the actual values in this.
         vector_mask_template = K.sum(matrix_mask, axis=self.mask_concat_axis)

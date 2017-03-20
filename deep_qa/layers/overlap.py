@@ -1,11 +1,11 @@
 from keras import backend as K
-from keras.layers import Layer
 from overrides import overrides
 
 from ..tensors.backend import switch
+from .masked_layer import MaskedLayer
 
 
-class Overlap(Layer):
+class Overlap(MaskedLayer):
     """
     This Layer takes 2 inputs: a ``tensor_a`` (e.g. a document) and a ``tensor_b``
     (e.g. a question). It returns a one-hot vector suitable for feature
@@ -29,25 +29,11 @@ class Overlap(Layer):
     """
     @overrides
     def __init__(self, **kwargs):
-        self.supports_masking = True
         super(Overlap, self).__init__(**kwargs)
 
     @overrides
     def compute_output_shape(self, input_shapes):
         return (input_shapes[0][0], input_shapes[0][1], 2)
-
-    # This is a hack made necessary by
-    # https://github.com/fchollet/keras/issues/5311
-    @overrides
-    def compute_mask(self, inputs, input_mask=None):  # pylint: disable=unused-argument
-        if K.backend() == "tensorflow":
-            tensor_a = inputs[0]
-            length_a = K.int_shape(tensor_a)[1]
-            return K.cast(K.ones_like(K.repeat_elements(K.expand_dims(tensor_a, 2),
-                                                        length_a,
-                                                        axis=2)), "bool")
-        else:
-            return None
 
     @overrides
     def call(self, inputs, mask=None):

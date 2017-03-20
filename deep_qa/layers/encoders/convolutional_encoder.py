@@ -2,6 +2,7 @@ from keras import backend as K
 from keras.engine import InputSpec
 from keras.layers import Layer, Convolution1D, MaxPooling1D, merge, Dense
 from keras.regularizers import l1_l2
+from overrides import overrides
 
 class CNNEncoder(Layer):
     '''
@@ -53,11 +54,12 @@ class CNNEncoder(Layer):
         self.initial_weights = weights
         super(CNNEncoder, self).__init__(**kwargs)
 
+    @overrides
     def build(self, input_shape):
         input_length = input_shape[1]  # number of words
         # We define convolution, maxpooling and dense layers first.
-        self.convolution_layers = [Convolution1D(nb_filter=self.num_filters,
-                                                 filter_length=ngram_size,
+        self.convolution_layers = [Convolution1D(filters=self.num_filters,
+                                                 kernel_size=ngram_size,
                                                  activation=self.conv_layer_activation,
                                                  W_regularizer=self.regularizer(),
                                                  b_regularizer=self.regularizer())
@@ -84,25 +86,30 @@ class CNNEncoder(Layer):
 
         super(CNNEncoder, self).build(input_shape)
 
-    def call(self, x, mask=None):
+    @overrides
+    def call(self, inputs, mask=None):  # pylint: disable=arguments-differ,unused-argument
         # Each convolution layer returns output of size (samples, pool_length, num_filters),
         #       where pool_length = num_words - ngram_size + 1
         # Each maxpooling layer returns output of size (samples, 1, num_filters).
         # We need to flatten to remove the second dimension of length 1 from the maxpooled output.
-        filter_outputs = [K.batch_flatten(max_pooling_layer.call(convolution_layer.call(x, mask)))
+        # TODO(matt): we need to use a convolutional layer here that supports masking.
+        filter_outputs = [K.batch_flatten(max_pooling_layer.call(convolution_layer.call(inputs)))
                           for max_pooling_layer, convolution_layer in zip(self.max_pooling_layers,
                                                                           self.convolution_layers)]
         maxpool_output = merge(filter_outputs, mode='concat') if len(filter_outputs) > 1 else filter_outputs[0]
         return self.projection_layer.call(maxpool_output)
 
+    @overrides
     def compute_output_shape(self, input_shape):
         return (input_shape[0], self.output_dim)
 
-    def compute_mask(self, input, input_mask=None):  # pylint: disable=redefined-builtin
+    @overrides
+    def compute_mask(self, inputs, mask=None):  # pylint: disable=unused-argument
         # By default Keras propagates the mask from a layer that supports masking. We don't need it
         # anymore. So eliminating it from the flow.
         return None
 
+    @overrides
     def get_config(self):
         config = {"output_dim": self.output_dim,
                   "num_filters": self.num_filters,

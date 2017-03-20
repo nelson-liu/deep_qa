@@ -2,16 +2,16 @@ from copy import deepcopy
 from typing import Any, Dict
 
 from keras import backend as K
-from keras.layers import Layer
 from keras import initializers, activations
 from overrides import overrides
 
-from ...tensors.backend import apply_feed_forward
 from ...common.params import get_choice_with_default
+from ...tensors.backend import apply_feed_forward
 from ...tensors.similarity_functions import similarity_functions
+from ..masked_layer import MaskedLayer
 
 
-class SlotSimilarityTupleMatcher(Layer):
+class SlotSimilarityTupleMatcher(MaskedLayer):
     """
     Like other ``TupleMatch`` layers, this layer takes as input two tensors corresponding to two tuples,
     an answer tuple and a background tuple, and calculates the degree to which the background tuple
@@ -79,6 +79,7 @@ class SlotSimilarityTupleMatcher(Layer):
         similarity_function['name'] = self.name + '_similarity_function'
         self.similarity_function = similarity_functions[sim_function_choice](**similarity_function)
 
+    @overrides
     def get_config(self):
         base_config = super(SlotSimilarityTupleMatcher, self).get_config()
         config = {'similarity_function': self.similarity_function_params,
@@ -90,10 +91,12 @@ class SlotSimilarityTupleMatcher(Layer):
         config.update(base_config)
         return config
 
+    @overrides
     def compute_output_shape(self, input_shapes):
         # pylint: disable=unused-argument
         return (input_shapes[0][0], 1)
 
+    @overrides
     def build(self, input_shape):
         super(SlotSimilarityTupleMatcher, self).build(input_shape)
 
@@ -126,9 +129,9 @@ class SlotSimilarityTupleMatcher(Layer):
         mask_shape = (input_shape[0][0], 1)
         return mask_shape
 
-    def call(self, x, mask=None):
-        tuple1_input, tuple2_input = x      # tuple1 shape: (batch size, num_slots, encoding_dim)
-                                            # tuple2 shape: (batch size, num_slots, encoding_dim)
+    def call(self, inputs, mask=None):
+        tuple1_input, tuple2_input = inputs      # tuple1 shape: (batch size, num_slots, encoding_dim)
+                                                 # tuple2 shape: (batch size, num_slots, encoding_dim)
         # Check that the tuples have the same number of slots.
         assert K.int_shape(tuple1_input)[1] == K.int_shape(tuple2_input)[1]
 
@@ -137,6 +140,8 @@ class SlotSimilarityTupleMatcher(Layer):
         similarities = self.similarity_function.compute_similarity(tuple1_input, tuple2_input)
 
         # Remove any similarities if one of the corresponding slots was all padding.
+        if mask is None:
+            mask = [None, None]
         tuple1_mask, tuple2_mask = mask
         # Make a masked version of similarities which remomves similarities from slots which were all
         # padding in either tuple.
