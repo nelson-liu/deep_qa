@@ -242,9 +242,9 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
     def write_who_did_what_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
             validation_file.write('1\tHe went to the store to buy goods, because he wanted to.'
-                             '\tHe bought xxxxx\tgoods###store\t0\n')
+                                  '\tHe bought xxxxx\tgoods###store\t0\n')
             validation_file.write('1\tShe hiking on the weekend with her friend.'
-                             '\tShe went xxxxx\thiking###friend###weekend###her friend\t0\n')
+                                  '\tShe went xxxxx\thiking###friend###weekend###her friend\t0\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             # document, question, answers
             train_file.write('1\tFred hit the ball with the bat.\tHe hit the ball with the xxxxx\tbat###ball\t0\n')
@@ -256,7 +256,7 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
     def write_tuple_inference_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
             validation_file.write('1\tss<>v f d<>oo o<>c$$$s<>v ff<>o i###ss r<>v<>o e<>o ee\t'
-                             'ss ss<>ve gg<>o sd<>ccs\t0\n')
+                                  'ss ss<>ve gg<>o sd<>ccs\t0\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             # document, question, answers
             train_file.write('1\tss<>v<>oo o<>c$$$s e<>ff<>o ii i###ss r<>rr<>o e<>o ee\t'
@@ -270,7 +270,8 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
 
     def write_span_prediction_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
-            validation_file.write('1\tquestion 1 with extra words\tpassage with answer and a reallylongword\t13,18\n')
+            validation_file.write('1\tquestion 1 with extra words\t'
+                                  'passage with answer and a reallylongword\t13,18\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             train_file.write('1\tquestion 1\tpassage1 with answer1\t14,20\n')
             train_file.write('2\tquestion 2\tpassage2 with answer2\t0,8\n')
