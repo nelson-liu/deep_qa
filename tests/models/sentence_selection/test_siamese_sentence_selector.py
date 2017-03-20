@@ -9,11 +9,7 @@ class TestSiameseSentenceSelector(DeepQaTestCase):
         args = {
                 'save_models': True,
                 "encoder": {
-                        "question_encoder": {
-                                "type": "gru",
-                                "output_dim": 7
-                        },
-                        "sentence_encoder": {
+                        "default": {
                                 "type": "gru",
                                 "output_dim": 7
                         }
