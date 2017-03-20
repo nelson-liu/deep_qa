@@ -10,9 +10,20 @@ from ...training.models import DeepQaModel
 
 
 class SiameseSentenceSelector(TextTrainer):
+    """
+    This class implements a (generally) Siamese network for the answer
+    sentence selectiont ask. Given a question and a collection of sentences,
+    we aim to identify which sentence has the answer to the question. This
+    model encodes the question and each sentence with (possibly different)
+    encoders, and then does a cosine similarity and normalizes to get a
+    distribution over the set of sentences.
+
+    Note that in some cases, this may not be exactly "Siamese" because the
+    question and sentences encoders can differ.
+    """
     def __init__(self, params: Dict[str, Any]):
-        self.max_question_length = params.pop('max_question_length', None)
-        self.max_sentence_length = params.pop('max_sentence_length', None)
+        self.num_question_words = params.pop('num_question_words', None)
+        self.num_sentence_words = params.pop('num_sentence_words', None)
         self.num_sentences = params.pop('num_sentences', None)
         super(SiameseSentenceSelector, self).__init__(params)
 
@@ -20,8 +31,8 @@ class SiameseSentenceSelector(TextTrainer):
     def _build_model(self):
         """
         The basic outline here is that we'll pass the questions and each
-        sentence in the passage through some sort of encoder. At the simplest,
-        this could be a biLSTM or a biGRU.
+        sentence in the passage through some sort of encoder (e.g. BOW, GRU,
+        or biGRU).
 
         Then, we take the encoded representation of the question and calculate
         a cosine similarity with the encoded representation of each sentence in
@@ -31,12 +42,12 @@ class SiameseSentenceSelector(TextTrainer):
         """
         # First we create input layers and pass the inputs through embedding layers.
         # shape: (batch size, question_length)
-        question_input = Input(shape=self._get_sentence_shape(self.max_question_length),
+        question_input = Input(shape=self._get_sentence_shape(self.num_question_words),
                                dtype='int32', name="question_input")
 
         # shape: (batch size, num_sentences, sentences_length)
         sentences_input_shape = ((self.num_sentences,) +
-                                 self._get_sentence_shape(self.max_sentence_length))
+                                 self._get_sentence_shape(self.num_sentence_words))
         sentences_input = Input(shape=sentences_input_shape,
                                 dtype='int32', name="sentences_input")
 
@@ -47,12 +58,14 @@ class SiameseSentenceSelector(TextTrainer):
         sentences_embedding = self._embed_input(sentences_input)
 
         # We encode the question embeddings with some encoder.
-        question_encoder = self._get_encoder(name="question_encoder")
+        question_encoder = self._get_encoder(name="question_encoder",
+                                             fallback_behavior="use default encoder")
         # shape: (batch size, encoder_output_dimension)
         encoded_question = question_encoder(question_embedding)
 
         # We encode the document embeddings with some encoder.
-        sentences_encoder = EncoderWrapper(self._get_encoder(name="sentence_encoder"),
+        sentences_encoder = EncoderWrapper(self._get_encoder(name="sentence_encoder",
+                                                             fallback_behavior="use default encoder"),
                                            name="TimeDistributed_sentences_encoder")
         # shape: (batch size, num_sentences, encoder_output_dimension)
         encoded_sentences = sentences_encoder(sentences_embedding)
@@ -82,9 +95,8 @@ class SiameseSentenceSelector(TextTrainer):
         Return a dictionary with the appropriate padding lengths.
         """
         max_lengths = super(SiameseSentenceSelector, self)._get_max_lengths()
-        max_lengths['num_question_words'] = self.max_question_length
+        max_lengths['num_question_words'] = self.num_question_words
         max_lengths['num_sentences'] = self.num_sentences
-        max_lengths['num_sentence_words'] = self.max_sentence_length
         return max_lengths
 
     @overrides
@@ -92,20 +104,16 @@ class SiameseSentenceSelector(TextTrainer):
         """
         Set the padding lengths of the model.
         """
-        # TODO(nelson): superclass complains that there is no
-        # num_sentence_words key, so we set it to None here.
-        # We should probably patch up / organize the API.
         super(SiameseSentenceSelector, self)._set_max_lengths(max_lengths)
-        self.max_question_length = max_lengths['num_question_words']
+        self.num_question_words = max_lengths['num_question_words']
         self.num_sentences = max_lengths['num_sentences']
-        self.max_sentence_length = max_lengths['num_sentence_words']
 
     @overrides
     def _set_max_lengths_from_model(self):
-        self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][1:])
-        self.max_question_length = self.model.get_input_shape_at(0)[0][1]
+        self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][2:])
+        self.num_question_words = self.model.get_input_shape_at(0)[0][1]
         self.num_sentences = self.model.get_input_shape_at(0)[1][1]
-        self.max_sentence_length = self.model.get_input_shape_at(0)[1][2]
+        self.num_sentence_words = self.model.get_input_shape_at(0)[1][2]
 
     @classmethod
     def _get_custom_objects(cls):
