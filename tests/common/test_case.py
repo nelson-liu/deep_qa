@@ -290,7 +290,9 @@ class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
     def write_sentence_selection_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
             validation_file.write('1\tWhere is Paris?\tParis is the capital of France.###It '
-                                  'is by the Seine.###It is quite old\t1\n')
+                                  'is by the Seine.###It is quite old###this is a '
+                                  'very long sentence meant to test that loading '
+                                  'and padding works properly in the model.\t1\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             train_file.write('1\tWho won Super Bowl 50?\tSuper Bowl 50 was in Santa '
                              'Clara.###The Patriots beat the Broncos.\t1\n')
