@@ -3,7 +3,7 @@
     "model_serialization_prefix": "models/sentence_selection/siamese",
     "encoder": {
         "default": {
-            "type": "gru",
+            "type": "bi_gru",
             "output_dim": 256
         }
     },
