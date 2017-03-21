@@ -23,7 +23,6 @@ class SiameseSentenceSelector(TextTrainer):
     """
     def __init__(self, params: Dict[str, Any]):
         self.num_question_words = params.pop('num_question_words', None)
-        self.num_sentence_words = params.pop('num_sentence_words', None)
         self.num_sentences = params.pop('num_sentences', None)
         super(SiameseSentenceSelector, self).__init__(params)
 
@@ -41,20 +40,20 @@ class SiameseSentenceSelector(TextTrainer):
         batch to get a probability distribution over sentences in the passage.
         """
         # First we create input layers and pass the inputs through embedding layers.
-        # shape: (batch size, question_length)
+        # shape: (batch size, num_question_words)
         question_input = Input(shape=self._get_sentence_shape(self.num_question_words),
                                dtype='int32', name="question_input")
 
-        # shape: (batch size, num_sentences, sentences_length)
+        # shape: (batch size, num_sentences, num_sentence_words)
         sentences_input_shape = ((self.num_sentences,) +
-                                 self._get_sentence_shape(self.num_sentence_words))
+                                 self._get_sentence_shape())
         sentences_input = Input(shape=sentences_input_shape,
                                 dtype='int32', name="sentences_input")
 
-        # shape: (batch size, question_length, embedding size)
+        # shape: (batch size, num_question_words, embedding size)
         question_embedding = self._embed_input(question_input)
 
-        # shape: (batch size, num_sentences, sentences_length, embedding size)
+        # shape: (batch size, num_sentences, num_sentence_words, embedding size)
         sentences_embedding = self._embed_input(sentences_input)
 
         # We encode the question embeddings with some encoder.
@@ -113,7 +112,6 @@ class SiameseSentenceSelector(TextTrainer):
         self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][2:])
         self.num_question_words = self.model.get_input_shape_at(0)[0][1]
         self.num_sentences = self.model.get_input_shape_at(0)[1][1]
-        self.num_sentence_words = self.model.get_input_shape_at(0)[1][2]
 
     @classmethod
     def _get_custom_objects(cls):
