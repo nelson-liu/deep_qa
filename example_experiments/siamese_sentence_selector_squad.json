@@ -1,0 +1,22 @@
+{
+    "model_class": "SiameseSentenceSelector",
+    "model_serialization_prefix": "models/sentence_selection/siamese",
+    "encoder": {
+        "default": {
+            "type": "gru",
+            "output_dim": 256
+        }
+    },
+    "batch_size": 32,
+    "patience": 2,
+    "embedding_dim": {
+        "words": 100,
+        "characters": 0
+    },
+    "optimizer": {"type": "adam",
+                  "clipnorm": 10.0
+    },
+    "num_epochs": 5,
+    "validation_files": ["/efs/data/dlfa/squad_sentence_selection/processed/processed_dev-v1.1.json.tsv"],
+    "train_files": ["/efs/data/dlfa/squad_sentence_selection/processed/processed_train-v1.1.json.tsv"]
+}
