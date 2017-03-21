@@ -67,7 +67,7 @@ class SquadSentenceSelectionReader():
                     candidate_answer_start_indices = Counter()
                     for answer in question_answer["answers"]:
                         candidate_answer_start_indices[answer["answer_start"]] += 1
-                    answer_start_index, count = candidate_answer_start_indices.most_common(1)[0]
+                    answer_start_index, _ = candidate_answer_start_indices.most_common(1)[0]
                     # Get the full sentence corresponding to the answer.
                     answer_sentence = None
                     for span_tuple in span_to_sentence_index:
