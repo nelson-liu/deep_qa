@@ -1,10 +1,14 @@
+from typing import Tuple
+
 from keras import backend as K
 from keras.engine import InputSpec
-from keras.layers import Layer, Convolution1D, MaxPooling1D, merge, Dense
+from keras.layers import Convolution1D, MaxPooling1D, Concatenate, Dense
 from keras.regularizers import l1_l2
 from overrides import overrides
 
-class CNNEncoder(Layer):
+from ..masked_layer import MaskedLayer
+
+class CNNEncoder(MaskedLayer):
     '''
     CNNEncoder is a combination of multiple convolution layers and max pooling layers. This is
     defined as a single layer to be consistent with the other encoders in terms of input and output
@@ -22,27 +26,36 @@ class CNNEncoder(Layer):
     We then use a fully connected layer to project in back to the desired output_dim.  For more
     details, refer to "A Sensitivity Analysis of (and Practitioners’ Guide to) Convolutional Neural
     Networks for Sentence Classification", Zhang and Wallace 2016, particularly Figure 1.
+
+    Parameters
+    ----------
+    output_dim: int
+        After doing convolutions, we'll project the collected features into a vector of this size.
+    num_filters: int
+        This is the output dim for each convolutional layer, which is the same as the number of
+        "filters" learned by that layer.
+    ngram_filter_sizes: Tuple[int], optional (default=(2, 3, 4, 5))
+        This specifies both the number of convolutional layers we will create and their sizes.  The
+        default of (2, 3, 4, 5) will have four convolutional layers, corresponding to encoding
+        ngrams of size 2 to 5 with some number of filters.
+    conv_layer_activation: str, optional (default='relu')
+    l1_regularization: float, optional (default=None)
+    l2_regularization: float, optional (default=None)
     '''
-    def __init__(self, weights=None, **kwargs):
-        self.supports_masking = True
-
-        # This is the output dim for each convolutional layer, which is the same as the number of
-        # "filters" learned by that layer.
-        self.num_filters = kwargs.pop('num_filters')
-
-        # This specifies both the number of convolutional layers we will create and their sizes.
-        # Must be a List[int].  The default of (2, 3, 4, 5) will have four convolutional layers,
-        # corresponding to encoding ngrams of size 2 to 5 with some number of filters.
-        ngram_filter_sizes = kwargs.pop('ngram_filter_sizes', (2, 3, 4, 5))
+    def __init__(self,
+                 output_dim: int,
+                 num_filters: int,
+                 ngram_filter_sizes: Tuple[int]=(2, 3, 4, 5),
+                 conv_layer_activation: str='relu',
+                 l1_regularization: float=None,
+                 l2_regularization: float=None,
+                 **kwargs):
+        self.num_filters = num_filters
         self.ngram_filter_sizes = ngram_filter_sizes
-
-        self.output_dim = kwargs.pop('output_dim')
-
-        conv_layer_activation = kwargs.pop('conv_layer_activation', 'relu')
+        self.output_dim = output_dim
         self.conv_layer_activation = conv_layer_activation
-
-        self.l1_regularization = kwargs.pop("l1_regularization", None)
-        self.l2_regularization = kwargs.pop("l2_regularization", None)
+        self.l1_regularization = l1_regularization
+        self.l2_regularization = l2_regularization
         self.regularizer = lambda: l1_l2(l1=self.l1_regularization, l2=self.l2_regularization)
 
         # These are member variables that will be defined during self.build().
@@ -51,7 +64,6 @@ class CNNEncoder(Layer):
         self.projection_layer = None
 
         self.input_spec = [InputSpec(ndim=3)]
-        self.initial_weights = weights
         super(CNNEncoder, self).__init__(**kwargs)
 
     @overrides
@@ -61,8 +73,8 @@ class CNNEncoder(Layer):
         self.convolution_layers = [Convolution1D(filters=self.num_filters,
                                                  kernel_size=ngram_size,
                                                  activation=self.conv_layer_activation,
-                                                 W_regularizer=self.regularizer(),
-                                                 b_regularizer=self.regularizer())
+                                                 kernel_regularizer=self.regularizer(),
+                                                 bias_regularizer=self.regularizer())
                                    for ngram_size in self.ngram_filter_sizes]
         self.max_pooling_layers = [MaxPooling1D(pool_length=input_length - ngram_size + 1)
                                    for ngram_size in self.ngram_filter_sizes]
@@ -80,14 +92,10 @@ class CNNEncoder(Layer):
         for layer in self.convolution_layers + self.max_pooling_layers + [self.projection_layer]:
             self.trainable_weights.extend(layer.trainable_weights)
 
-        if self.initial_weights is not None:
-            self.set_weights(self.initial_weights)
-            del self.initial_weights
-
         super(CNNEncoder, self).build(input_shape)
 
     @overrides
-    def call(self, inputs, mask=None):  # pylint: disable=arguments-differ,unused-argument
+    def call(self, inputs, mask=None):  # pylint: disable=unused-argument
         # Each convolution layer returns output of size (samples, pool_length, num_filters),
         #       where pool_length = num_words - ngram_size + 1
         # Each maxpooling layer returns output of size (samples, 1, num_filters).
@@ -96,7 +104,7 @@ class CNNEncoder(Layer):
         filter_outputs = [K.batch_flatten(max_pooling_layer.call(convolution_layer.call(inputs)))
                           for max_pooling_layer, convolution_layer in zip(self.max_pooling_layers,
                                                                           self.convolution_layers)]
-        maxpool_output = merge(filter_outputs, mode='concat') if len(filter_outputs) > 1 else filter_outputs[0]
+        maxpool_output = Concatenate()(filter_outputs) if len(filter_outputs) > 1 else filter_outputs[0]
         return self.projection_layer.call(maxpool_output)
 
     @overrides

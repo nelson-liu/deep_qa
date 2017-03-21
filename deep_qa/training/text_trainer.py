@@ -402,7 +402,7 @@ class TextTrainer(Trainer):
                     name=name)
         projection_layer = None
         if self.project_embeddings:
-            projection_layer = TimeDistributed(Dense(output_dim=embedding_dim,),
+            projection_layer = TimeDistributed(Dense(units=embedding_dim,),
                                                name=name + '_projection')
         return embedding_layer, projection_layer
 
@@ -599,14 +599,10 @@ class TextTrainer(Trainer):
     @classmethod
     def _get_custom_objects(cls):
         custom_objects = super(TextTrainer, cls)._get_custom_objects()
+        custom_objects["TimeDistributedEmbedding"] = TimeDistributedEmbedding
         for value in encoders.values():
             if value.__name__ not in ['LSTM']:
                 custom_objects[value.__name__] = value
-        custom_objects["TimeDistributedEmbedding"] = TimeDistributedEmbedding
-
-        # These are used in the words_and_characters tokenizer.
-        # TODO(nelson/matt): We might consider making the Tokenizer API
-        # return custom objects.
-        from ..layers.vector_matrix_split import VectorMatrixSplit
-        custom_objects["VectorMatrixSplit"] = VectorMatrixSplit
+        for name, layer in TextInstance.tokenizer.get_custom_objects().items():
+            custom_objects[name] = layer
         return custom_objects
