@@ -1,37 +1,15 @@
 # pylint: disable=no-self-use,invalid-name
 import numpy
-from keras import initializers
 from keras.layers import Input, merge
 from keras import backend as K
 
 from deep_qa.layers.encoders import BOWEncoder
 from deep_qa.layers.knowledge_selectors import DotProductKnowledgeSelector
-from deep_qa.layers.knowledge_selectors import hardmax
 from deep_qa.layers.time_distributed_embedding import TimeDistributedEmbedding
 from deep_qa.layers.wrappers.encoder_wrapper import EncoderWrapper
 from deep_qa.layers.wrappers.output_mask import OutputMask
 from deep_qa.training.models import DeepQaModel
 from ..common.test_case import DeepQaTestCase
-
-
-class TestKnowledgeSelector(DeepQaTestCase):
-    def test_hardmax(self):
-        num_samples = 10
-        knowledge_length = 5
-        init = initializers.get('uniform')
-        unnormalized_attention = init((num_samples, knowledge_length))
-        hardmax_output = hardmax(unnormalized_attention, knowledge_length)
-        input_value = K.eval(unnormalized_attention)
-        output_value = K.eval(hardmax_output)
-        assert output_value.shape == (num_samples, knowledge_length)
-        # Assert all elements other than the ones are zeros
-        assert numpy.count_nonzero(output_value) == num_samples
-        # Assert the max values in all rows are ones
-        assert numpy.all(numpy.equal(numpy.max(output_value, axis=1),  # pylint: disable=no-member
-                                     numpy.ones((num_samples,))))
-        # Assert ones are in the right places
-        assert numpy.all(numpy.equal(numpy.argmax(output_value, axis=1),  # pylint: disable=no-member
-                                     numpy.argmax(input_value, axis=1)))
 
 
 class TestDotProductKnowledgeSelector(DeepQaTestCase):

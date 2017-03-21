@@ -57,7 +57,7 @@ class VectorMatrixMerge(Layer):
             return None
         print(mask)
         num_vectors = len(mask) - 1
-        matrix_mask = mask[-1]
+        matrix_mask = K.cast(mask[-1], 'uint8')
         # We're just trying to get a mask of the right shape, here, so we can call K.ones_like() on
         # it.  We'll ignore the actual values in this.
         vector_mask_template = K.sum(matrix_mask, axis=self.mask_concat_axis)
@@ -65,7 +65,7 @@ class VectorMatrixMerge(Layer):
         result_mask = matrix_mask
         for _ in range(num_vectors):
             result_mask = K.concatenate([vector_mask, result_mask], axis=self.mask_concat_axis)
-        return result_mask
+        return K.cast(result_mask, 'bool')
 
     def get_config(self):
         base_config = super(VectorMatrixMerge, self).get_config()

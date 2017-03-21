@@ -122,7 +122,9 @@ class SlotSimilarityTupleMatcher(MaskedLayer):
             return None
         # Each of the two masks in input_mask are of shape: (batch size, num_slots)
         mask1, mask2 = input_mask
-        return K.any(mask1, axis=-1, keepdims=True) * K.any(mask2, axis=-1, keepdims=True)
+        mask1 = K.cast(K.any(mask1, axis=-1, keepdims=True), 'uint8')
+        mask2 = K.cast(K.any(mask2, axis=-1, keepdims=True), 'uint8')
+        return K.cast(mask1 * mask2, 'bool')
 
     def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
         # input_shape is [(batch_size, num_slots, embedding_dim), (batch_size, num_slots, embedding_dim)]

@@ -137,8 +137,8 @@ class ThresholdTupleMatcher(MaskedLayer):
             return None
         # Each of the two masks in input_mask are of shape: (batch size, num_slots, num_slot_words)
         mask1, mask2 = input_mask
-        mask = K.any(mask1, axis=[1, 2]) * K.any(mask2, axis=[1, 2])
-        return K.expand_dims(mask)
+        mask = K.cast(K.any(mask1, axis=[1, 2]), 'uint8') * K.cast(K.any(mask2, axis=[1, 2]), 'uint8')
+        return K.cast(K.expand_dims(mask), 'bool')
 
     def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
         # input_shape is [(batch_size, num_slots, num_slot_words_t1, embedding_dim),

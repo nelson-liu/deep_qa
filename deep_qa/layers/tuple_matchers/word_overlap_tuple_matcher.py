@@ -1,12 +1,12 @@
 from keras import backend as K
 from keras import initializers, activations
-from keras.layers import Layer
 from overrides import overrides
 
 from ...tensors.backend import switch, apply_feed_forward
+from ..masked_layer import MaskedLayer
 
 
-class WordOverlapTupleMatcher(Layer):
+class WordOverlapTupleMatcher(MaskedLayer):
     r"""
     This layer takes as input two tensors corresponding to two tuples, an answer tuple and a background tuple,
     and calculates the degree to which the background tuple `entails` the answer tuple.  Entailment is
@@ -55,7 +55,6 @@ class WordOverlapTupleMatcher(Layer):
     def __init__(self, num_hidden_layers: int=1, hidden_layer_width: int=4,
                  initialization: str='glorot_uniform', hidden_layer_activation: str='tanh',
                  final_activation: str='sigmoid', **kwargs):
-        self.supports_masking = True
         # Parameters for the shallow neural network
         self.num_hidden_layers = num_hidden_layers
         self.hidden_layer_width = hidden_layer_width
@@ -103,17 +102,18 @@ class WordOverlapTupleMatcher(Layer):
         # the whole tuple_match should be masked, so we would return a 0, otherwise we return a 1.  As such,
         # the shape of the returned mask is (batch size, 1).
         input1, input2 = input
-        mask = K.any(input1, axis=[1, 2]) * K.any(input2, axis=[1, 2])
-        return K.expand_dims(mask)
+        mask = K.cast(K.any(input1, axis=[1, 2]), 'uint8') * K.cast(K.any(input2, axis=[1, 2]), 'uint8')
+        return K.cast(K.expand_dims(mask), 'bool')
 
     def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
         # input_shape is [(batch_size, num_slots, num_slot_words_t1), (batch_size, num_slots, num_slot_words_t2)]
         mask_shape = (input_shape[0][0], 1)
         return mask_shape
 
-    def call(self, x, mask=None):
-        tuple1_input, tuple2_input = x      # tuple1 shape: (batch size, num_slots, num_slot_words_t1)
-                                            # tuple2 shape: (batch size, num_slots, num_slot_words_t2)
+    @overrides
+    def call(self, inputs, mask=None):
+        tuple1_input, tuple2_input = inputs  # tuple1 shape: (batch size, num_slots, num_slot_words_t1)
+                                             # tuple2 shape: (batch size, num_slots, num_slot_words_t2)
         # Check that the tuples have the same number of slots.
         assert K.int_shape(tuple1_input)[1] == K.int_shape(tuple2_input)[1]
 
