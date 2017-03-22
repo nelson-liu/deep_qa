@@ -47,3 +47,5 @@ class TestMaskedSoftmaxLayer:
         softmax = K.eval(MaskedSoftmax().call(options, mask=mask))
         assert softmax.shape == (1, 4)
         numpy.testing.assert_almost_equal(softmax, [[0.66524096, 0, 0.09003057, 0.24472847]])
+        mask = K.eval(MaskedSoftmax().compute_mask(options, mask=mask))
+        numpy.testing.assert_almost_equal(mask, [[1, 0, 1, 1]])
