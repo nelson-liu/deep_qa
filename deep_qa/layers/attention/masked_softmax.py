@@ -32,8 +32,8 @@ class MaskedSoftmax(Layer):
     @overrides
     def compute_mask(self, inputs, mask=None):
         # pylint: disable=unused-argument
-        # We simply return the mask that was passed to us.
-        return mask
+        # We do not need a mask beyond this layer.
+        return None
 
     @overrides
     def get_output_shape_for(self, input_shape):

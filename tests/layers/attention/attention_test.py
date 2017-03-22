@@ -77,9 +77,6 @@ class TestAttentionLayer:
         result = K.eval(Attention().call([vector, matrix], mask=["_", mask]))
         assert_almost_equal(result, numpy.array([[0.52871835, 0.47128162, 0.0],
                                                  [0.50749944, 0.0, 0.49250056]]))
-        mask = K.eval(Attention().compute_mask([vector, matrix], mask=["_", mask]))
-        assert_almost_equal(mask, numpy.array([[1.0, 1.0, 0.0],
-                                               [1.0, 0.0, 1.0]]))
 
         # Test the case where a mask is all 0s and an input is all 0s.
         vector = K.variable(numpy.array([[0.0, 0.0, 0.0], [0.3, 0.1, 0.5]]))
@@ -89,10 +86,6 @@ class TestAttentionLayer:
         result = K.eval(Attention().call([vector, matrix], mask=["_", mask]))
         assert_almost_equal(result, numpy.array([[0.5, 0.5, 0.0],
                                                  [0.0, 0.0, 0.0]]))
-        mask = K.eval(Attention().compute_mask([vector, matrix], mask=["_", mask]))
-        assert_almost_equal(mask, numpy.array([[1.0, 1.0, 0.0],
-                                               [0.0, 0.0, 0.0]]))
-
 
     def test_call_works_on_simple_input(self):
         sentence_length = 2
