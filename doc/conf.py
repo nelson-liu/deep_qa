@@ -17,11 +17,13 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import sphinx
+from distutils.version import LooseVersion
 import sphinx_rtd_theme
 import os
 import sys
 import inspect
-sys.path.insert(0, os.path.abspath('../src/main/python/'))
+sys.path.insert(0, os.path.abspath('../'))
 
 
 # -- General configuration ------------------------------------------------
@@ -185,6 +187,14 @@ epub_copyright = copyright
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ['search.html']
 
+# -- Miscellaneous Extra Tweaks -------------------------------------------
+# pngmath / imgmath compatibility layer for different sphinx versions
+
+if LooseVersion(sphinx.__version__) < LooseVersion('1.4'):
+    extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append('sphinx.ext.imgmath')
+
 # make github links resolve
 def linkcode_resolve(domain, info):
     """
@@ -228,4 +238,4 @@ def linkcode_resolve(domain, info):
         linespec = ""
 
     filename = info['module'].replace('.', '/')
-    return "http://github.com/allenai/deep_qa/blob/master/src/main/python/%s.py%s" % (filename, linespec)
+    return "http://github.com/allenai/deep_qa/blob/master/%s.py%s" % (filename, linespec)

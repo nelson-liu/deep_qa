@@ -21,6 +21,15 @@ DecomposableAttention
     :undoc-members:
     :show-inheritance:
 
+MultipleChoiceBidaf
+-------------------
+
+.. automodule:: deep_qa.models.multiple_choice_qa.multiple_choice_bidaf
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
 MultipleTrueFalseMemoryNetwork
 ------------------------------
 
@@ -61,6 +70,15 @@ TupleEntailment
 ---------------
 
 .. automodule:: deep_qa.models.multiple_choice_qa.tuple_entailment
+    :members:
+    :noindex:
+    :undoc-members:
+    :show-inheritance:
+
+TupleInference
+------------------------------
+
+.. automodule:: deep_qa.models.multiple_choice_qa.tuple_inference
     :members:
     :noindex:
     :undoc-members:
