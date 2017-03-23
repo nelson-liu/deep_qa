@@ -109,10 +109,12 @@ class TimeDistributed(KerasTimeDistributed):
             # stateful).  We respect the input shape in that case and don't reshape the input. This
             # is slower.  K.rnn also expects only a single tensor, so we can't do this if we have
             # multiple inputs.
+            inputs = inputs[0]
+            mask = mask[0]
             def step(x_i, _):
                 output = self.layer.call(x_i)
                 return output, []
-            _, outputs, _ = K.rnn(step, inputs, mask=mask, input_states=[])
+            _, outputs, _ = K.rnn(step, inputs, mask=mask, initial_states=[])
         else:
             reshaped_xs, reshaped_masks = self.reshape_inputs_and_masks(inputs, mask)
             outputs = self.layer.call(reshaped_xs, mask=reshaped_masks)

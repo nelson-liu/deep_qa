@@ -26,8 +26,6 @@ class BOWEncoder(MaskedLayer):
     @overrides
     def call(self, inputs, mask=None):
         # pylint: disable=redefined-variable-type
-        print("input to BOWEncoder:", inputs)
-        print("input mask to BOWEncoder:", mask)
         if mask is None:
             return K.mean(inputs, axis=1)
         else:

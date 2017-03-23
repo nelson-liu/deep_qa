@@ -145,7 +145,7 @@ class MultipleChoiceBidaf(TextTrainer):
         # typing is kind of nice sometimes...  At least I can get this to work, even though it's
         # not supported in Keras.
         bidaf_question_model.get_output_mask_shape_for = self.bidaf_question_model_mask_shape
-        embedded_options = TimeDistributedWithMask(bidaf_question_model, keep_dims=True)(options_input)
+        embedded_options = TimeDistributedWithMask(bidaf_question_model, keep_dims=True)([options_input])
 
         # Then we compare the weighted passage to each of the encoded options, and get a
         # distribution over answer options.  We'll use an encoder to get a single vector for the
@@ -160,8 +160,8 @@ class MultipleChoiceBidaf(TextTrainer):
         attention_layer = Attention(deepcopy(self.similarity_function_params))
         option_scores = attention_layer([encoded_passage, encoded_options])
 
-        return DeepQaModel(input=[question_input, passage_input, options_input],
-                           output=option_scores)
+        return DeepQaModel(inputs=[question_input, passage_input, options_input],
+                           outputs=option_scores)
 
     @staticmethod
     def bidaf_question_model_mask_shape(input_shape):
@@ -185,7 +185,7 @@ class MultipleChoiceBidaf(TextTrainer):
             layer_output_dict[layer.name] = layer.get_output_at(0)
         input_layers = [layer_input_dict[name] for name in input_layer_names]
         output_layers = [layer_output_dict[name] for name in output_layer_names]
-        model = DeepQaModel(input=input_layers, output=output_layers, name=name)
+        model = DeepQaModel(inputs=input_layers, outputs=output_layers, name=name)
         if not self.train_bidaf:
             model.trainable = False
         return model
