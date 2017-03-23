@@ -29,8 +29,11 @@ class CNNEncoder(MaskedLayer):
 
     Parameters
     ----------
-    output_dim: int
+    units: int
         After doing convolutions, we'll project the collected features into a vector of this size.
+        This used to be ``output_dim``, but Keras changed it to ``units``.  I prefer the name
+        ``output_dim``, so we'll leave the code using ``output_dim``, and just use the name
+        ``units`` in the external API.
     num_filters: int
         This is the output dim for each convolutional layer, which is the same as the number of
         "filters" learned by that layer.
@@ -43,7 +46,7 @@ class CNNEncoder(MaskedLayer):
     l2_regularization: float, optional (default=None)
     '''
     def __init__(self,
-                 output_dim: int,
+                 units: int,
                  num_filters: int,
                  ngram_filter_sizes: Tuple[int]=(2, 3, 4, 5),
                  conv_layer_activation: str='relu',
@@ -52,7 +55,7 @@ class CNNEncoder(MaskedLayer):
                  **kwargs):
         self.num_filters = num_filters
         self.ngram_filter_sizes = ngram_filter_sizes
-        self.output_dim = output_dim
+        self.output_dim = units
         self.conv_layer_activation = conv_layer_activation
         self.l1_regularization = l1_regularization
         self.l2_regularization = l2_regularization
@@ -81,11 +84,14 @@ class CNNEncoder(MaskedLayer):
         self.projection_layer = Dense(self.output_dim)
         # Building all layers because these sub-layers are not explitly part of the computatonal graph.
         for convolution_layer, max_pooling_layer in zip(self.convolution_layers, self.max_pooling_layers):
-            convolution_layer.build(input_shape)
-            max_pooling_layer.build(convolution_layer.compute_output_shape(input_shape))
+            with K.name_scope(convolution_layer.name):
+                convolution_layer.build(input_shape)
+            with K.name_scope(max_pooling_layer.name):
+                max_pooling_layer.build(convolution_layer.compute_output_shape(input_shape))
         maxpool_output_dim = self.num_filters * len(self.ngram_filter_sizes)
         projection_input_shape = (input_shape[0], maxpool_output_dim)
-        self.projection_layer.build(projection_input_shape)
+        with K.name_scope(self.projection_layer.name):
+            self.projection_layer.build(projection_input_shape)
         # Defining the weights of this "layer" as the set of weights from all convolution
         # and maxpooling layers.
         self.trainable_weights = []
@@ -125,7 +131,7 @@ class CNNEncoder(MaskedLayer):
 
     @overrides
     def get_config(self):
-        config = {"output_dim": self.output_dim,
+        config = {"units": self.output_dim,
                   "num_filters": self.num_filters,
                   "ngram_filter_sizes": self.ngram_filter_sizes,
                   "conv_layer_activation": self.conv_layer_activation,

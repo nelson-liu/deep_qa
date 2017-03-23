@@ -22,7 +22,7 @@ class TestDotProductKnowledgeSelector(DeepQaTestCase):
         embedding = TimeDistributedEmbedding(input_dim=3, output_dim=2, mask_zero=True)
         embedded_sentence = embedding(sentence_input)
         embedded_background = embedding(background_input)
-        encoder = BOWEncoder(output_dim=2)
+        encoder = BOWEncoder(units=2)
         encoded_sentence = encoder(embedded_sentence)
         encoded_background = EncoderWrapper(encoder)(embedded_background)
         merge_mode = lambda layer_outs: K.concatenate([K.expand_dims(layer_outs[0], axis=1),

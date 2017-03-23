@@ -31,13 +31,13 @@ class TreeCompositionLSTM(Recurrent):
     def __init__(self, **kwargs):
         assert "stack_limit" in kwargs, "Specify stack_limit"
         assert "buffer_ops_limit" in kwargs, "Specify buffer_ops_limit"
-        assert "output_dim" in kwargs, "Specify output_dim"
+        assert "units" in kwargs, "Specify output_dim"
         self.stack_limit = kwargs["stack_limit"]
         # buffer_ops_limit is the max of buffer_limit and num_ops. This needs to be one value since
         # the initial buffer state and the list of operations need to be concatenated before passing
         # them to TreeCompositionLSTM
         self.buffer_ops_limit = kwargs["buffer_ops_limit"]
-        self.output_dim = kwargs["output_dim"]
+        self.output_dim = kwargs["units"]
         init = kwargs.get("init", "glorot_uniform")
         self.init = initializers.get(init)
         inner_init = kwargs.get("inner_init", "orthogonal")

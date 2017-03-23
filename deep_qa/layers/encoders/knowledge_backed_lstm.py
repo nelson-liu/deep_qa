@@ -13,7 +13,7 @@ class KnowledgeBackedLSTM(LSTM):
     used for the average are computed as a function of the previous timestep's output, and the
     background information matrix.
     '''
-    def __init__(self, output_dim, token_dim, knowledge_dim, knowledge_length,
+    def __init__(self, units, token_dim, knowledge_dim, knowledge_length,
                  attention_init='uniform', attention_activation='tanh', **kwargs):
         """
         output_dim (int): Dimensionality of output (same as LSTM)
@@ -31,7 +31,7 @@ class KnowledgeBackedLSTM(LSTM):
         self.attention_init = initializers.get(attention_init)
         self.attention_activation = activations.get(attention_activation)
         # LSTM's constructor expects output_dim. So pass it along.
-        kwargs['output_dim'] = output_dim
+        kwargs['units'] = units
         super(KnowledgeBackedLSTM, self).__init__(**kwargs)
         # This class' grand parent (Recurrent) would have set ndim (number of
         # input dimensions) to 3. Let's change that to 4.

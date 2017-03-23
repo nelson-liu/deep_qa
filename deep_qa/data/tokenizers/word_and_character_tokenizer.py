@@ -102,8 +102,8 @@ class WordAndCharacterTokenizer(Tokenizer):
         # input layer.  Except sometimes Keras adds funny things to the ends of the input layer, so
         # we'll strip those off.
         input_name = input_layer.name
-        if input_name.startswith('/'):
-            input_name = input_name[1:]
+        if '/' in input_name:
+            input_name = input_name.rsplit('/', 1)[1]
         if ':' in input_name:
             input_name = input_name.split(':')[0]
         if input_name.split('_')[-1].isdigit():

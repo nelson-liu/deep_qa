@@ -145,15 +145,14 @@ class MultipleChoiceBidaf(TextTrainer):
         # typing is kind of nice sometimes...  At least I can get this to work, even though it's
         # not supported in Keras.
         bidaf_question_model.get_output_mask_shape_for = self.bidaf_question_model_mask_shape
-        embedded_options = TimeDistributedWithMask(bidaf_question_model, keep_dims=True)([options_input])
+        embedded_options = TimeDistributedWithMask(bidaf_question_model, keep_dims=True)(options_input)
 
         # Then we compare the weighted passage to each of the encoded options, and get a
         # distribution over answer options.  We'll use an encoder to get a single vector for the
         # passage and for each answer option, then do an "attention" to get a distribution over
         # answer options.  We can think of doing other similarity computations (e.g., a
         # decomposable attention) later.
-        passage_encoder = self._get_encoder(name="similarity_encoder",
-                                            fallback_behavior="use default params")
+        passage_encoder = self._get_encoder(name="similarity", fallback_behavior="use default params")
         option_encoder = EncoderWrapper(passage_encoder)
         encoded_passage = passage_encoder(weighted_passage)
         encoded_options = option_encoder(embedded_options)

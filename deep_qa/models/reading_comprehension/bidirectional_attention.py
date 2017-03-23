@@ -192,8 +192,8 @@ class BidirectionalAttentionFlow(TextTrainer):
         span_end_weights = TimeDistributed(Dense(units=1))(span_end_input)
         span_end_probabilities = MaskedSoftmax(name="span_end_softmax")(span_end_weights)
 
-        return DeepQaModel(input=[question_input, passage_input],
-                           output=[span_begin_probabilities, span_end_probabilities])
+        return DeepQaModel(inputs=[question_input, passage_input],
+                           outputs=[span_begin_probabilities, span_end_probabilities])
 
     def _instance_type(self):  # pylint: disable=no-self-use
         return CharacterSpanInstance

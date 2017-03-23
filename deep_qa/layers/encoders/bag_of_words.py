@@ -16,7 +16,7 @@ class BOWEncoder(MaskedLayer):
 
         # For consistency of handling sentence encoders, we will often get passed this parameter.
         # We don't use it, but Layer will complain if it's there, so we get rid of it here.
-        kwargs.pop('output_dim', None)
+        kwargs.pop('units', None)
         super(BOWEncoder, self).__init__(**kwargs)
 
     @overrides
