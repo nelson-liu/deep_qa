@@ -1,20 +1,22 @@
 {
     "model_class": "SiameseSentenceSelector",
-    "model_serialization_prefix": "models/sentence_selection/siamese",
+    "model_serialization_prefix": "models/sentence_selection/siamese_stacked",
     "encoder": {
         "default": {
             "type": "bi_gru",
-            "output_dim": 256
+            "output_dim": 128
         }
     },
     "batch_size": 32,
     "patience": 2,
     "embedding_dim": {
         "words": 100,
-        "characters": 0
     },
-    "optimizer": {"type": "adam",
-                  "clipnorm": 10.0
+    "pretrained_embeddings_file": "/efs/data/dlfa/glove/glove.6B.100d.txt.gz",
+    "fine_tune_embeddings": False,
+    "project_embeddings": False,
+    "optimizer": {
+        "type": "adam"
     },
     "num_epochs": 5,
     "validation_files": ["/efs/data/dlfa/squad_sentence_selection/processed/processed_dev-v1.1.json.tsv"],
