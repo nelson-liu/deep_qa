@@ -86,12 +86,12 @@ class BidirectionalAttentionFlow(TextTrainer):
                                dtype='int32', name="question_input")
         passage_input = Input(shape=self._get_sentence_shape(self.num_passage_words),
                               dtype='int32', name="passage_input")
-        # Shape: (batch_size, num_question_words, embedding_size * 2) (embedding_size * 2 because,
+        # Shape: (batch_size, num_question_words, embedding_dim * 2) (embedding_dim * 2 because,
         # by default in this class, self._embed_input concatenates a word embedding with a
         # character-level encoder).
         question_embedding = self._embed_input(question_input)
 
-        # Shape: (batch_size, num_passage_words, embedding_size * 2)
+        # Shape: (batch_size, num_passage_words, embedding_dim * 2)
         passage_embedding = self._embed_input(passage_input)
 
         # Min's model has some highway layers here, with relu activations.  Note that highway
@@ -110,10 +110,10 @@ class BidirectionalAttentionFlow(TextTrainer):
         phrase_layer = self._get_seq2seq_encoder(name="phrase",
                                                  fallback_behavior="use default params")
 
-        # Shape: (batch_size, num_question_words, embedding_size * 2)
+        # Shape: (batch_size, num_question_words, embedding_dim * 2)
         encoded_question = phrase_layer(question_embedding)
 
-        # Shape: (batch_size, num_passage_words, embedding_size * 2)
+        # Shape: (batch_size, num_passage_words, embedding_dim * 2)
         encoded_passage = phrase_layer(passage_embedding)
 
         # PART 2:
@@ -127,7 +127,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         # Shape: (batch_size, num_passage_words, num_question_words), normalized over question
         # words for each passage word.
         passage_question_attention = MaskedSoftmax()(passage_question_similarity)
-        # Shape: (batch_size, num_passage_words, embedding_size * 2)
+        # Shape: (batch_size, num_passage_words, embedding_dim * 2)
         weighted_sum_layer = WeightedSum(name="passage_question_vectors", use_masking=False)
         passage_question_vectors = weighted_sum_layer([encoded_question, passage_question_attention])
 
@@ -137,20 +137,21 @@ class BidirectionalAttentionFlow(TextTrainer):
         question_passage_similarity = Max(axis=-1)(passage_question_similarity)
         # Shape: (batch_size, num_passage_words)
         question_passage_attention = MaskedSoftmax()(question_passage_similarity)
-        # Shape: (batch_size, embedding_size * 2)
+        # Shape: (batch_size, embedding_dim * 2)
         weighted_sum_layer = WeightedSum(name="question_passage_vector", use_masking=False)
         question_passage_vector = weighted_sum_layer([encoded_passage, question_passage_attention])
 
         # Then he repeats this question/passage vector for every word in the passage, and uses it
         # as an additional input to the hidden layers above.
         repeat_layer = Repeat(axis=1, repetitions=self.num_passage_words)
-        # Shape: (batch_size, num_passage_words, embedding_size * 2)
+        # Shape: (batch_size, num_passage_words, embedding_dim * 2)
         tiled_question_passage_vector = repeat_layer(question_passage_vector)
 
-        # Shape: (batch_size, num_passage_words, embedding_size * 8)
-        final_merged_passage = ComplexConcat(combination='1,2,1*2,1*3')([encoded_passage,
-                                                                         passage_question_vectors,
-                                                                         tiled_question_passage_vector])
+        # Shape: (batch_size, num_passage_words, embedding_dim * 8)
+        complex_concat_layer = ComplexConcat(combination='1,2,1*2,1*3', name='final_merged_passage')
+        final_merged_passage = complex_concat_layer([encoded_passage,
+                                                     passage_question_vectors,
+                                                     tiled_question_passage_vector])
 
         # PART 3:
         # Having computed a combined representation of the document that includes attended question
@@ -177,7 +178,7 @@ class BidirectionalAttentionFlow(TextTrainer):
         # did in his _paper_.  The equations in his paper do not mention that he did this last
         # weighted passage representation and concatenation before doing the final biLSTM (though
         # his figure makes it clear this is what he intended; he just wrote the equations wrong).
-        # Shape: (batch_size, num_passage_words, embedding_size * 2)
+        # Shape: (batch_size, num_passage_words, embedding_dim * 2)
         sum_layer = WeightedSum(name="passage_weighted_by_predicted_span", use_masking=False)
         repeat_layer = Repeat(axis=1, repetitions=self.num_passage_words)
         passage_weighted_by_predicted_span = repeat_layer(sum_layer([modeled_passage,
@@ -207,9 +208,9 @@ class BidirectionalAttentionFlow(TextTrainer):
 
     @overrides
     def _set_max_lengths(self, max_lengths: Dict[str, int]):
-        # Adding this because we're bypassing word_sequence_length in our model, but TextTrainer
+        # Adding this because we're bypassing num_sentence_words in our model, but TextTrainer
         # expects it.
-        max_lengths['word_sequence_length'] = None
+        max_lengths['num_sentence_words'] = None
         super(BidirectionalAttentionFlow, self)._set_max_lengths(max_lengths)
         self.num_passage_words = max_lengths['num_passage_words']
         self.num_question_words = max_lengths['num_question_words']
@@ -219,11 +220,11 @@ class BidirectionalAttentionFlow(TextTrainer):
         self.num_question_words = self.model.get_input_shape_at(0)[0][1]
         self.num_passage_words = self.model.get_input_shape_at(0)[1][1]
         # We need to pass this slice of the passage input shape to the superclass
-        # mainly to set self.max_word_length. The decision of whether to pass
+        # mainly to set self.num_word_characters. The decision of whether to pass
         # the passage input or the question input is arbitrary, as the
         # two word lengths are guaranteed to be the same and BiDAF ignores
-        # self.max_sentence_length.
-        self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][2:])
+        # self.num_sentence_words.
+        self.set_text_lengths_from_model_input(self.model.get_input_shape_at(0)[1][1:])
 
     @classmethod
     def _get_custom_objects(cls):
@@ -235,3 +236,45 @@ class BidirectionalAttentionFlow(TextTrainer):
         custom_objects["Repeat"] = Repeat
         custom_objects["WeightedSum"] = WeightedSum
         return custom_objects
+
+    @overrides
+    def score_instance(self, instance: CharacterSpanInstance):
+        inputs, _ = self._prepare_instance(instance)
+        try:
+            span_begin_probs, span_end_probs = self.model.predict(inputs)
+            span_indices = self.get_best_span(span_begin_probs,
+                                              span_end_probs)
+            return span_indices
+        except:
+            print('Inputs were: ' + str(inputs))
+            raise
+
+    @staticmethod
+    def get_best_span(span_begin_probs, span_end_probs):
+        if len(span_begin_probs.shape) > 2 or len(span_end_probs.shape) > 2:
+            raise ValueError("Input shapes must be (X,) or (1,X)")
+        if len(span_begin_probs.shape) == 2:
+            assert span_begin_probs.shape[0] == 1, "2D input must have an initial dimension of 1"
+            span_begin_probs = span_begin_probs.flatten()
+        if len(span_end_probs.shape) == 2:
+            assert span_end_probs.shape[0] == 1, "2D input must have an initial dimension of 1"
+            span_end_probs = span_end_probs.flatten()
+        max_span_probability = 0
+        best_word_span = (0, 1)
+        begin_span_argmax = 0
+        for j, _ in enumerate(span_begin_probs):
+            val1 = span_begin_probs[begin_span_argmax]
+            val2 = span_end_probs[j]
+
+            if val1 * val2 > max_span_probability:
+                best_word_span = (begin_span_argmax, j)
+                max_span_probability = val1 * val2
+
+            # We need to update best_span_argmax here _after_ we've checked the current span
+            # position, so that we don't allow things like (1, 1), which are empty spans.  We've
+            # added a special stop symbol to the end of the passage, so this still allows for all
+            # valid spans over the passage.
+            if val1 < span_begin_probs[j]:
+                val1 = span_begin_probs[j]
+                begin_span_argmax = j
+        return (best_word_span[0], best_word_span[1])

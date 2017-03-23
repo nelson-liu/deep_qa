@@ -1,18 +1,21 @@
-# pylint: disable=invalid-name
+# pylint: disable=invalid-name,protected-access
+from copy import deepcopy
 from unittest import TestCase
 import codecs
-from copy import deepcopy
 import gzip
 import logging
 import os
 import shutil
+
+import numpy
+from numpy.testing import assert_allclose
 
 from deep_qa.common.checks import log_keras_version_info
 from deep_qa.models.memory_networks.memory_network import MemoryNetwork
 from deep_qa.models.multiple_choice_qa.multiple_true_false_similarity import MultipleTrueFalseSimilarity
 
 
-class DeepQaTestCase(TestCase):
+class DeepQaTestCase(TestCase):  # pylint: disable=too-many-public-methods
     TEST_DIR = './TMP_TEST/'
     TRAIN_FILE = TEST_DIR + 'train_file'
     VALIDATION_FILE = TEST_DIR + 'validation_file'
@@ -32,27 +35,59 @@ class DeepQaTestCase(TestCase):
     def tearDown(self):
         shutil.rmtree(self.TEST_DIR)
 
-    def get_model(self, cls, additional_arguments=None):
+    def get_model_params(self, model_class, additional_arguments=None):
         params = {}
         params['save_models'] = False
         params['model_serialization_prefix'] = self.TEST_DIR
         params['train_files'] = [self.TRAIN_FILE]
         params['validation_files'] = [self.VALIDATION_FILE]
-        params['embedding_size'] = 6
+        params['embedding_dim'] = {'words': 6, 'characters': 2}
         params['encoder'] = {"default": {'type': 'bow'}}
         params['num_epochs'] = 1
         params['keras_validation_split'] = 0.0
-        if self.is_model_with_background(cls):
+        if self.is_model_with_background(model_class):
             params['train_files'].append(self.TRAIN_BACKGROUND)
             params['validation_files'].append(self.VALIDATION_BACKGROUND)
-        if self.is_memory_network(cls):
+        if self.is_memory_network(model_class):
             params['knowledge_selector'] = {'type': 'dot_product'}
             params['memory_updater'] = {'type': 'sum'}
             params['entailment_input_combiner'] = {'type': 'memory_only'}
         if additional_arguments:
             for key, value in additional_arguments.items():
                 params[key] = deepcopy(value)
-        return cls(params)
+        return params
+
+    def get_model(self, model_class, additional_arguments=None):
+        params = self.get_model_params(model_class, additional_arguments)
+        return model_class(params)
+
+    def ensure_model_trains_and_loads(self, model_class, args):
+        args['save_models'] = True
+        model = self.get_model(model_class, args)
+        model.train()
+
+        # load the model that we serialized
+        loaded_model = self.get_model(model_class, args)
+        loaded_model.load_model()
+
+        # verify that original model and the loaded model predict the same outputs
+        assert_allclose(model.model.predict(model.__dict__["validation_input"]),
+                        loaded_model.model.predict(model.__dict__["validation_input"]))
+
+        # We should get the same result if we index the data from the
+        # original model and the loaded model.
+        indexed_validation_input, _ = loaded_model._prepare_data(
+                model.__dict__["validation_dataset"],
+                for_train=False)
+        assert_allclose(model.model.predict(model.__dict__["validation_input"]),
+                        loaded_model.model.predict(indexed_validation_input))
+        return model, loaded_model
+
+    @staticmethod
+    def one_hot(index, length):
+        vector = numpy.zeros(length)
+        vector[index] = 1
+        return vector
 
     def write_snli_file(self):
         with codecs.open(self.SNLI_FILE, 'w', 'utf-8') as snli_file:
@@ -62,6 +97,18 @@ class DeepQaTestCase(TestCase):
             snli_file.write('4\ttext4\thypothesis4\tneutral\n')
             snli_file.write('5\ttext5\thypothesis5\tentails\n')
             snli_file.write('6\ttext6\thypothesis6\tcontradicts\n')
+
+    def write_sequence_tagging_files(self):
+        with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
+            train_file.write('cats###N\tare###V\tanimals###N\t.###.\n')
+            train_file.write('dogs###N\tare###V\tanimals###N\t.###.\n')
+            train_file.write('snakes###N\tare###V\tanimals###N\t.###.\n')
+            train_file.write('birds###N\tare###V\tanimals###N\t.###.\n')
+        with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
+            validation_file.write('horses###N\tare###V\tanimals###N\t.###.\n')
+            validation_file.write('cows###N\tare###V\tanimals###N\t.###.\n')
+            validation_file.write('monkeys###N\tare###V\tanimals###N\t.###.\n')
+            validation_file.write('caterpillars###N\tare###V\tanimals###N\t.###.\n')
 
     def write_true_false_model_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as validation_file:
@@ -202,9 +249,10 @@ class DeepQaTestCase(TestCase):
 
     def write_who_did_what_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as train_file:
-            train_file.write('1\tHe went to the store to buy goods.\tHe bought xxxxx\tgoods###store\t0\n')
+            train_file.write('1\tHe went to the store to buy goods, because he wanted to.'
+                             '\tHe bought xxxxx\tgoods###store\t0\n')
             train_file.write('1\tShe hiking on the weekend with her friend.'
-                             '\tShe went xxxxx\thiking###friend###weekend\t0\n')
+                             '\tShe went xxxxx\thiking###friend###weekend###her friend\t0\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             # document, question, answers
             train_file.write('1\tFred hit the ball with the bat.\tHe hit the ball with the xxxxx\tbat###ball\t0\n')
@@ -230,7 +278,7 @@ class DeepQaTestCase(TestCase):
 
     def write_span_prediction_files(self):
         with codecs.open(self.VALIDATION_FILE, 'w', 'utf-8') as train_file:
-            train_file.write('1\tquestion 1\tpassage with answer\t13,18\n')
+            train_file.write('1\tquestion 1 with extra words\tpassage with answer and a reallylongword\t13,18\n')
         with codecs.open(self.TRAIN_FILE, 'w', 'utf-8') as train_file:
             train_file.write('1\tquestion 1\tpassage1 with answer1\t14,20\n')
             train_file.write('2\tquestion 2\tpassage2 with answer2\t0,8\n')
@@ -257,13 +305,13 @@ class DeepQaTestCase(TestCase):
                 shutil.copyfileobj(f_in, f_out)
 
     @staticmethod
-    def is_memory_network(cls):  # pylint: disable=bad-staticmethod-argument
-        if issubclass(cls, MemoryNetwork):
+    def is_memory_network(model_class):
+        if issubclass(model_class, MemoryNetwork):
             return True
         return False
 
-    def is_model_with_background(self, cls):
+    def is_model_with_background(self, model_class):
         # pylint: disable=multiple-statements
-        if self.is_memory_network(cls): return True
-        if cls == MultipleTrueFalseSimilarity: return True
+        if self.is_memory_network(model_class): return True
+        if model_class == MultipleTrueFalseSimilarity: return True
         return False

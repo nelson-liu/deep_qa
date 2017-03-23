@@ -37,7 +37,7 @@ class WordAndCharacterTokenizer(Tokenizer):
     @overrides
     def get_words_for_indexer(self, text: str) -> Dict[str, List[str]]:
         words = self.tokenize(text)
-        characters = [char for char in text]
+        characters = [char for word in words for char in word]
         return {'words': words, 'characters': characters}
 
     @overrides
@@ -72,18 +72,13 @@ class WordAndCharacterTokenizer(Tokenizer):
         (..., sentence_length, embedding_dim * 2).
         """
         # pylint: disable=protected-access
-        # So that we end up with even embeddings across different inputs, we'll use half the
-        # `embedding_size` in the given `TextTrainer`.
-        embedding_size = int(text_trainer.embedding_size / 2)
         # This is happening before any masking is done, so we don't need to worry about the
         # mask_split_axis argument to VectorMatrixSplit.
         words, characters = VectorMatrixSplit(split_axis=-1)(input_layer)
         word_embedding = text_trainer._get_embedded_input(words,
-                                                          embedding_size=embedding_size,
                                                           embedding_name='word_' + embedding_name,
                                                           vocab_name='words')
         character_embedding = text_trainer._get_embedded_input(characters,
-                                                               embedding_size=embedding_size,
                                                                embedding_name='character_' + embedding_name,
                                                                vocab_name='characters')
 
@@ -128,4 +123,4 @@ class WordAndCharacterTokenizer(Tokenizer):
 
     @overrides
     def get_max_lengths(self, sentence_length: int, word_length: int) -> Dict[str, int]:
-        return {'word_sequence_length': sentence_length, 'word_character_length': word_length}
+        return {'num_sentence_words': sentence_length, 'num_word_characters': word_length}

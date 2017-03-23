@@ -20,13 +20,14 @@ class TextTuple:
         self.location = location
         self.source = source
 
-    def display_string(self):
+    def display_string(self, context_limit=None):
         # NOTE: not currently displaying location, time, and source info.
-        return ("TextTuple( [\n\tsubj: {0} \n\tverb: {1} \n\tobjects: {2} " +
-                "\n\tcontext: {3}\n] )").format(self.subject,
-                                                self.verb,
-                                                ", ".join(self.objects),
-                                                self.context)
+        if context_limit is None:
+            context_limit = len(self.context)
+        return ("(S: {0}, V: {1}, O: {2}, C: {3})").format(self.subject,
+                                                           self.verb,
+                                                           ", ".join(self.objects),
+                                                           self.context[:context_limit])
 
     def to_text_list(self, object_handling: str="collapse", include_context: bool=True):
         '''
@@ -119,6 +120,9 @@ class TupleInferenceInstance(TextInstance):
     background_tuples: List[TextTuple]
         This is a list of background ``TextTuples`` (currently used for all answer candidates).
 
+    question_text: str, default=None
+        The original text of the question, if available.
+
     label: int, default=None
         The class label (i.e. the index of the correct multiple choice answer) -- corresponds to the
         indices in self.answer_tuples.
@@ -130,18 +134,25 @@ class TupleInferenceInstance(TextInstance):
     use_context = True
 
     def __init__(self, answer_tuples: List[List[TextTuple]], background_tuples: List[TextTuple],
-                 label: int=None, index: int=None):
+                 question_text: str=None, label: int=None, index: int=None):
         super(TupleInferenceInstance, self).__init__(label, index)
         self.answer_tuples = answer_tuples
         self.background_tuples = background_tuples
+        self.question_text = question_text
 
     def display_string(self):
-        to_return = 'MultipleTrueFalseTuplesWithBackgroundInstance: \n'
-        to_return += "  Answer Candidates: \n"
+        to_return = 'TupleInferenceInstance: \n'
+        to_return += "Answer Candidates: \n"
         for answer_index in range(len(self.answer_tuples)):
-            string_answer_tuples = [str(a_tuple) for a_tuple in self.answer_tuples[answer_index]]
-            to_return += "\t [{0}] {1}\n".format(answer_index, ", \n".join(string_answer_tuples))
-        to_return += "\n  Background Tuples: \n " + ", \n".join(str(self.background_tuples))
+            string_answer_tuples = [a_tuple.display_string() for a_tuple in self.answer_tuples[answer_index]]
+            if answer_index == self.label:
+                to_return += "**"   # To inidicate correctness in a visually easy to parse way
+            else:
+                to_return += "  "
+                to_return += "Answer Option [{0}]:\n{1}\n".format(answer_index, ",\n".join(string_answer_tuples))
+            to_return += "\nBackground Tuples:\n"
+            for background_tuple in self.background_tuples:
+                to_return += background_tuple.display_string() + ",\n"
         return to_return
 
     @overrides
@@ -193,8 +204,12 @@ class TupleInferenceInstance(TextInstance):
     @classmethod
     def read_from_line(cls, line: str, default_label: int=None):
         """
-        Reads a TupleInstances from a line.  The format has one option (currently):
-            [question index][tab][all question+answer tuples][tab][background tuples][tab][label]
+        Reads a TupleInferenceInstance from a line.  The format has two options (currently):
+            Option 1:
+                [question index][tab][all question+answer tuples][tab][background tuples][tab][label]
+            Option 2:
+                same as option 1, but [question text][tab] comes immediately after the question index,
+                following the tab.
         The question+answer tuples are formatted as:
             [a_1-tuple_1]$$$...$$$[a_1-tuple_n]###...###[a+_m-tuple_1]$$$...$$$[a_m-tuple_p]
         such that ``$$$`` serves as the tuple delimiter and ``###`` serves as the answer candidate
@@ -219,11 +234,16 @@ class TupleInferenceInstance(TextInstance):
         later.
         """
         fields = line.split("\t")
-        if len(fields) == 4:
+        if len(fields) == 5:
+            index, question_text, answers_string, background_string, label = fields
+            index = int(index)
+        elif len(fields) == 4:
             index, answers_string, background_string, label = fields
+            question_text = None
             index = int(index)
         elif len(fields) == 3:
             answers_string, background_string, label = fields
+            question_text = None
             index = None
         else:
             raise RuntimeError("Unrecognized line format (" + str(len(fields)) + " columns): " + line)
@@ -242,7 +262,7 @@ class TupleInferenceInstance(TextInstance):
         if label >= len(answer_tuples):
             raise ConfigurationError("Invalid label, label is >= the number of answers.")
 
-        return cls(answer_tuples, background_tuples, label=label, index=index)
+        return cls(answer_tuples, background_tuples, question_text, label=label, index=index)
 
 
 class IndexedTupleInferenceInstance(IndexedInstance):
@@ -266,28 +286,28 @@ class IndexedTupleInferenceInstance(IndexedInstance):
     def get_lengths(self) -> Dict[str, int]:
         # We care only about the longest slot here because all slots will be padded to the same length.
         max_slot_length = 0
-        max_word_length = 0
+        num_word_characters = 0
         max_num_slots = 0
         max_question_tuples = 0
         for answer in self.answers_indexed:
             answer_slots, answer_length, answer_word_length = self.get_lengths_from_indexed_tuples(answer)
             max_num_slots = max(max_num_slots, answer_slots)
             max_slot_length = max(max_slot_length, answer_length)
-            max_word_length = max(max_word_length, answer_word_length)
+            num_word_characters = max(num_word_characters, answer_word_length)
             max_question_tuples = max(max_question_tuples, len(answer))
         background_slots, background_length, background_word_length = \
             self.get_lengths_from_indexed_tuples(self.background_indexed)
         max_num_slots = max(max_num_slots, background_slots)
         max_slot_length = max(max_slot_length, background_length)
-        max_word_length = max(max_word_length, background_word_length)
+        num_word_characters = max(num_word_characters, background_word_length)
 
         lengths = {'num_options': len(self.answers_indexed),
                    'num_question_tuples': max_question_tuples,
                    'num_background_tuples': len(self.background_indexed),
-                   'word_sequence_length': max_slot_length,
+                   'num_sentence_words': max_slot_length,
                    'num_slots': max_num_slots}
-        if max_word_length > 0:
-            lengths['word_character_length'] = max_word_length
+        if num_word_characters > 0:
+            lengths['num_word_characters'] = num_word_characters
         return lengths
 
     @staticmethod
@@ -309,22 +329,22 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         max_slot_words: int
             The max number of words found in any of the slots.
 
-        max_word_length: int
+        num_word_characters: int
             The length of the longest word, with a return value of 0 if the model isn't using character padding.
         '''
         max_num_slots = 0
         max_slot_words = 0
-        max_word_length = 0
+        num_word_characters = 0
         for indexed_tuple in indexed_tuples:
             num_slots = len(indexed_tuple)
             max_num_slots = max(max_num_slots, num_slots)
             for slot in indexed_tuple:
-                word_sequence_lengths = IndexedInstance._get_word_sequence_lengths(slot)
-                max_slot_words = max(max_slot_words, word_sequence_lengths['word_sequence_length'])
-                if 'word_character_length' in word_sequence_lengths:
-                    max_word_length = max(max_word_length, word_sequence_lengths['word_character_length'])
+                num_sentence_wordss = IndexedInstance._get_word_sequence_lengths(slot)
+                max_slot_words = max(max_slot_words, num_sentence_wordss['num_sentence_words'])
+                if 'num_word_characters' in num_sentence_wordss:
+                    num_word_characters = max(num_word_characters, num_sentence_wordss['num_word_characters'])
 
-        return max_num_slots, max_slot_words, max_word_length
+        return max_num_slots, max_slot_words, num_word_characters
 
     @overrides
     def pad(self, max_lengths: Dict[str, int]):
@@ -386,16 +406,16 @@ class IndexedTupleInferenceInstance(IndexedInstance):
         max_lengths: Dict of {str: int}
             The lengths to pad to.  Must include the keys:
                 - 'num_slots': the number of slots desired
-                - 'word_sequence_length': the number of words in a given slot
+                - 'num_sentence_words': the number of words in a given slot
             May also include:
-                - 'word_character_length': the length of each word,
+                - 'num_word_characters': the length of each word,
                 relevant when using a ``WordAndCharacterTokenizer``.
 
         Returns
         -------
         tuple_in: List[List[int]]
             In the returned (modified) list, the length matches the desired_num_slots and each of the slots
-            has a length equal to the value set by 'word_sequence_length' in max_lengths.
+            has a length equal to the value set by 'num_sentence_words' in max_lengths.
         '''
         desired_num_slots = max_lengths['num_slots']
         tuple_in = self.pad_sequence_to_length(tuple_in, desired_num_slots,

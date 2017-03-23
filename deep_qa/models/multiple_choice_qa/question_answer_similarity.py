@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from overrides import overrides
 
+from keras import backend as K
 from keras.layers import Dense, Dropout, Input
 
 from ...data.instances.question_answer_instance import QuestionAnswerInstance
@@ -28,22 +29,6 @@ class QuestionAnswerSimilarity(TextTrainer):
         self.num_options = params.pop('num_options', None)
         super(QuestionAnswerSimilarity, self).__init__(params)
 
-        self.answer_dim = self.embedding_size
-
-        self.hidden_layers = []
-        self.projection_layer = None
-        self._init_layers()
-
-    def _init_layers(self):
-        self.hidden_layers = []
-        for i in range(self.num_hidden_layers):
-            self.hidden_layers.append(Dense(output_dim=self.hidden_layer_width,
-                                            activation=self.hidden_layer_activation,
-                                            name='question_hidden_layer_%d' % i))
-        self.projection_layer = Dense(output_dim=self.answer_dim,
-                                      activation='linear',
-                                      name='question_projection')
-
     @overrides
     def _build_model(self):
         """
@@ -69,15 +54,21 @@ class QuestionAnswerSimilarity(TextTrainer):
         # This needs to use a new encoder because we can't compile the same LSTM with two different
         # padding lengths...  If you really want to use the same LSTM for both questions and
         # answers, pad the answers to the same dimension as the questions, replacing
-        # self.max_answer_length with self.max_sentence_length everywhere.
+        # self.max_answer_length with self.num_sentence_words everywhere.
         answer_encoder = EncoderWrapper(question_encoder, name="answer_encoder")
         encoded_answers = answer_encoder(answer_embedding)
 
         # Then we pass the question through some hidden (dense) layers.
         hidden_input = regularized_encoded_question
-        for layer in self.hidden_layers:
-            hidden_input = layer(hidden_input)
-        projected_input = self.projection_layer(hidden_input)
+        for i in range(self.num_hidden_layers):
+            hidden_layer = Dense(output_dim=self.hidden_layer_width,
+                                 activation=self.hidden_layer_activation,
+                                 name='question_hidden_layer_%d' % i)
+            hidden_input = hidden_layer(hidden_input)
+        projection_layer = Dense(output_dim=K.int_shape(encoded_answers)[-1],
+                                 activation='linear',
+                                 name='question_projection')
+        projected_input = projection_layer(hidden_input)
 
         # Lastly, we compare the similarity of the question to the answer options.  Note that this
         # layer has no parameters, so it doesn't need to be put into self._init_layers().
@@ -103,5 +94,5 @@ class QuestionAnswerSimilarity(TextTrainer):
 
     @overrides
     def _set_max_lengths_from_model(self):
-        self.max_sentence_length = self.model.get_input_shape_at(0)[1]
+        self.num_sentence_words = self.model.get_input_shape_at(0)[1]
         # TODO(matt): implement this correctly

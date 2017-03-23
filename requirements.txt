@@ -5,7 +5,7 @@
 
 # Neural net and related libraries.
 # We need at least keras 1.2.2 due to bugfixes in `keras.backend.batch_dot()`
-keras>=1.2.2
+keras==1.2.2
 h5py
 scikit-learn
 theano
@@ -40,6 +40,9 @@ overrides
 # imports this.
 nltk
 
+# Mainly used for the faster tokenizer.
+spacy
+
 # Used by span prediction models.
 numpy
 matplotlib
@@ -58,6 +61,9 @@ pytest-pythonpath
 
 # Allows generation of coverage reports with pytest.
 pytest-cov
+
+# Allows marking tests as flaky, to be rerun if they fail
+flaky
 
 # Allows codecov to generate coverage reports
 coverage
