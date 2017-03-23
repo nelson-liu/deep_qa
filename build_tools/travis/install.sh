@@ -47,3 +47,6 @@ pip install -r requirements.txt
 
 # Install punkt tokenizer
 python -m nltk.downloader punkt
+
+# Install spacy data
+python -m spacy.en.download all
