@@ -40,7 +40,9 @@ class BOWEncoder(MaskedLayer):
             # division by zero.
             # (samples, num_words)
             weighted_mask = float_mask / (K.sum(float_mask, axis=1, keepdims=True) + K.epsilon())
-            return K.sum(inputs * K.expand_dims(weighted_mask), axis=1)  # (samples, word_dim)
+            if K.ndim(weighted_mask) < K.ndim(inputs):
+                weighted_mask = K.expand_dims(weighted_mask)
+            return K.sum(inputs * weighted_mask, axis=1)  # (samples, word_dim)
 
     @overrides
     def compute_mask(self, inputs, mask=None):
