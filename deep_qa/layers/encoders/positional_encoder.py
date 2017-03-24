@@ -44,6 +44,7 @@ class PositionalEncoder(Layer):
         return (input_shape[0], input_shape[2])  # removing second dimension
 
     def call(self, x, mask=None):
+        # pylint: disable=redefined-variable-type
 
         def my_keras_cumsum(tensor, axis=0):
             """
@@ -78,9 +79,7 @@ class PositionalEncoder(Layer):
             one_over_m = ones_like_x / masked_m
             j_index = my_keras_cumsum(ones_like_x, 1)
         else:
-            # pylint: disable=redefined-variable-type
             one_over_m = switch(ones_like_x, ones_like_x/masked_m, K.zeros_like(ones_like_x))
-            # pylint: enable=redefined-variable-type
 
             j_index = my_keras_cumsum(ones_like_x, 1) * K.expand_dims(float_mask, 2)
 
