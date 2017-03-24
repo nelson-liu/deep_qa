@@ -78,7 +78,7 @@ class Trainer:
         self.validation_files = params.pop('validation_files', None)
 
         # The files containing the data that should be used for evaluation.
-        # The default of None mean to just not perform test set evaluation.
+        # The default of None means to just not perform test set evaluation.
         self.test_files = params.pop('test_files', None)
 
         optimizer_params = params.pop('optimizer', 'adam')
