@@ -80,7 +80,7 @@ class PositionalEncoder(Layer):
         else:
             # pylint: disable=redefined-variable-type
             one_over_m = switch(ones_like_x, ones_like_x/masked_m, K.zeros_like(ones_like_x))
-            # pylint: disable=redefined-variable-type
+            # pylint: enable=redefined-variable-type
 
             j_index = my_keras_cumsum(ones_like_x, 1) * K.expand_dims(float_mask, 2)
 
