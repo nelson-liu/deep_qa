@@ -217,7 +217,7 @@ class TupleInferenceInstance(TextInstance):
 
         (1) [question index][tab][all question+answer tuples][tab][background tuples][tab][label]
         (2) same as option 1, but [question text][tab] comes immediately after the question index,
-        following the tab.
+            following the tab.
 
         The question and answer tuples are formatted as:
 
@@ -429,6 +429,7 @@ class IndexedTupleInferenceInstance(IndexedInstance):
 
             - 'num_slots': the number of slots desired
             - 'num_sentence_words': the number of words in a given slot
+
             May also include:
 
             - 'num_word_characters': the length of each word, relevant when using a

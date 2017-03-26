@@ -7,6 +7,7 @@ deep_qa.layers
     deep_qa.layers.backend
     deep_qa.layers.encoders
     deep_qa.layers.entailment_models
+    deep_qa.layers.tuple_matchers
     deep_qa.layers.wrappers
 
 deep_qa.layers.adaptive_recurrence

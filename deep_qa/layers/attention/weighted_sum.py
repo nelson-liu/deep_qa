@@ -48,7 +48,7 @@ class WeightedSum(MaskedLayer):
     (batch_size, num_documents, num_queries, num_words).  Both of these cases are fine.  In the
     first case, the returned tensor will have shape (batch_size, num_queries, embedding_dim), and
     in the second case, it will have shape (batch_size, num_documents, num_queries, embedding_dim).
-    But you _can't_ have an attention "vector" that does not include all of the queries, so shape
+    But you `can't` have an attention "vector" that does not include all of the queries, so shape
     (batch_size, num_words) is not allowed - you haven't specified how to handle that dimension in
     the "matrix", so we can't do anything with this input.
     """
