@@ -1,8 +1,10 @@
 from keras import backend as K
-from keras.layers import Layer
 from keras.constraints import Constraint
 from keras.regularizers import l1_l2
 from overrides import overrides
+
+from .masked_layer import MaskedLayer
+
 
 class BetweenZeroAndOne(Constraint):
     """
@@ -20,7 +22,7 @@ class BetweenZeroAndOne(Constraint):
         return p
 
 
-class NoisyOr(Layer):
+class NoisyOr(MaskedLayer):
     r"""
     This layer takes as input a tensor of probabilities and calculates the noisy-or probability
     across a given axis based on the noisy-or equation:
@@ -51,7 +53,6 @@ class NoisyOr(Layer):
     def __init__(self, axis=-1, name="noisy_or", param_init='uniform', noise_param_constraint=None, **kwargs):
         self.axis = axis
         self.param_init = param_init
-        self.supports_masking = True
         self.name = name
         # The noisy-or equation includes a noise parameter (q) which is learned during training.
         self.noise_parameter = None

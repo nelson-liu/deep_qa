@@ -141,7 +141,7 @@ class AdaptiveStep(MaskedLayer):
         self.trainable_weights.extend(memory_updater.trainable_weights)
         super(AdaptiveStep, self).build(input_shape)
 
-    def call(self, inputs):
+    def call(self, inputs, mask=None):
         encoded_question, current_memory, encoded_knowledge = inputs
         # We need to create a tensor which doesn't have the encoding_dim dimension. So that this Layer is
         # independent of the dimension of the input tensors, we just sum over the last dimension to remove it.

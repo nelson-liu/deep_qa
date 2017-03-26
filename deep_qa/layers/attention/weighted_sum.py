@@ -1,9 +1,9 @@
 from keras import backend as K
-from keras.layers import Layer
 from overrides import overrides
 
+from ..masked_layer import MaskedLayer
 
-class WeightedSum(Layer):
+class WeightedSum(MaskedLayer):
     '''
     This ``Layer`` takes a matrix of vectors and a vector of row weights, and returns a weighted
     sum of the vectors.  You might use this to get some aggregate sentence representation after
@@ -51,7 +51,6 @@ class WeightedSum(Layer):
     the "matrix", so we can't do anything with this input.
     '''
     def __init__(self, use_masking: bool=True, **kwargs):
-        self.supports_masking = True
         self.use_masking = use_masking
         super(WeightedSum, self).__init__(**kwargs)
 

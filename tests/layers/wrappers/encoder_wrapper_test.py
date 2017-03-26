@@ -20,7 +20,7 @@ class TestEncoderWrapper(DeepQaTestCase):
         encoded_background = EncoderWrapper(BOWEncoder(units=2))(embedded_background)
 
         mask_output = OutputMask()(encoded_background)
-        model = DeepQaModel(input=[background_input], output=mask_output)
+        model = DeepQaModel(inputs=[background_input], outputs=mask_output)
 
         test_background = numpy.asarray([
                 [

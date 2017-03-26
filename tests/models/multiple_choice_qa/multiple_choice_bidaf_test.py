@@ -2,7 +2,7 @@
 from keras import backend as K
 import pytest
 
-from deep_qa.models.multiple_choice_qa.multiple_choice_bidaf import MultipleChoiceBidaf
+from deep_qa.contrib.models.multiple_choice_bidaf import MultipleChoiceBidaf
 from deep_qa.models.reading_comprehension.bidirectional_attention import BidirectionalAttentionFlow
 from ...common.test_case import DeepQaTestCase
 from ...common.test_markers import requires_tensorflow

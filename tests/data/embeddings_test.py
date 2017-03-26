@@ -8,6 +8,7 @@ from deep_qa.data.data_indexer import DataIndexer
 from ..common.test_case import DeepQaTestCase
 
 class TestPretrainedEmbeddings(DeepQaTestCase):
+    # pylint: disable=protected-access
     def test_get_embedding_layer_uses_correct_embedding_dim(self):
         data_indexer = DataIndexer()
         embeddings_filename = self.TEST_DIR + "embeddings.gz"

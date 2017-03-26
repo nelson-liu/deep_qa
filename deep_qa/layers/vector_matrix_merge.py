@@ -1,18 +1,20 @@
 from keras import backend as K
-from keras.layers import Layer
+from overrides import overrides
+
+from .masked_layer import MaskedLayer
 
 
-class VectorMatrixMerge(Layer):
+class VectorMatrixMerge(MaskedLayer):
     """
-    This Layer takes a tensor with K modes and a collection of other tensors with K - 1 modes, and
-    concatenates the lower-order tensors at the beginning of the higher-order tensor along a
-    given mode.  We call this a vector-matrix merge to evoke the notion of appending vectors onto a
-    matrix, but this will also work with higher-order tensors.
+    This ``Layer`` takes a tensor with ``K`` modes and a collection of other tensors with ``K - 1``
+    modes, and concatenates the lower-order tensors at the beginning of the higher-order tensor
+    along a given mode.  We call this a vector-matrix merge to evoke the notion of appending
+    vectors onto a matrix, but this will also work with higher-order tensors.
 
-    For example, if you have a memory tensor of shape (batch_size, knowledge_length, encoding_dim),
-    containing `knowledge_length` encoded sentences, you could use this layer to concatenate `N`
-    individual encoded sentences with it, resulting in a tensor of shape
-    (batch_size, N + knowledge_length, encoding_dim).
+    For example, if you have a memory tensor of shape ``(batch_size, knowledge_length,
+    encoding_dim)``, containing ``knowledge_length`` encoded sentences, you could use this layer to
+    concatenate ``N`` individual encoded sentences with it, resulting in a tensor of shape
+    ``(batch_size, N + knowledge_length, encoding_dim)``.
 
     This layer supports masking - we will pass through whatever mask you have on the matrix, and
     concatenate ones to it, similar to how to we concatenate the inputs.  We need to know what axis
@@ -21,19 +23,27 @@ class VectorMatrixMerge(Layer):
     the right thing with masked vectors here is complicated.  If you want to handle that later,
     submit a PR.
 
-    This Layer is essentially the opposite of a VectorMatrixSplit.
+    This ``Layer`` is essentially the opposite of a
+    :ref:`~deep_qa.layers.vector_matrix_split.VectorMatrixSplit`.
+
+    Parameters
+    ----------
+    concat_axis: int
+        The axis to concatenate the vectors and matrix on.
+    mask_concat_axis: int, optional (default=None)
+        The axis to concatenate the masks on (defaults to ``concat_axis`` if ``None``)
     """
     def __init__(self,
                  concat_axis: int,
                  mask_concat_axis: int=None,
                  propagate_mask: bool=True,
                  **kwargs):
-        self.supports_masking = True
         self.concat_axis = concat_axis
         self.mask_concat_axis = mask_concat_axis if mask_concat_axis is not None else concat_axis
         self.propagate_mask = propagate_mask
         super(VectorMatrixMerge, self).__init__(**kwargs)
 
+    @overrides
     def call(self, inputs, mask=None):
         # We need to reverse these here, so that the order is preserved when we roll out the
         # concatenations.
@@ -45,6 +55,7 @@ class VectorMatrixMerge(Layer):
             result = K.concatenate([expanded_vector, result], axis=self.concat_axis)
         return result
 
+    @overrides
     def compute_output_shape(self, input_shapes):
         num_vectors = len(input_shapes) - 1
         matrix_shape = input_shapes[-1]
@@ -52,7 +63,8 @@ class VectorMatrixMerge(Layer):
         new_shape[self.concat_axis] += num_vectors
         return tuple(new_shape)
 
-    def compute_mask(self, inputs, mask=None):  # pylint: disable=unused-argument
+    @overrides
+    def compute_mask(self, inputs, mask=None):
         if mask is None or all(m is None for m in mask) or not self.propagate_mask:
             return None
         print(mask)
@@ -67,6 +79,7 @@ class VectorMatrixMerge(Layer):
             result_mask = K.concatenate([vector_mask, result_mask], axis=self.mask_concat_axis)
         return K.cast(result_mask, 'bool')
 
+    @overrides
     def get_config(self):
         base_config = super(VectorMatrixMerge, self).get_config()
         config = {

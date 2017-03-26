@@ -1,9 +1,10 @@
 import keras.backend as K
-from keras.layers import Layer
 from overrides import overrides
 
+from ..masked_layer import MaskedLayer
 
-class BatchDot(Layer):
+
+class BatchDot(MaskedLayer):
     """
     This ``Layer`` calls ``K.batch_dot()`` on two inputs ``tensor_a`` and ``tensor_b``.
     This function will work for tensors of arbitrary size as long as
@@ -93,7 +94,6 @@ class BatchDot(Layer):
 
     """
     def __init__(self, **kwargs):
-        self.supports_masking = True
         super(BatchDot, self).__init__(**kwargs)
 
     @overrides
@@ -161,8 +161,8 @@ class BatchDot(Layer):
         return tuple(final_out_shape)
 
     @overrides
-    def call(self, x, mask=None):
-        tensor_a, tensor_b = x
+    def call(self, inputs, mask=None):
+        tensor_a, tensor_b = inputs
         if (K.ndim(tensor_a) > 3 or K.ndim(tensor_b) > 3) and K.backend() == 'theano':
             raise RuntimeError("K.batch_dot() in theano is broken for tensors with more than"
                                " three dimensions.  Use tensorflow instead.")

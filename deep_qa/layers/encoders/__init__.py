@@ -9,7 +9,6 @@ from .bag_of_words import BOWEncoder
 from .convolutional_encoder import CNNEncoder
 from .positional_encoder import PositionalEncoder
 from .shareable_gru import ShareableGRU as GRU
-from .tree_composition_lstm import TreeCompositionLSTM
 
 
 def set_regularization_params(encoder_type: str, params: Dict[str, Any]):
@@ -46,7 +45,6 @@ encoders = OrderedDict()  # pylint:  disable=invalid-name
 encoders["bow"] = BOWEncoder
 encoders["lstm"] = LSTM
 encoders["gru"] = GRU
-encoders["tree_lstm"] = TreeCompositionLSTM
 encoders["cnn"] = CNNEncoder
 encoders["positional"] = PositionalEncoder
 encoders["bi_gru"] = (lambda **params: Bidirectional(GRU(return_sequences=False,

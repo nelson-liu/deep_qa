@@ -1,11 +1,11 @@
 from keras import backend as K
-from keras.layers import Layer
 from overrides import overrides
 
+from ..masked_layer import MaskedLayer
 from ...tensors.backend import switch, very_negative_like
 
 
-class Max(Layer):
+class Max(MaskedLayer):
     """
     This ``Layer`` performs a max over some dimension.  Keras has a similar layer called
     ``GlobalMaxPooling1D``, but it is not as configurable as this one, and it does not support
@@ -20,7 +20,6 @@ class Max(Layer):
         - A tensor with one less dimension, where we have taken a max over one of the dimensions.
     """
     def __init__(self, axis: int=-1, **kwargs):
-        self.supports_masking = True
         self.axis = axis
         super(Max, self).__init__(**kwargs)
 
@@ -39,10 +38,10 @@ class Max(Layer):
         return input_shape[:axis] + input_shape[axis+1:]
 
     @overrides
-    def call(self, x, mask=None):
+    def call(self, inputs, mask=None):
         if mask is not None:
-            x = switch(mask, x, very_negative_like(x))
-        return K.max(x, axis=self.axis)
+            inputs = switch(mask, inputs, very_negative_like(inputs))
+        return K.max(inputs, axis=self.axis)
 
     @overrides
     def get_config(self):

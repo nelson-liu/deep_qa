@@ -32,7 +32,7 @@ class TestAttentiveGRUKnowledgeCombiner:
                                                  output_shape=(5, 11))
 
         sequence_of_outputs = attentive_gru(combined_sentence_with_attention)
-        model = Model(input=[input_layer, attention], output=sequence_of_outputs)
+        model = Model(inputs=[input_layer, attention], outputs=sequence_of_outputs)
         model.compile(loss="mse", optimizer="sgd")  # Will not train this model
         test_input = numpy.asarray([[0, 3, 1, 7, 10]], dtype='int32')
         attention_input = numpy.asarray([[1., 0., 0., 0., 0.]], dtype='float32')

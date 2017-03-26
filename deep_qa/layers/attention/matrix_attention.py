@@ -2,14 +2,14 @@ from copy import deepcopy
 from typing import Any, Dict
 
 from keras import backend as K
-from keras.layers import Layer
 from overrides import overrides
 
+from ..masked_layer import MaskedLayer
 from ...common.params import get_choice_with_default
 from ...tensors.similarity_functions import similarity_functions
 
 
-class MatrixAttention(Layer):
+class MatrixAttention(MaskedLayer):
     '''
     This ``Layer`` takes two matrices as input and returns a matrix of attentions.
 
@@ -42,7 +42,6 @@ class MatrixAttention(Layer):
         default similarity function with no parameters is a simple dot product.
     '''
     def __init__(self, similarity_function: Dict[str, Any]=None, **kwargs):
-        self.supports_masking = True
         super(MatrixAttention, self).__init__(**kwargs)
         self.similarity_function_params = deepcopy(similarity_function)
         if similarity_function is None:

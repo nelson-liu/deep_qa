@@ -42,7 +42,7 @@ class TestDotProductKnowledgeSelector(DeepQaTestCase):
         merged_mask = OutputMask()(merged)
         selector = DotProductKnowledgeSelector()
         attention_weights = selector(merged)
-        model = DeepQaModel(input=[sentence_input, background_input], output=[merged_mask, attention_weights])
+        model = DeepQaModel(inputs=[sentence_input, background_input], outputs=[merged_mask, attention_weights])
         model.summary(show_masks=True)
 
         test_input = numpy.asarray([[2, 2, 2]])
