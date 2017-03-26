@@ -36,7 +36,7 @@ popd
 
 # Configure the conda environment and put it in the path using the
 # provided versions.
-conda create -n $CONDA_ENV_NAME --yes --quiet python=3.5
+conda create -n $CONDA_ENV_NAME --yes --quiet python=3.5.2
 source activate testenv
 
 # Install pip dependencies.
