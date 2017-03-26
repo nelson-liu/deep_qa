@@ -21,7 +21,6 @@ class TopKnowledgeSelector(MaskedLayer):
             # input mask is of shape (batch_size, knowledge_length, sentence_length)
             return mask[:, 0, :]  #(batch_size, sentence_length)
 
-    @overrides
     def get_output_mask_shape_for(self, input_shape):  # pylint: disable=no-self-use
         """
         This is a method I added in order to allow for proper mask computation in TimeDistributed.

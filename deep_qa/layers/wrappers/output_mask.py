@@ -1,3 +1,5 @@
+from overrides import overrides
+
 from ..masked_layer import MaskedLayer
 
 
@@ -14,5 +16,10 @@ class OutputMask(MaskedLayer):
         # so we add it afterwards.
         super(OutputMask, self).__init__(**kwargs)
 
+    @overrides
+    def compute_mask(self, inputs, mask=None):
+        return None
+
+    @overrides
     def call(self, inputs, mask=None):  # pylint: disable=unused-argument
         return mask
