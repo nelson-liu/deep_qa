@@ -4,7 +4,16 @@
     "encoder": {
         "default": {
             "type": "bi_gru",
-            "output_dim": 128
+            "units": 128
+        }
+    },
+    "seq2seq_encoder": {
+        "default": {
+            "type": "bi_gru",
+            "encoder_params": {
+                "units": 100
+            },
+            "wrapper_params": {}
         }
     },
     "batch_size": 32,

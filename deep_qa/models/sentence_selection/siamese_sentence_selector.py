@@ -20,8 +20,16 @@ class SiameseSentenceSelector(TextTrainer):
 
     Note that in some cases, this may not be exactly "Siamese" because the
     question and sentences encoders can differ.
+
+    Parameters
+    ----------
+    num_seq2seq_layers : int, optional (default: ``2``)
+        We use a few stacked biLSTMs (or similar), to give the model some
+        depth.  This parameter controls how many deep layers we should use.
+
     """
     def __init__(self, params: Dict[str, Any]):
+        self.num_seq2seq_layers = params.pop('num_hidden_seq2seq_layers', 2)
         self.num_question_words = params.pop('num_question_words', None)
         self.num_sentences = params.pop('num_sentences', None)
         super(SiameseSentenceSelector, self).__init__(params)
@@ -56,18 +64,36 @@ class SiameseSentenceSelector(TextTrainer):
         # shape: (batch size, num_sentences, num_sentence_words, embedding size)
         sentences_embedding = self._embed_input(sentences_input)
 
-        # We encode the question embeddings with some encoder.
+        # We encode the question embedding with some more seq2seq layers
+        modeled_question = question_embedding
+        for i in range(self.num_seq2seq_layers):
+            hidden_layer = self._get_seq2seq_encoder(name="question_seq2seq_{}".format(i),
+                                                     fallback_behavior="use default params")
+            # shape: (batch_size, num_question_words, seq2seq output dimension)
+            modeled_question = hidden_layer(modeled_question)
+
+        # We encode the sentence embedding with some more seq2seq layers
+        modeled_sentence = sentences_embedding
+        for i in range(self.num_seq2seq_layers):
+            hidden_layer = EncoderWrapper(
+                self._get_seq2seq_encoder(name="sentence_seq2seq_{}".format(i),
+                                          fallback_behavior="use default params"),
+                name="TimeDistributed_seq2seq_sentences_encoder")
+            # shape: (batch_size, num_question_words, seq2seq output dimension)
+            modeled_sentence = hidden_layer(modeled_sentence)
+
+        # We encode the modeled question with some encoder.
         question_encoder = self._get_encoder(name="question_encoder",
                                              fallback_behavior="use default encoder")
         # shape: (batch size, encoder_output_dimension)
-        encoded_question = question_encoder(question_embedding)
+        encoded_question = question_encoder(modeled_question)
 
-        # We encode the document embeddings with some encoder.
+        # We encode the modeled document with some encoder.
         sentences_encoder = EncoderWrapper(self._get_encoder(name="sentence_encoder",
                                                              fallback_behavior="use default encoder"),
                                            name="TimeDistributed_sentences_encoder")
         # shape: (batch size, num_sentences, encoder_output_dimension)
-        encoded_sentences = sentences_encoder(sentences_embedding)
+        encoded_sentences = sentences_encoder(modeled_sentence)
 
         # Here we use the Attention layer with the cosine similarity function
         # to get the cosine similarities of each sesntence with the question.
