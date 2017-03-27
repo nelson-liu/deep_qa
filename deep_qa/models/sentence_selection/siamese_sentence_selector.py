@@ -77,9 +77,9 @@ class SiameseSentenceSelector(TextTrainer):
         modeled_sentence = sentences_embedding
         for i in range(self.num_seq2seq_layers):
             hidden_layer = TimeDistributed(
-                self._get_seq2seq_encoder(name="sentence_seq2seq_{}".format(i),
-                                          fallback_behavior="use default params"),
-                name="TimeDistributed_seq2seq_sentences_encoder_{}".format(i))
+                    self._get_seq2seq_encoder(name="sentence_seq2seq_{}".format(i),
+                                              fallback_behavior="use default params"),
+                    name="TimeDistributed_seq2seq_sentences_encoder_{}".format(i))
             # shape: (batch_size, num_question_words, seq2seq output dimension)
             modeled_sentence = hidden_layer(modeled_sentence)
 

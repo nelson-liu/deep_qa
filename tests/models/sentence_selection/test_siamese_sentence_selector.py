@@ -15,13 +15,13 @@ class TestSiameseSentenceSelector(DeepQaTestCase):
                         }
                 },
                 "seq2seq_encoder": {
-                    "default": {
-                        "type": "gru",
-                        "encoder_params": {
-                            "units": 7
-                        },
-                        "wrapper_params": {}
-                    }
+                        "default": {
+                                "type": "gru",
+                                "encoder_params": {
+                                        "units": 7
+                                },
+                                "wrapper_params": {}
+                        }
                 },
                 "embedding_dim": {"words": 5},
         }
