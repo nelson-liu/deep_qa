@@ -24,13 +24,16 @@ class SiameseSentenceSelector(TextTrainer):
 
     Parameters
     ----------
-    num_seq2seq_layers : int, optional (default: ``2``)
+    num_hidden_seq2seq_layers : int, optional (default: ``2``)
         We use a few stacked biLSTMs (or similar), to give the model some
         depth.  This parameter controls how many deep layers we should use.
 
+    share_hidden_seq2seq_layers : bool, optional (default: ``False``)
+        Whether or not to encode the sentences and the question with the same
+        hidden seq2seq layers, or have different ones for each.
     """
     def __init__(self, params: Dict[str, Any]):
-        self.num_seq2seq_layers = params.pop('num_hidden_seq2seq_layers', 2)
+        self.num_hidden_seq2seq_layers = params.pop('num_hidden_seq2seq_layers', 2)
         self.share_hidden_seq2seq_layers = params.pop('share_hidden_seq2seq_layers', False)
         self.num_question_words = params.pop('num_question_words', None)
         self.num_sentences = params.pop('num_sentences', None)
@@ -68,7 +71,7 @@ class SiameseSentenceSelector(TextTrainer):
 
         # We encode the question embedding with some more seq2seq layers
         modeled_question = question_embedding
-        for i in range(self.num_seq2seq_layers):
+        for i in range(self.num_hidden_seq2seq_layers):
             if self.share_hidden_seq2seq_layers:
                 seq2seq_encoder_name = "seq2seq_{}".format(i)
             else:
@@ -80,7 +83,7 @@ class SiameseSentenceSelector(TextTrainer):
 
         # We encode the sentence embedding with some more seq2seq layers
         modeled_sentence = sentences_embedding
-        for i in range(self.num_seq2seq_layers):
+        for i in range(self.num_hidden_seq2seq_layers):
             if self.share_hidden_seq2seq_layers:
                 seq2seq_encoder_name = "seq2seq_{}".format(i)
             else:
