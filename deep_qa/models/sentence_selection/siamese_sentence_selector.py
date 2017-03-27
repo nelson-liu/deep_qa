@@ -31,6 +31,7 @@ class SiameseSentenceSelector(TextTrainer):
     """
     def __init__(self, params: Dict[str, Any]):
         self.num_seq2seq_layers = params.pop('num_hidden_seq2seq_layers', 2)
+        self.share_hidden_seq2seq_layers = params.pop('share_hidden_seq2seq_layers', False)
         self.num_question_words = params.pop('num_question_words', None)
         self.num_sentences = params.pop('num_sentences', None)
         super(SiameseSentenceSelector, self).__init__(params)
@@ -68,7 +69,11 @@ class SiameseSentenceSelector(TextTrainer):
         # We encode the question embedding with some more seq2seq layers
         modeled_question = question_embedding
         for i in range(self.num_seq2seq_layers):
-            hidden_layer = self._get_seq2seq_encoder(name="question_seq2seq_{}".format(i),
+            if self.share_hidden_seq2seq_layers:
+                seq2seq_encoder_name = "seq2seq_{}".format(i)
+            else:
+                seq2seq_encoder_name = "question_seq2seq_{}".format(i)
+            hidden_layer = self._get_seq2seq_encoder(name=seq2seq_encoder_name,
                                                      fallback_behavior="use default params")
             # shape: (batch_size, num_question_words, seq2seq output dimension)
             modeled_question = hidden_layer(modeled_question)
@@ -76,8 +81,13 @@ class SiameseSentenceSelector(TextTrainer):
         # We encode the sentence embedding with some more seq2seq layers
         modeled_sentence = sentences_embedding
         for i in range(self.num_seq2seq_layers):
+            if self.share_hidden_seq2seq_layers:
+                seq2seq_encoder_name = "seq2seq_{}".format(i)
+            else:
+                seq2seq_encoder_name = "sentence_seq2seq_{}".format(i)
+
             hidden_layer = TimeDistributed(
-                    self._get_seq2seq_encoder(name="sentence_seq2seq_{}".format(i),
+                    self._get_seq2seq_encoder(name=seq2seq_encoder_name,
                                               fallback_behavior="use default params"),
                     name="TimeDistributed_seq2seq_sentences_encoder_{}".format(i))
             # shape: (batch_size, num_question_words, seq2seq output dimension)

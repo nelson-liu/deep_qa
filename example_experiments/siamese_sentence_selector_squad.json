@@ -1,6 +1,7 @@
 {
     "model_class": "SiameseSentenceSelector",
     "model_serialization_prefix": "models/sentence_selection/siamese_stacked",
+    "share_hidden_seq2seq_layers": True,
     "encoder": {
         "default": {
             "type": "bi_gru",
