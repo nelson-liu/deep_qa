@@ -1,6 +1,7 @@
 from typing import Any, Dict
 from overrides import overrides
 from keras.layers import Input
+from keras.layers.wrappers import TimeDistributed
 
 from ...data.instances.sentence_selection_instance import SentenceSelectionInstance
 from ...layers.attention.attention import Attention
@@ -75,10 +76,10 @@ class SiameseSentenceSelector(TextTrainer):
         # We encode the sentence embedding with some more seq2seq layers
         modeled_sentence = sentences_embedding
         for i in range(self.num_seq2seq_layers):
-            hidden_layer = EncoderWrapper(
+            hidden_layer = TimeDistributed(
                 self._get_seq2seq_encoder(name="sentence_seq2seq_{}".format(i),
                                           fallback_behavior="use default params"),
-                name="TimeDistributed_seq2seq_sentences_encoder")
+                name="TimeDistributed_seq2seq_sentences_encoder_{}".format(i))
             # shape: (batch_size, num_question_words, seq2seq output dimension)
             modeled_sentence = hidden_layer(modeled_sentence)
 
